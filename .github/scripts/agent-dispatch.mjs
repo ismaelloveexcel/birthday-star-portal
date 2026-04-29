@@ -173,17 +173,40 @@ for (const it of ready) {
   ).trim();
   console.log(`  created ${issueUrl}`);
 
-  // Best-effort: assign to Copilot. If Copilot coding agent is not enabled
-  // for this repo the assignment fails harmlessly and a human can pick up
-  // the issue manually.
+  // Best-effort: assign to Copilot. This requires a PAT with `Issues: write`
+  // permission — the default GITHUB_TOKEN cannot perform the GraphQL
+  // `replaceActorsForAssignable` mutation against the Copilot bot and will
+  // fail with "Bot does not have access to the repository". Set the repo
+  // secret COPILOT_ASSIGN_TOKEN to a fine-grained PAT scoped to this repo
+  // with Issues + Pull requests write access. Without it, the issue is
+  // created but the Copilot SWE agent never picks it up — the loop stalls
+  // until a human clicks "Assign to Agent" on the issue.
   const issueNum = issueUrl.split('/').pop();
-  try {
-    execSync(
-      `gh issue edit ${issueNum} --repo ${repo} --add-assignee Copilot`,
-      { stdio: 'inherit', env: process.env },
+  const assignToken = process.env.COPILOT_ASSIGN_TOKEN;
+  if (!assignToken) {
+    console.log(
+      `  WARN: COPILOT_ASSIGN_TOKEN secret is not set; issue #${issueNum} ` +
+        'left unassigned. The Copilot SWE agent will NOT pick this up ' +
+        'automatically. See docs/autonomy.md "Required permissions".',
     );
-  } catch {
-    console.log('  (could not assign Copilot; issue left unassigned)');
+  } else {
+    try {
+      execSync(
+        `gh issue edit ${issueNum} --repo ${repo} --add-assignee Copilot`,
+        {
+          stdio: 'inherit',
+          env: { ...process.env, GH_TOKEN: assignToken, GITHUB_TOKEN: assignToken },
+        },
+      );
+      console.log(`  assigned Copilot to #${issueNum}`);
+    } catch {
+      console.log(
+        `  WARN: COPILOT_ASSIGN_TOKEN is set but assigning Copilot to ` +
+          `#${issueNum} failed. Verify the PAT has Issues:write on this ` +
+          'repo and that Copilot coding agent is enabled in Settings → ' +
+          'Code & automation → Copilot.',
+      );
+    }
   }
 
   budget--;

@@ -43,6 +43,12 @@ jobs:
       - name: Run dispatcher
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Optional PAT used ONLY to assign Copilot to dispatched issues.
+          # The default GITHUB_TOKEN cannot perform the GraphQL
+          # `replaceActorsForAssignable` mutation against the Copilot bot;
+          # without this secret the issue is created but left unassigned and
+          # the Copilot SWE agent never picks it up. See docs/autonomy.md.
+          COPILOT_ASSIGN_TOKEN: ${{ secrets.COPILOT_ASSIGN_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           DRY_RUN: ${{ inputs.dry_run || 'false' }}
           MAX_OPEN: ${{ vars.AGENT_MAX_OPEN || '5' }}
