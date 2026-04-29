@@ -26,7 +26,6 @@ export const metadata: Metadata = {
     title: `${config.PRODUCT_NAME} — ${config.PRODUCT_EDITION}`,
     description:
       "Your child becomes the hero. Their guests become the crew. One link does it all.",
-    images: ["/og-space.png"],
   },
 };
 
