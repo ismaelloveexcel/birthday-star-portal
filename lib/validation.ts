@@ -16,7 +16,7 @@ export type FormErrors = Partial<Record<keyof FormData, string>>;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // Phone must start with + followed by digits (spaces, dashes, parens allowed); at least 7 digits total enforced below
-const PHONE_RE = /^\+[\d\s\-()+]{6,}$/;
+const PHONE_RE = /^\+[\d\s\-()]{6,}$/;
 
 export function validateForm(data: FormData): FormErrors {
   const errors: FormErrors = {};

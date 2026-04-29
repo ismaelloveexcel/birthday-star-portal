@@ -51,28 +51,33 @@ export function formatPartyDate(
   // once (handles DST transitions correctly).
 
   function getOffsetMs(utcMs: number): number {
-    const parts = new Intl.DateTimeFormat("en-GB", {
-      timeZone: safeTZ,
-      timeZoneName: "longOffset",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    }).formatToParts(new Date(utcMs));
+    try {
+      const parts = new Intl.DateTimeFormat("en-GB", {
+        timeZone: safeTZ,
+        timeZoneName: "longOffset",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }).formatToParts(new Date(utcMs));
 
-    const get = (type: string) => {
-      const p = parts.find((x) => x.type === type);
-      return p ? p.value : "";
-    };
+      const get = (type: string) => {
+        const p = parts.find((x) => x.type === type);
+        return p ? p.value : "";
+      };
 
-    // timeZoneName looks like "GMT+05:30" or "GMT-04:00" or "GMT"
-    const tzName = get("timeZoneName");
-    const match = tzName.match(/GMT([+-])(\d{2}):(\d{2})/);
-    if (!match) return 0; // UTC
-    const sign = match[1] === "+" ? 1 : -1;
-    return sign * (Number(match[2]) * 60 + Number(match[3])) * 60 * 1000;
+      // timeZoneName looks like "GMT+05:30" or "GMT-04:00" or "GMT"
+      const tzName = get("timeZoneName");
+      const match = tzName.match(/GMT([+-])(\d{2}):(\d{2})/);
+      if (!match) return 0; // UTC
+      const sign = match[1] === "+" ? 1 : -1;
+      return sign * (Number(match[2]) * 60 + Number(match[3])) * 60 * 1000;
+    } catch {
+      // Invalid IANA timezone or unsupported runtime — fall back to local offset
+      return -new Date(utcMs).getTimezoneOffset() * 60 * 1000;
+    }
   }
 
   // First approximation: treat wall-clock time as UTC
@@ -88,7 +93,10 @@ export function detectContactType(contact: string): ContactType {
   if (!contact) return "both";
   const trimmed = contact.trim();
   const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
-  const isPhone = /^\+[\d\s\-()+]{6,}$/.test(trimmed);
+  // Phone: must start with + and have at least 7 actual digits
+  const isPhone =
+    /^\+[\d\s\-()]{6,}$/.test(trimmed) &&
+    trimmed.replace(/[^\d]/g, "").length >= 7;
   if (isEmail && !isPhone) return "email";
   if (isPhone && !isEmail) return "whatsapp";
   if (isEmail && isPhone) return "email";

@@ -19,8 +19,8 @@ export default function RSVPAction({ parentContact, childName }: RSVPActionProps
 
   // Only show WhatsApp button if we have a usable phone number (7+ digits)
   const showWhatsApp = (type === "whatsapp" || type === "both") && waNumber.length >= 7;
-  // Always show email if WhatsApp is unavailable or contact is email-only
-  const showEmail = type === "email" || type === "both" || !showWhatsApp;
+  // Only show email button when parentContact is actually an email address
+  const showEmail = type === "email";
 
   return (
     <div className="flex flex-col sm:flex-row gap-3 justify-center items-stretch">

@@ -389,8 +389,14 @@ export default function HomePage() {
                     className="btn-secondary"
                     style={{ minHeight: 40, padding: "0.4rem 1rem", fontSize: "0.85rem" }}
                     onClick={async () => {
-                      await copyToClipboard(window.location.href);
-                      alert("Link copied! Paste it in Safari or Chrome.");
+                      const ok = await copyToClipboard(window.location.href);
+                      if (ok) {
+                        alert("Link copied! Paste it in Safari or Chrome.");
+                      } else {
+                        alert(
+                          "Could not copy automatically. Please copy the address bar URL manually."
+                        );
+                      }
                     }}
                   >
                     📋 Copy link to open in Safari/Chrome
@@ -399,7 +405,7 @@ export default function HomePage() {
                     href={`mailto:${config.SUPPORT_EMAIL}?subject=${encodeURIComponent(
                       "Birthday Portal — storage error"
                     )}&body=${encodeURIComponent(
-                      `I ran into a storage error. My form data:\n\n${JSON.stringify(form, null, 2)}`
+                      "Hi, I could not complete checkout because my browser blocked the form from saving data (storage error).\n\nPlease reply and I will send my party details so you can set up my portal manually.\n\nThank you!"
                     )}`}
                     className="btn-secondary"
                     style={{ minHeight: 40, padding: "0.4rem 1rem", fontSize: "0.85rem" }}

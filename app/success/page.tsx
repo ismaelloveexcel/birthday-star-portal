@@ -19,7 +19,10 @@ export default function SuccessPage() {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem("bdp_session");
+      // Try localStorage first; fall back to sessionStorage (set when localStorage was unavailable on checkout)
+      const raw =
+        localStorage.getItem("bdp_session") ??
+        sessionStorage.getItem("bdp_session");
       if (!raw) {
         setState({ status: "error" });
         return;
