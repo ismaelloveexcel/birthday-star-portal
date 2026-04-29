@@ -129,6 +129,15 @@ launch stage with low traffic.
    handles edge cases.
 5. No detailed analytics. At most, the app can send optional no-PII
    conversion pings when `NEXT_PUBLIC_PING_URL` is configured.
+6. `npm run build` requires outbound access to `fonts.googleapis.com` because
+   `next/font/google` fetches Orbitron and DM Sans at compile time. This
+   works on Vercel (where the build environment has unrestricted egress)
+   but fails in offline or egress-restricted sandboxes. There is no
+   first-class Next 15 config to persist the font cache between fresh
+   builds. Workarounds (switching fonts, swapping in a font-loader
+   library, or vendoring the .woff2 files) were intentionally rejected
+   for v1 to keep the dependency surface small. Run the production build
+   in an environment with network access to Google Fonts.
 
 ## Roadmap
 
