@@ -133,3 +133,15 @@ launch stage with low traffic.
 
 - **Phase 2 (after first 10 paid sales):** replace localStorage + base64 URL
   with verified payment token flow.
+
+## Phase 1 manual smoke test
+
+- [ ] Form draft restores after refresh
+- [ ] "Start over" clears draft
+- [ ] OG image renders correctly when sharing the URL on WhatsApp
+- [ ] Favicon appears in browser tab
+- [ ] Tabbing through landing page shows visible focus outlines
+- [ ] Quiz buttons announce selection to screen readers (test with VoiceOver/NVDA)
+- [ ] /robots.txt and /sitemap.xml return 200
+- [ ] CI workflow passes on the PR
+- [ ] No console errors on /, /success, /pack
