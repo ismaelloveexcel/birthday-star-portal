@@ -94,7 +94,12 @@ textarea {
   box-shadow:
     0 0 32px rgba(79, 195, 247, 0.6),
     0 0 60px rgba(124, 77, 255, 0.35);
-  animation: glowPulse 1.4s ease-in-out infinite;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-primary:hover {
+    animation: glowPulse 1.4s ease-in-out infinite;
+  }
 }
 
 .btn-secondary {
