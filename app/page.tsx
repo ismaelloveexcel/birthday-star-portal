@@ -319,7 +319,7 @@ export default function HomePage() {
                 type="button"
                 onClick={startOver}
                 className="btn-secondary"
-                style={{ minHeight: 36, padding: "0.35rem 0.9rem", fontSize: "0.85rem" }}
+                style={{ minHeight: 48, padding: "0.35rem 0.9rem", fontSize: "0.85rem" }}
               >
                 Start over
               </button>

@@ -8,7 +8,36 @@ export const alt = "Birthday Star Portal — Space Mission Edition";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+// Subset of glyphs actually rendered in the OG image — keeps the font payload tiny.
+const OG_TEXT = "Birthday Star Portal Space Mission Editionwandering dodo";
+
+// Fetch a Google Font's binary at edge runtime so satori can render with it.
+// Without this, `fontFamily: "Orbitron"` silently falls back to the built-in
+// sans-serif, because next/og does not download web fonts on its own.
+async function loadGoogleFont(family: string, weight: number, text: string): Promise<ArrayBuffer | null> {
+  try {
+    const url = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(
+      family
+    )}:wght@${weight}&text=${encodeURIComponent(text)}`;
+    const css = await (
+      await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } })
+    ).text();
+    const match = css.match(/src: url\((.+?)\) format\('(?:opentype|truetype)'\)/);
+    if (!match) return null;
+    const res = await fetch(match[1]);
+    if (!res.ok) return null;
+    return await res.arrayBuffer();
+  } catch {
+    return null;
+  }
+}
+
 export default async function OpengraphImage() {
+  const orbitron = await loadGoogleFont("Orbitron", 800, OG_TEXT);
+  const fonts = orbitron
+    ? [{ name: "Orbitron", data: orbitron, style: "normal" as const, weight: 800 as const }]
+    : undefined;
+
   return new ImageResponse(
     (
       <div
@@ -63,6 +92,6 @@ export default async function OpengraphImage() {
         </div>
       </div>
     ),
-    { ...size }
+    { ...size, fonts }
   );
 }

@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { config } from "@/lib/config";
 
 export default function robots(): MetadataRoute.Robots {
+  const base = config.BASE_URL.replace(/\/$/, "");
   return {
     rules: [
       {
@@ -9,6 +10,6 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
       },
     ],
-    sitemap: `${config.BASE_URL}/sitemap.xml`,
+    sitemap: `${base}/sitemap.xml`,
   };
 }

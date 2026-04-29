@@ -127,7 +127,8 @@ launch stage with low traffic.
    for v1.
 4. No portal link recovery if parent loses the link. Manual support via email
    handles edge cases.
-5. No analytics. You will not know how many portals have been generated.
+5. No detailed analytics. At most, the app can send optional no-PII
+   conversion pings when `NEXT_PUBLIC_PING_URL` is configured.
 
 ## Roadmap
 
