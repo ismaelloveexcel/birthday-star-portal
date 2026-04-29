@@ -32,12 +32,17 @@ for (const pr of prs) {
   }
   console.log(`→ update-branch on #${pr.number} (${pr.headRefName})`);
   try {
+    // IMPORTANT: pipe stderr (don't inherit) so we can read it back from the
+    // thrown error and detect the 422 / "merge conflict" response. With
+    // stdio: 'inherit' here, e.stderr was always null and the conflict branch
+    // below was unreachable — agent PRs with conflicts never got the
+    // `needs-rebase` label or warning comment.
     execSync(
       `gh api -X PUT repos/${repo}/pulls/${pr.number}/update-branch -H "Accept: application/vnd.github+json"`,
-      { stdio: 'inherit', env: process.env },
+      { stdio: ['ignore', 'pipe', 'pipe'], env: process.env },
     );
   } catch (e) {
-    const msg = (e.stderr && e.stderr.toString()) || e.message || '';
+    const msg = (e.stderr && e.stderr.toString()) || (e.stdout && e.stdout.toString()) || e.message || '';
     if (msg.includes('422') || /merge conflict/i.test(msg)) {
       console.log(`  conflict on #${pr.number}; labelling needs-rebase`);
       try {

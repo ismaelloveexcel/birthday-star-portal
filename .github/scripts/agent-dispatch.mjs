@@ -68,8 +68,11 @@ for (const it of items) {
 }
 
 // --- gather state ---
+// NOTE: do NOT add `pullRequest` to the --json field list here. `gh issue list`
+// rejects it ("Unknown JSON field") and the whole dispatcher exits non-zero,
+// silently halting all autonomous work. We only need labels/state/number.
 const allIssues = ghJson(
-  `issue list --repo ${repo} --state all --limit 500 --label agent-pr --json number,state,labels,title,pullRequest`,
+  `issue list --repo ${repo} --state all --limit 500 --label agent-pr --json number,state,labels,title`,
 );
 const allPRs = ghJson(
   `pr list --repo ${repo} --state all --limit 500 --label agent-pr --json number,state,mergedAt,labels,title,headRefName`,
@@ -163,7 +166,7 @@ for (const it of ready) {
     continue;
   }
 
-  const labelArgs = labels.map((l) => `--label "${l}"`).join(' ');
+  const labelArgs = labels.map((l) => `--label ${JSON.stringify(l)}`).join(' ');
   const issueUrl = gh(
     `issue create --repo ${repo} --title ${JSON.stringify(it.title)} --body-file - ${labelArgs}`,
     body,

@@ -142,7 +142,7 @@ function getAgentId(labels) {
 // --- main ---
 const prs = ghJson(
   `pr list --repo ${repo} --state open --label agent-pr --limit 100 ` +
-    `--json number,title,headRefName,createdAt,labels,mergeable,mergeStateStatus,isDraft,reviewDecision,statusCheckRollup,files,autoMergeRequest`,
+    `--json number,title,headRefName,createdAt,labels,mergeable,isDraft,reviewDecision,statusCheckRollup,files`,
 );
 
 console.log(`Found ${prs.length} open agent-pr PR(s)`);
@@ -187,8 +187,12 @@ for (const pr of prs) {
     console.log(`SKIP ${tag}: ${pending.length} pending check(s)`);
     continue;
   }
-  if (pr.mergeable && pr.mergeable !== 'MERGEABLE') {
-    console.log(`SKIP ${tag}: mergeable=${pr.mergeable}`);
+  // Mergeable gate: fail-closed. Only proceed when GitHub has computed the
+  // merge status AND it's MERGEABLE. Treat null/UNKNOWN/CONFLICTING/etc. as
+  // not-mergeable so a freshly opened PR (status still computing) can't slip
+  // through if the veto window is ever shortened.
+  if (pr.mergeable !== 'MERGEABLE') {
+    console.log(`SKIP ${tag}: mergeable=${pr.mergeable ?? 'null'}`);
     continue;
   }
 
