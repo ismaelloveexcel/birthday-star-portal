@@ -156,3 +156,52 @@ launch stage with low traffic.
 - [ ] /robots.txt and /sitemap.xml return 200
 - [ ] CI workflow passes on the PR
 - [ ] No console errors on /, /success, /pack
+
+## Operations
+
+This is the live ops runbook for whoever is on call after launch. Keep it
+short, keep it current.
+
+### Read conversion-rate logs
+
+The app emits three no-PII events via `navigator.sendBeacon` to whatever
+URL is set in `NEXT_PUBLIC_PING_URL`. The current ping endpoint is a
+Cloudflare Worker that appends each `{ event, ts }` payload to a log
+stream.
+
+- Open the Cloudflare dashboard → **Workers & Pages** → select the ping
+  worker → **Logs** tab → **Begin log stream** (or **Tail**).
+- Filter by event name. Conversion rate is computed as:
+  - `link_opened_rate = portal_link_opened / portal_link_generated`
+  - `purchase_intent_rate = portal_link_generated / portal_form_submit`
+- If the worker is replaced with a different endpoint, update the
+  `NEXT_PUBLIC_PING_URL` env var in Vercel and redeploy. There is no
+  database — historical numbers live only in the worker's log retention.
+
+### Update the Payhip price
+
+1. Sign in to [payhip.com](https://payhip.com) → **Products** → "Birthday
+   Star Portal".
+2. Edit the price field, save.
+3. The app reads `NEXT_PUBLIC_CHECKOUT_URL` (a static product link), so no
+   redeploy is required — Payhip serves the new price on the same URL.
+4. If you change the product slug, update `NEXT_PUBLIC_CHECKOUT_URL` in
+   Vercel project settings and redeploy.
+
+### Roll back a bad deploy on Vercel
+
+Open the Vercel dashboard → **Deployments** for the project → find the
+last known-good deployment (typically the one immediately before the bad
+one) → click the three-dot menu → **Promote to Production**. This
+instantly aliases the production domain to the older build with no
+rebuild, so recovery is roughly 30 seconds. Once the rollback is live,
+revert the offending commit on `main` so the next deploy doesn't re-ship
+the bug.
+
+### Support inbox
+
+Customer-facing recovery email: **support@wanderingdodo.com**. Until the
+Phase 2 verified-token flow ships, this is the **only** recovery path
+for parents who lose their magic link — there is no database lookup. Be
+ready to manually rebuild a portal link from the parent's order details
+on Payhip and email it back.
