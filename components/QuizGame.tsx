@@ -95,7 +95,6 @@ export default function QuizGame(props: QuizGameProps) {
 
   function pick(qi: number, oi: number) {
     if (submitted) return;
-    if (answers[qi] !== null) return; // Cannot change after selecting
     const next = answers.slice();
     next[qi] = oi;
     setAnswers(next);
@@ -122,7 +121,6 @@ export default function QuizGame(props: QuizGameProps) {
           <div className="grid gap-2">
             {q.options.map((opt, oi) => {
               const selected = answers[qi] === oi;
-              const locked = answers[qi] !== null;
               const isCorrect = oi === q.correctIndex;
               const showResult = submitted && (selected || isCorrect);
               const bg = showResult
@@ -148,14 +146,14 @@ export default function QuizGame(props: QuizGameProps) {
                   key={oi}
                   type="button"
                   onClick={() => pick(qi, oi)}
-                  disabled={locked || submitted}
+                  disabled={submitted}
                   className="text-left rounded-lg px-4 py-3 transition"
                   style={{
                     minHeight: 48,
                     background: bg,
                     border: `1px solid ${border}`,
                     color: "var(--color-star)",
-                    cursor: locked || submitted ? "default" : "pointer",
+                    cursor: submitted ? "default" : "pointer",
                   }}
                 >
                   {opt}

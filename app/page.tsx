@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import BirthdayPortal from "@/components/BirthdayPortal";
 import { config } from "@/lib/config";
 import { validateForm, hasErrors, type FormData, type FormErrors } from "@/lib/validation";
+import { copyToClipboard } from "@/lib/utils";
 
 const TIMEZONES = [
   "Asia/Dubai",
@@ -37,6 +38,7 @@ export default function HomePage() {
   const [form, setForm] = useState<FormData>(emptyForm);
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
+  const [storageError, setStorageError] = useState(false);
 
   const demoData = useMemo(() => {
     const d = new Date();
@@ -81,10 +83,25 @@ export default function HomePage() {
       return;
     }
     setSubmitting(true);
+    setStorageError(false);
+    const serialised = JSON.stringify(form);
+    let saved = false;
     try {
-      localStorage.setItem("bdp_session", JSON.stringify(form));
+      localStorage.setItem("bdp_session", serialised);
+      saved = true;
     } catch {
-      // ignore — error state on /success will handle it
+      // localStorage failed (e.g. Safari Private Mode) — try sessionStorage
+      try {
+        sessionStorage.setItem("bdp_session", serialised);
+        saved = true;
+      } catch {
+        // both storage APIs unavailable
+      }
+    }
+    if (!saved) {
+      setSubmitting(false);
+      setStorageError(true);
+      return;
     }
     window.location.href = config.CHECKOUT_URL;
   }
@@ -129,7 +146,7 @@ export default function HomePage() {
       <section className="section">
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
-            {["🔒 Secure checkout", "👤 No account required", "📱 Works on any device"].map((t) => (
+            {["🔒 Secure Payhip checkout", "↩ 14-day refund", "📱 Works on any phone — no app"].map((t) => (
               <div key={t} className="card py-4 px-3 text-sm md:text-base">
                 {t}
               </div>
@@ -139,7 +156,7 @@ export default function HomePage() {
             <p className="text-star italic">
               “Zara&apos;s guests thought it was the coolest invite they&apos;d ever seen.”
             </p>
-            <div className="text-comet text-sm mt-3">— Priya, mum of 6</div>
+            <div className="text-comet text-sm mt-3">— Priya, mum of a 6-year-old</div>
           </blockquote>
         </div>
       </section>
@@ -281,7 +298,7 @@ export default function HomePage() {
               <input
                 id="field-parentContact"
                 className={`input ${errors.parentContact ? "input-error" : ""}`}
-                placeholder="For guests to RSVP to you"
+                placeholder="+971 50 123 4567 or you@example.com"
                 value={form.parentContact}
                 onChange={(e) => update("parentContact", e.target.value)}
               />
@@ -350,6 +367,54 @@ export default function HomePage() {
             <button type="submit" disabled={submitting} className="btn-primary w-full">
               {submitting ? "Launching…" : `Launch My Birthday Mission — ${config.PRICE} →`}
             </button>
+            <p className="text-xs text-comet text-center pt-2">
+              Secure checkout · 14-day refund · Link arrives instantly.
+            </p>
+            {storageError && (
+              <div
+                role="alert"
+                className="card p-4 mt-3 text-sm"
+                style={{ borderColor: "var(--color-danger)" }}
+              >
+                <p className="font-semibold mb-2" style={{ color: "var(--color-danger)" }}>
+                  ⚠️ Your browser is blocking this page from saving your details.
+                </p>
+                <p className="text-comet mb-3">
+                  This happens in Safari Private Mode and some in-app browsers (Instagram,
+                  Facebook, TikTok). Please open this page in Safari or Chrome to continue.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    style={{ minHeight: 40, padding: "0.4rem 1rem", fontSize: "0.85rem" }}
+                    onClick={async () => {
+                      const ok = await copyToClipboard(window.location.href);
+                      if (ok) {
+                        alert("Link copied! Paste it in Safari or Chrome.");
+                      } else {
+                        alert(
+                          "Could not copy automatically. Please copy the address bar URL manually."
+                        );
+                      }
+                    }}
+                  >
+                    📋 Copy link to open in Safari/Chrome
+                  </button>
+                  <a
+                    href={`mailto:${config.SUPPORT_EMAIL}?subject=${encodeURIComponent(
+                      "Birthday Portal — storage error"
+                    )}&body=${encodeURIComponent(
+                      "Hi, I could not complete checkout because my browser blocked the form from saving data (storage error).\n\nPlease reply and I will send my party details so you can set up my portal manually.\n\nThank you!"
+                    )}`}
+                    className="btn-secondary"
+                    style={{ minHeight: 40, padding: "0.4rem 1rem", fontSize: "0.85rem" }}
+                  >
+                    ✉️ Email support
+                  </a>
+                </div>
+              </div>
+            )}
           </form>
         </div>
       </section>
