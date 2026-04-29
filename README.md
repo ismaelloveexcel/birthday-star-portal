@@ -157,3 +157,56 @@ launch stage with low traffic.
 - [ ] /robots.txt and /sitemap.xml return 200
 - [ ] CI workflow passes on the PR
 - [ ] No console errors on /, /success, /pack
+
+## Operations
+
+Live ops runbook for v1. Owner: Wandering Dodo. Customer-facing recovery
+inbox: **support@wanderingdodo.com** (the only path until Phase 2 ships
+verified payment tokens — anyone who loses their portal link must email this
+address to be reissued one manually).
+
+### Reading conversion-funnel pings (Cloudflare Worker)
+
+The optional `NEXT_PUBLIC_PING_URL` endpoint receives `sendBeacon` POSTs of
+the shape `{ "event": "...", "ts": <unix-ms> }` for three events:
+`portal_form_submit`, `portal_link_generated`, `portal_link_opened`. The
+production endpoint is a Cloudflare Worker that writes one log line per
+request.
+
+To compute conversion rate over the last 24 h:
+
+1. Open the Cloudflare dashboard → Workers & Pages → select the ping
+   Worker → **Logs** → **Begin log stream** (or use `wrangler tail
+   <worker-name> --format pretty` from a local checkout of the Worker repo
+   to pull a live tail).
+2. Count occurrences of each `event` value. The funnel is
+   `portal_form_submit` → `portal_link_generated` → `portal_link_opened`.
+   `link_generated / form_submit` is the checkout completion rate;
+   `link_opened / link_generated` is the share-and-open rate.
+3. There is no per-user identifier in the payload, so these are aggregate
+   counts only — that is intentional (see "Known v1 limitations").
+
+If the Worker is ever swapped for a different ping endpoint, update
+`NEXT_PUBLIC_PING_URL` in the Vercel project settings; no code change is
+required.
+
+### Updating the Payhip price
+
+Prices are not stored in this repo. To change the $14 price:
+
+1. Log into [payhip.com](https://payhip.com) → Products → "Birthday Star
+   Portal" → Edit.
+2. Update the price and save.
+3. Update the headline price copy on the landing page (`app/page.tsx`) only
+   if the displayed price has actually changed, and ship that as a normal
+   PR. The `NEXT_PUBLIC_CHECKOUT_URL` value does not need to change.
+
+### Rolling back a bad Vercel deploy
+
+If a deploy regresses production, open the Vercel dashboard → the
+`birthday-star-portal` project → **Deployments**, find the last known-good
+deployment (look for the green check and a recent timestamp before the
+regression), open its menu, and choose **Promote to Production**. This is
+an instant alias swap — no rebuild — and is the fastest recovery path.
+Once production is stable, revert or fix the offending commit on `main` so
+the next deploy is healthy.
