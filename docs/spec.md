@@ -144,9 +144,6 @@ birthday-star-portal/
 │   ├── utils.ts
 │   └── validation.ts
 │
-├── public/
-│   └── og-space.png  (placeholder — create a simple dark space-themed static OG image)
-│
 ├── .env.local.example
 └── vercel.json
 
@@ -359,7 +356,6 @@ Dynamic metadata for this page (use Next.js generateMetadata or head tags):
 - description: "Accept your mission briefing. Cadet training required."
 - og:title: same as title
 - og:description: same as description
-- og:image: /og-space.png (static asset)
 
 Since data is in URL params and generateMetadata runs server-side, extract childName from the encoded data param if possible for dynamic title. If not possible without full decode on server, use a static fallback title: "🚀 You're invited to a Birthday Mission!"
 
