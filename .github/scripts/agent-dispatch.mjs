@@ -12,7 +12,19 @@ import yaml from 'js-yaml';
 const repo = process.env.GITHUB_REPOSITORY;
 if (!repo) throw new Error('GITHUB_REPOSITORY not set');
 const dryRun = (process.env.DRY_RUN || 'false') === 'true';
-const maxOpen = Number(process.env.MAX_OPEN || '5');
+
+// Fail-closed parsing: a misconfigured MAX_OPEN must NEVER silently disable the
+// back-pressure cap (NaN comparisons would break the budget check).
+function parsePositiveInt(raw, fallback, name) {
+  if (raw === undefined || raw === '') return fallback;
+  const n = Number(raw);
+  if (!Number.isInteger(n) || n < 0) {
+    console.warn(`WARN: invalid ${name}=${JSON.stringify(raw)}; falling back to ${fallback}`);
+    return fallback;
+  }
+  return n;
+}
+const maxOpen = parsePositiveInt(process.env.MAX_OPEN, 5, 'MAX_OPEN');
 
 function gh(args, input) {
   return execSync(`gh ${args}`, {

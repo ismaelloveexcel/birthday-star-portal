@@ -26,7 +26,7 @@ console.log(`Rebasing ${prs.length} open agent-pr PR(s)`);
 
 for (const pr of prs) {
   const labelNames = new Set(pr.labels.map((l) => l.name));
-  if (labelNames.has('do-not-merge') || labelNames.has('needs-human')) {
+  if (labelNames.has('do-not-merge') || labelNames.has('needs-human') || labelNames.has('needs-rebase')) {
     console.log(`SKIP #${pr.number}: blocked label`);
     continue;
   }

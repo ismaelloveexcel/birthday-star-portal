@@ -20,9 +20,36 @@ import { minimatch } from 'minimatch';
 
 const repo = process.env.GITHUB_REPOSITORY;
 if (!repo) throw new Error('GITHUB_REPOSITORY not set');
-const minAge = Number(process.env.MIN_AGE_HOURS || '2');
+
+// Fail-closed parsing for guardrail tunables: a misconfigured value must NEVER
+// silently disable a guardrail. Invalid input → fall back to safe default and warn.
+function parsePositiveNumber(raw, fallback, name) {
+  if (raw === undefined || raw === '') return fallback;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n < 0) {
+    console.warn(`WARN: invalid ${name}=${JSON.stringify(raw)}; falling back to ${fallback}`);
+    return fallback;
+  }
+  return n;
+}
+function parseQuietRange(raw, fallback) {
+  const m = /^(\d{1,2})-(\d{1,2})$/.exec(raw || '');
+  if (!m) {
+    console.warn(`WARN: invalid QUIET_HOURS=${JSON.stringify(raw)}; falling back to ${fallback}`);
+    return fallback;
+  }
+  const start = Number(m[1]);
+  const end = Number(m[2]);
+  if (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || start > 23 || end < 0 || end > 23) {
+    console.warn(`WARN: QUIET_HOURS hours out of 0–23 range (${raw}); falling back to ${fallback}`);
+    return fallback;
+  }
+  return { start, end };
+}
+
+const minAge = parsePositiveNumber(process.env.MIN_AGE_HOURS, 2, 'MIN_AGE_HOURS');
 const dryRun = (process.env.DRY_RUN || 'false') === 'true';
-const quietRange = process.env.QUIET_HOURS || '22-7'; // start-end, hours, end-exclusive
+const quietHours = parseQuietRange(process.env.QUIET_HOURS, { start: 22, end: 7 }); // end-exclusive
 const quietTz = process.env.QUIET_TZ || 'Asia/Dubai';
 
 function gh(args) {
@@ -34,7 +61,7 @@ function ghJson(args) {
 
 // --- helpers ---
 function inQuietHours() {
-  const [start, end] = quietRange.split('-').map(Number);
+  const { start, end } = quietHours;
   const hour = Number(
     new Intl.DateTimeFormat('en-US', { hour: '2-digit', hour12: false, timeZone: quietTz }).format(new Date()),
   );
@@ -120,7 +147,7 @@ const prs = ghJson(
 
 console.log(`Found ${prs.length} open agent-pr PR(s)`);
 const quiet = inQuietHours();
-if (quiet) console.log(`Quiet hours active (${quietRange} ${quietTz}); only merge-anytime PRs eligible.`);
+if (quiet) console.log(`Quiet hours active (${quietHours.start}-${quietHours.end} ${quietTz}); only merge-anytime PRs eligible.`);
 
 for (const pr of prs) {
   const labels = pr.labels.map((l) => ({ name: l.name }));

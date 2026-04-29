@@ -35,7 +35,7 @@ nothing).
    Envelope: v1.
 4. **One-command smoke test: `npm run smoke`.** A script that boots
    `next start` and curls `/`, `/success?_test=1`, and `/pack?data=<fixture>`,
-   greping each for a known string. Replaces 9 manual checkboxes in the
+   grepping each for a known string. Replaces 9 manual checkboxes in the
    README. Effort: M. Envelope: v1.
 5. **Move copy out of `lib/config.ts` into `content/copy.json`.** Lets a
    non-coder VA edit price/badge/testimonials in the GitHub web UI.

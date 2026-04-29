@@ -42,7 +42,7 @@ jobs:
           node-version: 20
 
       - name: Install runtime deps
-        run: npm install --no-save --no-audit --no-fund js-yaml@4.1.0 minimatch@9.0.5
+        run: npm install --no-save --no-audit --no-fund --ignore-scripts js-yaml@4.1.0 minimatch@9.0.5
 
       - name: Sweep
         env:
