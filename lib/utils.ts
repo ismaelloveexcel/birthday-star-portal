@@ -43,7 +43,6 @@ export function formatPartyDate(
   // Parse wall-clock parts
   const [year, month, day] = safeDate.split("-").map(Number);
   const [hour, minute] = safeTime.split(":").map(Number);
-
   // Strategy: find the UTC instant that corresponds to year/month/day hour:minute
   // in the given IANA timezone.
   //
@@ -77,7 +76,7 @@ export function formatPartyDate(
   }
 
   // First approximation: treat wall-clock time as UTC
-  const wallAsUtcMs = Date.UTC(year, (month ?? 1) - 1, day, hour, minute);
+  const wallAsUtcMs = Date.UTC(year, month - 1, day, hour, minute);
 
   // Get the offset at that rough UTC time and subtract to get target UTC ms
   const offsetMs = getOffsetMs(wallAsUtcMs - getOffsetMs(wallAsUtcMs));
@@ -89,9 +88,7 @@ export function detectContactType(contact: string): ContactType {
   if (!contact) return "both";
   const trimmed = contact.trim();
   const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
-  const isPhone =
-    trimmed.startsWith("+") &&
-    /^\+[\d\s\-()+]{6,}$/.test(trimmed);
+  const isPhone = /^\+[\d\s\-()+]{6,}$/.test(trimmed);
   if (isEmail && !isPhone) return "email";
   if (isPhone && !isEmail) return "whatsapp";
   if (isEmail && isPhone) return "email";
