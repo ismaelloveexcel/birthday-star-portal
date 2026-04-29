@@ -1,0 +1,33 @@
+# CODEOWNERS — used by the agent-automerge workflow as a sensitive-paths
+# allow-list. Any PR touching these paths is auto-labelled `needs-human` and
+# excluded from auto-merge until a human reviewer approves.
+#
+# Also enforced by branch protection (configure in repo settings: require
+# review from Code Owners on protected branches).
+
+# Repo-wide default — owner reviews everything as fallback.
+*                           @ismaelloveexcel
+
+# Autonomy infrastructure — never auto-merge changes to itself.
+/.github/                   @ismaelloveexcel
+/.github/workflows/         @ismaelloveexcel
+/.github/scripts/           @ismaelloveexcel
+/.github/agent-backlog.yml  @ismaelloveexcel
+/.github/CODEOWNERS         @ismaelloveexcel
+
+# Build, deploy, and runtime configuration — small files, big blast radius.
+/package.json               @ismaelloveexcel
+/package-lock.json          @ismaelloveexcel
+/next.config.js             @ismaelloveexcel
+/vercel.json                @ismaelloveexcel
+/tsconfig.json              @ismaelloveexcel
+/.eslintrc.json             @ismaelloveexcel
+/postcss.config.js          @ismaelloveexcel
+/tailwind.config.js         @ismaelloveexcel
+
+# Secrets-adjacent.
+/.env*                      @ismaelloveexcel
+
+# Spec / contract documents — agents must not silently rewrite intent.
+/docs/spec.md               @ismaelloveexcel
+/docs/autonomy.md           @ismaelloveexcel

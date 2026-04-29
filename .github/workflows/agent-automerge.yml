@@ -1,0 +1,55 @@
+name: Agent Auto-Merge
+
+# Every 15 minutes, evaluate open `agent-pr` PRs and enable auto-merge for any
+# that pass all guardrails (2h veto window, no veto/hold labels, all checks
+# green, in-scope changes only, no CODEOWNERS-protected files, outside quiet
+# hours).
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Log decisions without enabling auto-merge'
+        type: boolean
+        default: true
+  schedule:
+    - cron: '*/15 * * * *'
+  pull_request:
+    types: [labeled, unlabeled, synchronize, ready_for_review]
+  check_suite:
+    types: [completed]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  checks: read
+  statuses: read
+
+concurrency:
+  group: agent-automerge
+  cancel-in-progress: false
+
+jobs:
+  sweep:
+    if: vars.AUTONOMY_PAUSED != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install runtime deps
+        run: npm install --no-save --no-audit --no-fund --ignore-scripts js-yaml@4.1.0 minimatch@9.0.5
+
+      - name: Sweep
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+          MIN_AGE_HOURS: ${{ vars.AGENT_VETO_HOURS || '2' }}
+          QUIET_HOURS: ${{ vars.AGENT_QUIET_HOURS || '22-7' }}
+          QUIET_TZ: ${{ vars.AGENT_QUIET_TZ || 'Asia/Dubai' }}
+        run: node .github/scripts/agent-automerge.mjs

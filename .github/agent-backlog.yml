@@ -1,0 +1,109 @@
+# Autonomous dispatch backlog.
+#
+# Each item becomes ONE GitHub issue assigned to @copilot when:
+#   1. all `depends_on` items have a MERGED PR carrying label `agent-id:<dep>`
+#   2. no open issue or open/merged PR with label `agent-id:<this-id>` exists
+#   3. fewer than MAX_OPEN agent PRs are currently open
+#
+# `id` is the idempotency key. NEVER reuse an id for new work — append a new id.
+# `scope` is an allow-list of globs. The auto-merge workflow refuses to merge
+#   any agent PR whose changed files fall outside its declared scope.
+# `prompt` is appended to the issue body verbatim and is what the agent reads.
+
+defaults:
+  base: main
+  labels: [agent-pr]
+
+items:
+  - id: pr-1-dx-unblock
+    title: "PR 1 — DX unblock: next/font/local, engines.node, npm run smoke"
+    branch: agent/pr-1-dx-unblock
+    depends_on: []
+    scope:
+      - "package.json"
+      - "package-lock.json"
+      - "app/layout.tsx"
+      - "app/fonts/**"
+      - "scripts/**"
+      - "README.md"
+    prompt: |
+      Make the repo bootable in a fresh clone with no surprises:
+        1. Switch the Google-fonts import in `app/layout.tsx` to `next/font/local`
+           and check the .woff2 files into `app/fonts/`. CI must build offline.
+        2. Add `"engines": { "node": ">=20 <21" }` to `package.json`.
+        3. Add `npm run smoke` — a Node script that boots `next start` on a
+           random port, curls `/`, `/success?_test=1`, and `/pack?data=<fixture>`,
+           greps each for a known string, and exits non-zero on any miss.
+           Replace the 9 manual checkboxes in README accordingly.
+      Do not touch anything outside the declared scope.
+
+  - id: pr-4-copy-extract
+    title: "PR 4 — Extract copy from lib/config.ts to content/copy.json"
+    branch: agent/pr-4-copy-extract
+    depends_on: [pr-1-dx-unblock]
+    scope:
+      - "content/**"
+      - "lib/config.ts"
+      - "lib/copy.ts"
+      - "app/**"
+      - "components/**"
+      - "tests/**"
+    prompt: |
+      Move every user-facing string from `lib/config.ts` to `content/copy.json`.
+      Add a typed `lib/copy.ts` loader. Update every component that reads the
+      old constants. Do not change visible strings. Tests must pass.
+
+  - id: pr-2-lost-link-recovery
+    title: "PR 2 — Self-serve lost-link recovery on /success?recover=1"
+    branch: agent/pr-2-lost-link-recovery
+    depends_on: [pr-4-copy-extract]
+    scope:
+      - "app/success/**"
+      - "components/**"
+      - "lib/**"
+      - "tests/**"
+      - "content/**"
+    prompt: |
+      Implement opportunity 1.1 from `docs/opportunities.md`. Pure client logic,
+      no DB. Add a vitest covering payload reconstruction.
+
+  - id: pr-3-og-card
+    title: "PR 3 — Per-child OG card via app/pack/opengraph-image.tsx"
+    branch: agent/pr-3-og-card
+    depends_on: [pr-4-copy-extract]
+    scope:
+      - "app/pack/**"
+      - "lib/**"
+      - "tests/**"
+      - "public/og/**"
+    prompt: |
+      Implement opportunity 2.1 from `docs/opportunities.md` using `next/og`
+      (already a dependency). Reuse the same base64 decoder as `generateMetadata`.
+
+  - id: pr-5-printable-badge
+    title: "PR 5 — Printable Mission Badge PDF (client-side)"
+    branch: agent/pr-5-printable-badge
+    depends_on: [pr-4-copy-extract]
+    scope:
+      - "app/pack/**"
+      - "components/**"
+      - "lib/**"
+      - "package.json"
+      - "package-lock.json"
+      - "tests/**"
+    prompt: |
+      Implement opportunity 2.2 from `docs/opportunities.md`. Use `pdf-lib`
+      (single dep). Generate fully in-browser. No new server routes.
+
+  - id: pr-7-support-templates
+    title: "PR 7 — Support reply templates in docs/support/"
+    branch: agent/pr-7-support-templates
+    depends_on: [pr-1-dx-unblock]
+    scope:
+      - "docs/support/**"
+      - "README.md"
+    prompt: |
+      Implement opportunity 1.3 from `docs/opportunities.md`. Three markdown
+      templates: lost-link, refund, generic. Link from README support section.
+
+  # PR 6 (digest worker) lives in a separate repo and is dispatched there.
