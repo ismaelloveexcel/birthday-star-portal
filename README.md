@@ -129,6 +129,17 @@ launch stage with low traffic.
    handles edge cases.
 5. No detailed analytics. At most, the app can send optional no-PII
    conversion pings when `NEXT_PUBLIC_PING_URL` is configured.
+6. `npm run build` requires outbound network access to `fonts.googleapis.com`
+   the first time it runs in a given environment. `app/layout.tsx` uses
+   `next/font/google` (Orbitron + DM Sans), which Next 15 fetches at build
+   time and caches inside `.next/cache`. Vercel and standard GitHub-hosted
+   runners can reach Google Fonts so this is invisible in real CI and
+   production. Restricted sandboxes that block egress to `fonts.googleapis.com`
+   cannot run `next build` without first warming the `.next/cache` directory
+   from an environment that does have network. Next 15 exposes no
+   `next.config.js` switch to point `next/font/google` at preexisting font
+   files, and switching fonts or adding a font-loading library is explicitly
+   out of scope for v1. Revisit if a different host platform is adopted.
 
 ## Roadmap
 
@@ -146,3 +157,64 @@ launch stage with low traffic.
 - [ ] /robots.txt and /sitemap.xml return 200
 - [ ] CI workflow passes on the PR
 - [ ] No console errors on /, /success, /pack
+
+## Operations
+
+Live ops runbook for v1. Owner: Wandering Dodo. Customer-facing recovery
+inbox: **support@wanderingdodo.com** (the only path until Phase 2 ships
+verified payment tokens — anyone who loses their portal link must email this
+address to be reissued one manually).
+
+### Reading conversion-funnel pings (Cloudflare Worker)
+
+The optional `NEXT_PUBLIC_PING_URL` endpoint receives `sendBeacon` POSTs of
+the shape `{ "event": "...", "ts": <unix-ms> }` for three events:
+`portal_form_submit`, `portal_link_generated`, `portal_link_opened`. The
+production endpoint is a Cloudflare Worker that writes one log line per
+request.
+
+To compute conversion rate while tailing live traffic:
+
+1. Open the Cloudflare dashboard → Workers & Pages → select the ping
+   Worker → **Logs** → **Begin log stream** (or use `wrangler tail
+   <worker-name> --format pretty` from a local checkout of the Worker repo
+   to pull a live tail). Both surfaces are live streams — they show events
+   as they happen and do not back-fill history.
+2. Count occurrences of each `event` value across the tailing window. The
+   funnel is `portal_form_submit` → `portal_link_generated` →
+   `portal_link_opened`. `link_generated / form_submit` is the checkout
+   completion rate; `link_opened / link_generated` is the share-and-open
+   rate.
+3. There is no per-user identifier in the payload, so these are aggregate
+   counts only — that is intentional (see "Known v1 limitations").
+
+For a historical window (e.g. the last 24 h) the live tail is not enough.
+Either keep `wrangler tail` running and aggregate the captured output
+locally, or — if the Worker has been configured to forward logs to
+Workers Logpush / an R2 bucket / an external sink — query that sink
+instead. v1 does not ship a built-in historical dashboard.
+
+If the Worker is ever swapped for a different ping endpoint, update
+`NEXT_PUBLIC_PING_URL` in the Vercel project settings; no code change is
+required.
+
+### Updating the Payhip price
+
+Prices are not stored in this repo. To change the $14 price:
+
+1. Log into [payhip.com](https://payhip.com) → Products → "Birthday Star
+   Portal" → Edit.
+2. Update the price and save.
+3. Update the headline price copy on the landing page (`app/page.tsx`) only
+   if the displayed price has actually changed, and ship that as a normal
+   PR. The `NEXT_PUBLIC_CHECKOUT_URL` value does not need to change.
+
+### Rolling back a bad Vercel deploy
+
+If a deploy regresses production, open the Vercel dashboard → the
+`birthday-star-portal` project → **Deployments**, find the last known-good
+deployment (look for the green check and a recent timestamp before the
+regression), open its menu, and choose **Promote to Production**. This is
+an instant alias swap — no rebuild — and is the fastest recovery path.
+Once production is stable, revert or fix the offending commit on `main` so
+the next deploy is healthy.

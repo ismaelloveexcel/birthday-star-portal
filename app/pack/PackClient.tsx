@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import BirthdayPortal from "@/components/BirthdayPortal";
-import { decodePortalData } from "@/lib/utils";
+import { decodePortalData, pingEvent } from "@/lib/utils";
 import { config } from "@/lib/config";
 
 interface RawData {
@@ -73,6 +73,15 @@ export default function PackClient({ encoded }: { encoded: string | null }) {
       },
     };
   }, [encoded]);
+
+  // No-PII conversion ping fired once after a successful decode. Closes the
+  // funnel: portal_form_submit → portal_link_generated → portal_link_opened.
+  // Silent-skip when NEXT_PUBLIC_PING_URL is unset (handled inside pingEvent).
+  useEffect(() => {
+    if (result.ok) {
+      pingEvent("portal_link_opened");
+    }
+  }, [result.ok]);
 
   if (!result.ok) {
     return (
