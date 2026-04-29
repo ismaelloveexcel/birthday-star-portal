@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import BirthdayPortal from "@/components/BirthdayPortal";
 import { config } from "@/lib/config";
 import { validateForm, hasErrors, type FormData, type FormErrors } from "@/lib/validation";
-import { copyToClipboard } from "@/lib/utils";
+import { copyToClipboard, pingEvent } from "@/lib/utils";
 
 const TIMEZONES = [
   "Asia/Dubai",
@@ -189,6 +189,8 @@ export default function HomePage() {
     } catch {
       // Silent.
     }
+    // No-PII conversion ping (only sent if NEXT_PUBLIC_PING_URL is configured).
+    pingEvent("portal_form_submit");
     window.location.href = config.CHECKOUT_URL;
   }
 

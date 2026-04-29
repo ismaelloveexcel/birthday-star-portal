@@ -119,3 +119,27 @@ export function sanitizePhoneForWhatsApp(contact: string): string {
   // wa.me requires digits only (no leading +)
   return (contact || "").replace(/[^\d]/g, "");
 }
+
+/**
+ * Best-effort, no-PII conversion ping.
+ *
+ * - Reads NEXT_PUBLIC_PING_URL at call time. If unset, does nothing.
+ * - Uses navigator.sendBeacon so it never blocks navigation.
+ * - Payload is a single JSON line with only `{ event, ts }` — no party
+ *   details, no contact info, no IDs of any kind.
+ * - All errors are swallowed silently — telemetry must never break checkout.
+ */
+export function pingEvent(event: string): void {
+  try {
+    const url = process.env.NEXT_PUBLIC_PING_URL;
+    if (!url) return;
+    if (typeof navigator === "undefined" || typeof navigator.sendBeacon !== "function") {
+      return;
+    }
+    const body = JSON.stringify({ event, ts: Date.now() });
+    const blob = new Blob([body], { type: "application/json" });
+    navigator.sendBeacon(url, blob);
+  } catch {
+    // Silent — telemetry is best-effort.
+  }
+}
