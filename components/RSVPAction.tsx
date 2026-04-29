@@ -17,10 +17,8 @@ export default function RSVPAction({ parentContact, childName }: RSVPActionProps
     `RSVP: Captain ${childName}'s Birthday Mission`
   )}&body=${encodeURIComponent(message)}`;
 
-  // Only show WhatsApp button if we have a usable phone number (7+ digits)
   const showWhatsApp = (type === "whatsapp" || type === "both") && waNumber.length >= 7;
-  // Only show email button when parentContact is actually an email address
-  const showEmail = type === "email";
+  const showEmail = type === "email" || (!showWhatsApp); // fallback to email
 
   return (
     <div className="flex flex-col sm:flex-row gap-3 justify-center items-stretch">
