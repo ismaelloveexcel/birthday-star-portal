@@ -129,6 +129,17 @@ launch stage with low traffic.
    handles edge cases.
 5. No detailed analytics. At most, the app can send optional no-PII
    conversion pings when `NEXT_PUBLIC_PING_URL` is configured.
+6. `npm run build` requires outbound network access to `fonts.googleapis.com`
+   the first time it runs in a given environment. `app/layout.tsx` uses
+   `next/font/google` (Orbitron + DM Sans), which Next 15 fetches at build
+   time and caches inside `.next/cache`. Vercel and standard GitHub-hosted
+   runners can reach Google Fonts so this is invisible in real CI and
+   production. Restricted sandboxes that block egress to `fonts.googleapis.com`
+   cannot run `next build` without first warming the `.next/cache` directory
+   from an environment that does have network. Next 15 exposes no
+   `next.config.js` switch to point `next/font/google` at preexisting font
+   files, and switching fonts or adding a font-loading library is explicitly
+   out of scope for v1. Revisit if a different host platform is adopted.
 
 ## Roadmap
 
