@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import BirthdayPortal from "@/components/BirthdayPortal";
 import { config } from "@/lib/config";
 import { validateForm, hasErrors, type FormData, type FormErrors } from "@/lib/validation";
+import { copyToClipboard } from "@/lib/utils";
 
 const TIMEZONES = [
   "Asia/Dubai",
@@ -37,6 +38,7 @@ export default function HomePage() {
   const [form, setForm] = useState<FormData>(emptyForm);
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
+  const [storageError, setStorageError] = useState(false);
 
   const demoData = useMemo(() => {
     const d = new Date();
@@ -81,10 +83,25 @@ export default function HomePage() {
       return;
     }
     setSubmitting(true);
+    setStorageError(false);
+    const serialised = JSON.stringify(form);
+    let saved = false;
     try {
-      localStorage.setItem("bdp_session", JSON.stringify(form));
+      localStorage.setItem("bdp_session", serialised);
+      saved = true;
     } catch {
-      // ignore — error state on /success will handle it
+      // localStorage failed (e.g. Safari Private Mode) — try sessionStorage
+      try {
+        sessionStorage.setItem("bdp_session", serialised);
+        saved = true;
+      } catch {
+        // both storage APIs unavailable
+      }
+    }
+    if (!saved) {
+      setSubmitting(false);
+      setStorageError(true);
+      return;
     }
     window.location.href = config.CHECKOUT_URL;
   }
@@ -350,6 +367,45 @@ export default function HomePage() {
             <button type="submit" disabled={submitting} className="btn-primary w-full">
               {submitting ? "Launching…" : `Launch My Birthday Mission — ${config.PRICE} →`}
             </button>
+            {storageError && (
+              <div
+                role="alert"
+                className="card p-4 mt-3 text-sm"
+                style={{ borderColor: "var(--color-danger)" }}
+              >
+                <p className="font-semibold mb-2" style={{ color: "var(--color-danger)" }}>
+                  ⚠️ Your browser is blocking this page from saving your details.
+                </p>
+                <p className="text-comet mb-3">
+                  This happens in Safari Private Mode and some in-app browsers (Instagram,
+                  Facebook, TikTok). Please open this page in Safari or Chrome to continue.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    style={{ minHeight: 40, padding: "0.4rem 1rem", fontSize: "0.85rem" }}
+                    onClick={async () => {
+                      await copyToClipboard(window.location.href);
+                      alert("Link copied! Paste it in Safari or Chrome.");
+                    }}
+                  >
+                    📋 Copy link to open in Safari/Chrome
+                  </button>
+                  <a
+                    href={`mailto:${config.SUPPORT_EMAIL}?subject=${encodeURIComponent(
+                      "Birthday Portal — storage error"
+                    )}&body=${encodeURIComponent(
+                      `I ran into a storage error. My form data:\n\n${JSON.stringify(form, null, 2)}`
+                    )}`}
+                    className="btn-secondary"
+                    style={{ minHeight: 40, padding: "0.4rem 1rem", fontSize: "0.85rem" }}
+                  >
+                    ✉️ Email support
+                  </a>
+                </div>
+              </div>
+            )}
           </form>
         </div>
       </section>
