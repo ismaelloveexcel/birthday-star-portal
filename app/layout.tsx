@@ -1,6 +1,21 @@
 import type { Metadata } from "next";
+import { Orbitron, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { config } from "@/lib/config";
+
+const orbitron = Orbitron({
+  subsets: ["latin"],
+  weight: ["400", "600", "700", "800"],
+  variable: "--font-orbitron",
+  display: "swap",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-dm-sans",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(config.BASE_URL),
@@ -21,19 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin=""
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="en" className={`${orbitron.variable} ${dmSans.variable}`}>
       <body>{children}</body>
     </html>
   );

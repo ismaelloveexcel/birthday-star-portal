@@ -15,7 +15,8 @@ export interface FormData {
 export type FormErrors = Partial<Record<keyof FormData, string>>;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_RE = /^[+]?[\d\s\-()]{7,}$/;
+// Phone must start with + followed by digits (spaces, dashes, parens allowed); at least 7 digits total enforced below
+const PHONE_RE = /^\+[\d\s\-()]{6,}$/;
 
 export function validateForm(data: FormData): FormErrors {
   const errors: FormErrors = {};
@@ -59,7 +60,7 @@ export function validateForm(data: FormData): FormErrors {
     const isPhone = PHONE_RE.test(c) && c.replace(/[^\d]/g, "").length >= 7;
     if (!isEmail && !isPhone)
       errors.parentContact =
-        "Must be a valid email or phone number (min 7 digits)";
+        "Must be a valid email or phone with + country code (e.g. +971 50 123 4567)";
   }
 
   if (!data.favoriteThing.trim()) errors.favoriteThing = "Required";
