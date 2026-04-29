@@ -75,8 +75,8 @@ export default function PackClient({ encoded }: { encoded: string | null }) {
   }, [encoded]);
 
   // No-PII conversion ping fired once after a successful decode. Closes the
-  // funnel: form_submit → link_generated → link_opened. Silent-skip when
-  // NEXT_PUBLIC_PING_URL is unset (handled inside pingEvent).
+  // funnel: portal_form_submit → portal_link_generated → portal_link_opened.
+  // Silent-skip when NEXT_PUBLIC_PING_URL is unset (handled inside pingEvent).
   useEffect(() => {
     if (result.ok) {
       pingEvent("portal_link_opened");

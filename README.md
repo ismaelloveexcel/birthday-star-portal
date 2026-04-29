@@ -173,18 +173,26 @@ the shape `{ "event": "...", "ts": <unix-ms> }` for three events:
 production endpoint is a Cloudflare Worker that writes one log line per
 request.
 
-To compute conversion rate over the last 24 h:
+To compute conversion rate while tailing live traffic:
 
 1. Open the Cloudflare dashboard → Workers & Pages → select the ping
    Worker → **Logs** → **Begin log stream** (or use `wrangler tail
    <worker-name> --format pretty` from a local checkout of the Worker repo
-   to pull a live tail).
-2. Count occurrences of each `event` value. The funnel is
-   `portal_form_submit` → `portal_link_generated` → `portal_link_opened`.
-   `link_generated / form_submit` is the checkout completion rate;
-   `link_opened / link_generated` is the share-and-open rate.
+   to pull a live tail). Both surfaces are live streams — they show events
+   as they happen and do not back-fill history.
+2. Count occurrences of each `event` value across the tailing window. The
+   funnel is `portal_form_submit` → `portal_link_generated` →
+   `portal_link_opened`. `link_generated / form_submit` is the checkout
+   completion rate; `link_opened / link_generated` is the share-and-open
+   rate.
 3. There is no per-user identifier in the payload, so these are aggregate
    counts only — that is intentional (see "Known v1 limitations").
+
+For a historical window (e.g. the last 24 h) the live tail is not enough.
+Either keep `wrangler tail` running and aggregate the captured output
+locally, or — if the Worker has been configured to forward logs to
+Workers Logpush / an R2 bucket / an external sink — query that sink
+instead. v1 does not ship a built-in historical dashboard.
 
 If the Worker is ever swapped for a different ping endpoint, update
 `NEXT_PUBLIC_PING_URL` in the Vercel project settings; no code change is
