@@ -34,15 +34,55 @@ export function formatDate(dateString: string): string {
 export function formatPartyDate(
   dateString: string,
   timeString: string,
-  _timezone: string = "Asia/Dubai"
+  timezone: string = "Asia/Dubai"
 ): Date {
-  // Combine date and time. Note: timezone is informational — the parent's local
-  // device clock is used for the countdown calculation. Storing/applying full
-  // tz math would require an additional library, which is out-of-scope for v1.
   const safeDate = dateString || new Date().toISOString().slice(0, 10);
   const safeTime = timeString || "00:00";
-  // Build ISO-like string. Browsers parse "YYYY-MM-DDTHH:MM" as local time.
-  return new Date(`${safeDate}T${safeTime}`);
+  const safeTZ = timezone || "Asia/Dubai";
+
+  // Parse wall-clock parts
+  const [year, month, day] = safeDate.split("-").map(Number);
+  const [hour, minute] = safeTime.split(":").map(Number);
+
+  // Strategy: find the UTC instant that corresponds to year/month/day hour:minute
+  // in the given IANA timezone.
+  //
+  // We use Intl.DateTimeFormat with timeZoneName:'longOffset' to read back the
+  // UTC offset that applies to any given candidate UTC timestamp, then iterate
+  // once (handles DST transitions correctly).
+
+  function getOffsetMs(utcMs: number): number {
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone: safeTZ,
+      timeZoneName: "longOffset",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).formatToParts(new Date(utcMs));
+
+    const get = (type: string) => {
+      const p = parts.find((x) => x.type === type);
+      return p ? p.value : "";
+    };
+
+    // timeZoneName looks like "GMT+05:30" or "GMT-04:00" or "GMT"
+    const tzName = get("timeZoneName");
+    const match = tzName.match(/GMT([+-])(\d{2}):(\d{2})/);
+    if (!match) return 0; // UTC
+    const sign = match[1] === "+" ? 1 : -1;
+    return sign * (Number(match[2]) * 60 + Number(match[3])) * 60 * 1000;
+  }
+
+  // First approximation: treat wall-clock time as UTC
+  const wallAsUtcMs = Date.UTC(year, (month ?? 1) - 1, day, hour, minute);
+
+  // Get the offset at that rough UTC time and subtract to get target UTC ms
+  const offsetMs = getOffsetMs(wallAsUtcMs - getOffsetMs(wallAsUtcMs));
+
+  return new Date(wallAsUtcMs - offsetMs);
 }
 
 export function detectContactType(contact: string): ContactType {
