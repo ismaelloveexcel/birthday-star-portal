@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from "react";
 import { config } from "@/lib/config";
-import { copyToClipboard, encodePortalData, sanitizePhoneForWhatsApp, detectContactType } from "@/lib/utils";
+import { copyToClipboard, encodePortalData, sanitizePhoneForWhatsApp, detectContactType, pingEvent } from "@/lib/utils";
 import type { FormData } from "@/lib/validation";
 
 interface State {
@@ -35,6 +35,8 @@ export default function SuccessPage() {
       const encoded = encodePortalData(data);
       const url = `${config.BASE_URL}/pack?data=${encoded}`;
       setState({ status: "ok", data, url });
+      // No-PII conversion ping (only sent if NEXT_PUBLIC_PING_URL is configured).
+      pingEvent("portal_link_generated");
     } catch {
       setState({ status: "error" });
     }
