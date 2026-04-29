@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import BirthdayPortal from "@/components/BirthdayPortal";
 import { config } from "@/lib/config";
 import { validateForm, hasErrors, type FormData, type FormErrors } from "@/lib/validation";
@@ -16,6 +16,9 @@ const TIMEZONES = [
   "America/Los_Angeles",
   "Australia/Sydney",
 ];
+
+const DRAFT_KEY = "bdp_draft";
+const SESSION_KEY = "bdp_session";
 
 function emptyForm(): FormData {
   return {
@@ -33,12 +36,33 @@ function emptyForm(): FormData {
   };
 }
 
+function isValidDraft(value: unknown): value is FormData {
+  if (!value || typeof value !== "object") return false;
+  const v = value as Record<string, unknown>;
+  return (
+    typeof v.childName === "string" &&
+    typeof v.age === "string" &&
+    typeof v.partyDate === "string" &&
+    typeof v.partyTime === "string" &&
+    typeof v.location === "string" &&
+    typeof v.parentContact === "string" &&
+    typeof v.favoriteThing === "string" &&
+    typeof v.funFact1 === "string" &&
+    typeof v.funFact2 === "string" &&
+    typeof v.funFact3 === "string" &&
+    typeof v.timezone === "string"
+  );
+}
+
 export default function HomePage() {
   const [showDemo, setShowDemo] = useState(false);
   const [form, setForm] = useState<FormData>(emptyForm);
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
   const [storageError, setStorageError] = useState(false);
+  const [draftRestored, setDraftRestored] = useState(false);
+  const draftHydrated = useRef(false);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const demoData = useMemo(() => {
     const d = new Date();
@@ -64,6 +88,62 @@ export default function HomePage() {
     };
   }, []);
 
+  // Hydrate from localStorage draft on mount, only if no completed session exists.
+  // All storage access is wrapped in try/catch — Safari Private Mode and
+  // some in-app browsers throw on localStorage access.
+  useEffect(() => {
+    try {
+      const session = localStorage.getItem(SESSION_KEY);
+      if (session) {
+        draftHydrated.current = true;
+        return;
+      }
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) {
+        draftHydrated.current = true;
+        return;
+      }
+      const parsed = JSON.parse(raw) as unknown;
+      if (isValidDraft(parsed)) {
+        setForm(parsed);
+        setDraftRestored(true);
+      }
+    } catch {
+      // Silent — draft restore is a nice-to-have, not a blocker.
+    } finally {
+      draftHydrated.current = true;
+    }
+  }, []);
+
+  // Debounced save of the current form to localStorage on every change.
+  // Skip until after hydration so we never overwrite a stored draft with the
+  // empty initial form.
+  useEffect(() => {
+    if (!draftHydrated.current) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
+      } catch {
+        // Silent — see hydration note above.
+      }
+    }, 250);
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
+  }, [form]);
+
+  function startOver() {
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch {
+      // Silent.
+    }
+    setForm(emptyForm());
+    setErrors({});
+    setDraftRestored(false);
+  }
+
   function update<K extends keyof FormData>(key: K, value: FormData[K]) {
     setForm((f) => ({ ...f, [key]: value }));
     if (errors[key]) setErrors((e) => ({ ...e, [key]: undefined }));
@@ -87,12 +167,12 @@ export default function HomePage() {
     const serialised = JSON.stringify(form);
     let saved = false;
     try {
-      localStorage.setItem("bdp_session", serialised);
+      localStorage.setItem(SESSION_KEY, serialised);
       saved = true;
     } catch {
       // localStorage failed (e.g. Safari Private Mode) — try sessionStorage
       try {
-        sessionStorage.setItem("bdp_session", serialised);
+        sessionStorage.setItem(SESSION_KEY, serialised);
         saved = true;
       } catch {
         // both storage APIs unavailable
@@ -102,6 +182,12 @@ export default function HomePage() {
       setSubmitting(false);
       setStorageError(true);
       return;
+    }
+    // Clear the auto-saved draft now that the form has been committed.
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch {
+      // Silent.
     }
     window.location.href = config.CHECKOUT_URL;
   }
@@ -216,6 +302,24 @@ export default function HomePage() {
           <h2 className="font-display text-2xl md:text-3xl text-center text-glow mb-8">
             Create your child&apos;s birthday mission
           </h2>
+          {draftRestored && (
+            <div
+              className="card p-4 mb-4 text-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+              role="status"
+            >
+              <span className="text-star">
+                We restored your details from earlier.
+              </span>
+              <button
+                type="button"
+                onClick={startOver}
+                className="btn-secondary"
+                style={{ minHeight: 36, padding: "0.35rem 0.9rem", fontSize: "0.85rem" }}
+              >
+                Start over
+              </button>
+            </div>
+          )}
           <form onSubmit={handleSubmit} noValidate className="space-y-4">
             <Field
               id="field-childName"
