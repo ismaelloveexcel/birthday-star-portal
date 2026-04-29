@@ -17,7 +17,7 @@ export const config = {
   BRAND_NAME: "Wandering Dodo",
   BRAND_TAGLINE: "Premium digital birthday experiences.",
   PRICE: "$14",
-  LAUNCH_BADGE: "Early Access — $14",
+  LAUNCH_BADGE: "Launch price — $14",
   SUPPORT_EMAIL: "support@wanderingdodo.com",
   BASE_URL: _rawBaseUrl ?? "http://localhost:3000",
   CHECKOUT_URL: process.env.NEXT_PUBLIC_CHECKOUT_URL ?? "#",

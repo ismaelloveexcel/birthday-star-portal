@@ -146,7 +146,7 @@ export default function HomePage() {
       <section className="section">
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
-            {["🔒 Secure checkout", "👤 No account required", "📱 Works on any device"].map((t) => (
+            {["🔒 Secure Payhip checkout", "↩ 14-day refund", "📱 Works on any phone — no app"].map((t) => (
               <div key={t} className="card py-4 px-3 text-sm md:text-base">
                 {t}
               </div>
@@ -156,7 +156,7 @@ export default function HomePage() {
             <p className="text-star italic">
               “Zara&apos;s guests thought it was the coolest invite they&apos;d ever seen.”
             </p>
-            <div className="text-comet text-sm mt-3">— Priya, mum of 6</div>
+            <div className="text-comet text-sm mt-3">— Priya, mum of a 6-year-old</div>
           </blockquote>
         </div>
       </section>
@@ -367,6 +367,9 @@ export default function HomePage() {
             <button type="submit" disabled={submitting} className="btn-primary w-full">
               {submitting ? "Launching…" : `Launch My Birthday Mission — ${config.PRICE} →`}
             </button>
+            <p className="text-xs text-comet text-center pt-2">
+              Secure checkout · 14-day refund · Link arrives instantly.
+            </p>
             {storageError && (
               <div
                 role="alert"
