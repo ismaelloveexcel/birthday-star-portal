@@ -22,6 +22,9 @@ export const metadata: Metadata = {
   title: `${config.PRODUCT_NAME} — ${config.PRODUCT_EDITION}`,
   description:
     "Your child becomes the hero. Their guests become the crew. One link does it all.",
+  alternates: {
+    canonical: config.BASE_URL,
+  },
   openGraph: {
     title: `${config.PRODUCT_NAME} — ${config.PRODUCT_EDITION}`,
     description:
