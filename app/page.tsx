@@ -205,11 +205,14 @@ export default function HomePage() {
       </header>
 
       {/* === Hero === */}
-      <section className="section relative text-center">
-        <div className="star-field" aria-hidden />
+      <section className="section relative text-center" aria-labelledby="hero-heading">
+        <div className="star-field" aria-hidden="true" />
         <div className="relative z-10 max-w-3xl mx-auto">
-          <div className="badge-pill mb-6">🚀 {config.LAUNCH_BADGE}</div>
-          <h1 className="font-display text-3xl md:text-6xl leading-tight text-glow">
+          <div className="badge-pill mb-6">
+            <span aria-hidden="true">🚀 </span>
+            {config.LAUNCH_BADGE}
+          </div>
+          <h1 id="hero-heading" className="font-display text-3xl md:text-6xl leading-tight text-glow">
             Your child becomes the hero. Their guests become the crew. One link does it all.
           </h1>
           <p className="mt-6 text-comet md:text-lg max-w-2xl mx-auto">
@@ -229,7 +232,7 @@ export default function HomePage() {
       </section>
 
       {/* === Trust Signals === */}
-      <section className="section">
+      <section className="section" aria-label="Trust signals">
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
             {["🔒 Secure Payhip checkout", "↩ 14-day refund", "📱 Works on any phone — no app"].map((t) => (
@@ -248,9 +251,9 @@ export default function HomePage() {
       </section>
 
       {/* === How It Works === */}
-      <section className="section">
+      <section className="section" aria-labelledby="how-heading">
         <div className="max-w-4xl mx-auto">
-          <h2 className="font-display text-2xl md:text-3xl text-center text-glow mb-10">
+          <h2 id="how-heading" className="font-display text-2xl md:text-3xl text-center text-glow mb-10">
             HOW IT WORKS
           </h2>
           <div className="grid md:grid-cols-3 gap-4">
@@ -274,9 +277,9 @@ export default function HomePage() {
       </section>
 
       {/* === Live Demo === */}
-      <section id="demo" className="section">
+      <section id="demo" className="section" aria-labelledby="demo-heading">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="font-display text-2xl md:text-3xl text-glow mb-6">
+          <h2 id="demo-heading" className="font-display text-2xl md:text-3xl text-glow mb-6">
             Try a live mission before you buy
           </h2>
           {!showDemo && (
@@ -297,9 +300,9 @@ export default function HomePage() {
       </section>
 
       {/* === Form === */}
-      <section id="form" className="section">
+      <section id="form" className="section" aria-labelledby="form-heading">
         <div className="max-w-2xl mx-auto">
-          <h2 className="font-display text-2xl md:text-3xl text-center text-glow mb-8">
+          <h2 id="form-heading" className="font-display text-2xl md:text-3xl text-center text-glow mb-8">
             Create your child&apos;s birthday mission
           </h2>
           {draftRestored && (
@@ -524,9 +527,9 @@ export default function HomePage() {
       </section>
 
       {/* === Final CTA === */}
-      <section className="section text-center">
+      <section className="section text-center" aria-labelledby="final-cta-heading">
         <div className="max-w-2xl mx-auto card p-8">
-          <h2 className="font-display text-2xl md:text-3xl text-glow mb-3">
+          <h2 id="final-cta-heading" className="font-display text-2xl md:text-3xl text-glow mb-3">
             One form. One payment. One magic link.
           </h2>
           <p className="text-comet mb-6">

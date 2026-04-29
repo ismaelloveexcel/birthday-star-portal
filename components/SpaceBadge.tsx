@@ -45,9 +45,9 @@ export default function SpaceBadge({ score, childName, totalQuestions }: SpaceBa
   const stars = Array.from({ length: totalQuestions }, (_, i) => i < score);
 
   return (
-    <div className="card p-6 md:p-10 max-w-xl mx-auto text-center scale-in relative overflow-hidden">
+    <div className="card p-6 md:p-10 max-w-xl mx-auto text-center scale-in relative overflow-hidden" aria-labelledby="space-badge-heading">
       <div
-        aria-hidden
+        aria-hidden="true"
         className="absolute -top-12 -right-12 w-48 h-48 rounded-full opacity-30"
         style={{
           background:
@@ -58,13 +58,13 @@ export default function SpaceBadge({ score, childName, totalQuestions }: SpaceBa
         Wandering Dodo · Space Badge Certificate
       </div>
 
-      <h3 className="font-display text-2xl md:text-3xl text-glow mb-4">
+      <h3 id="space-badge-heading" className="font-display text-2xl md:text-3xl text-glow mb-4">
         SPACE CADET CERTIFICATE
       </h3>
 
-      <div className="flex justify-center gap-1 mb-4 text-2xl" aria-label={`${score} out of ${totalQuestions} stars`}>
+      <div className="flex justify-center gap-1 mb-4 text-2xl" role="img" aria-label={`${score} out of ${totalQuestions} stars`}>
         {stars.map((on, i) => (
-          <span key={i} style={{ color: on ? "var(--color-gold)" : "rgba(168,180,212,0.3)" }}>
+          <span key={i} aria-hidden="true" style={{ color: on ? "var(--color-gold)" : "rgba(168,180,212,0.3)" }}>
             ★
           </span>
         ))}
