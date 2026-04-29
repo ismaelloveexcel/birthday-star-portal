@@ -147,6 +147,18 @@ export default function QuizGame(props: QuizGameProps) {
                   type="button"
                   onClick={() => pick(qi, oi)}
                   disabled={submitted}
+                  aria-pressed={selected}
+                  aria-label={
+                    submitted
+                      ? `${opt} — ${
+                          isCorrect
+                            ? "correct answer"
+                            : selected
+                            ? "incorrect answer"
+                            : "not selected"
+                        }`
+                      : opt
+                  }
                   className="text-left rounded-lg px-4 py-3 transition"
                   style={{
                     minHeight: 48,

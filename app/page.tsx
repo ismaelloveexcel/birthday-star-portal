@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import BirthdayPortal from "@/components/BirthdayPortal";
 import { config } from "@/lib/config";
 import { validateForm, hasErrors, type FormData, type FormErrors } from "@/lib/validation";
-import { copyToClipboard } from "@/lib/utils";
+import { copyToClipboard, pingEvent } from "@/lib/utils";
 
 const TIMEZONES = [
   "Asia/Dubai",
@@ -16,6 +16,9 @@ const TIMEZONES = [
   "America/Los_Angeles",
   "Australia/Sydney",
 ];
+
+const DRAFT_KEY = "bdp_draft";
+const SESSION_KEY = "bdp_session";
 
 function emptyForm(): FormData {
   return {
@@ -33,12 +36,33 @@ function emptyForm(): FormData {
   };
 }
 
+function isValidDraft(value: unknown): value is FormData {
+  if (!value || typeof value !== "object") return false;
+  const v = value as Record<string, unknown>;
+  return (
+    typeof v.childName === "string" &&
+    typeof v.age === "string" &&
+    typeof v.partyDate === "string" &&
+    typeof v.partyTime === "string" &&
+    typeof v.location === "string" &&
+    typeof v.parentContact === "string" &&
+    typeof v.favoriteThing === "string" &&
+    typeof v.funFact1 === "string" &&
+    typeof v.funFact2 === "string" &&
+    typeof v.funFact3 === "string" &&
+    typeof v.timezone === "string"
+  );
+}
+
 export default function HomePage() {
   const [showDemo, setShowDemo] = useState(false);
   const [form, setForm] = useState<FormData>(emptyForm);
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
   const [storageError, setStorageError] = useState(false);
+  const [draftRestored, setDraftRestored] = useState(false);
+  const draftHydrated = useRef(false);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const demoData = useMemo(() => {
     const d = new Date();
@@ -64,6 +88,62 @@ export default function HomePage() {
     };
   }, []);
 
+  // Hydrate from localStorage draft on mount, only if no completed session exists.
+  // All storage access is wrapped in try/catch — Safari Private Mode and
+  // some in-app browsers throw on localStorage access.
+  useEffect(() => {
+    try {
+      const session = localStorage.getItem(SESSION_KEY);
+      if (session) {
+        draftHydrated.current = true;
+        return;
+      }
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) {
+        draftHydrated.current = true;
+        return;
+      }
+      const parsed = JSON.parse(raw) as unknown;
+      if (isValidDraft(parsed)) {
+        setForm(parsed);
+        setDraftRestored(true);
+      }
+    } catch {
+      // Silent — draft restore is a nice-to-have, not a blocker.
+    } finally {
+      draftHydrated.current = true;
+    }
+  }, []);
+
+  // Debounced save of the current form to localStorage on every change.
+  // Skip until after hydration so we never overwrite a stored draft with the
+  // empty initial form.
+  useEffect(() => {
+    if (!draftHydrated.current) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
+      } catch {
+        // Silent — see hydration note above.
+      }
+    }, 250);
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
+  }, [form]);
+
+  function startOver() {
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch {
+      // Silent.
+    }
+    setForm(emptyForm());
+    setErrors({});
+    setDraftRestored(false);
+  }
+
   function update<K extends keyof FormData>(key: K, value: FormData[K]) {
     setForm((f) => ({ ...f, [key]: value }));
     if (errors[key]) setErrors((e) => ({ ...e, [key]: undefined }));
@@ -87,12 +167,12 @@ export default function HomePage() {
     const serialised = JSON.stringify(form);
     let saved = false;
     try {
-      localStorage.setItem("bdp_session", serialised);
+      localStorage.setItem(SESSION_KEY, serialised);
       saved = true;
     } catch {
       // localStorage failed (e.g. Safari Private Mode) — try sessionStorage
       try {
-        sessionStorage.setItem("bdp_session", serialised);
+        sessionStorage.setItem(SESSION_KEY, serialised);
         saved = true;
       } catch {
         // both storage APIs unavailable
@@ -103,6 +183,14 @@ export default function HomePage() {
       setStorageError(true);
       return;
     }
+    // Clear the auto-saved draft now that the form has been committed.
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch {
+      // Silent.
+    }
+    // No-PII conversion ping (only sent if NEXT_PUBLIC_PING_URL is configured).
+    pingEvent("portal_form_submit");
     window.location.href = config.CHECKOUT_URL;
   }
 
@@ -119,11 +207,14 @@ export default function HomePage() {
       </header>
 
       {/* === Hero === */}
-      <section className="section relative text-center">
-        <div className="star-field" aria-hidden />
+      <section className="section relative text-center" aria-labelledby="hero-heading">
+        <div className="star-field" aria-hidden="true" />
         <div className="relative z-10 max-w-3xl mx-auto">
-          <div className="badge-pill mb-6">🚀 {config.LAUNCH_BADGE}</div>
-          <h1 className="font-display text-3xl md:text-6xl leading-tight text-glow">
+          <div className="badge-pill mb-6">
+            <span aria-hidden="true">🚀 </span>
+            {config.LAUNCH_BADGE}
+          </div>
+          <h1 id="hero-heading" className="font-display text-3xl md:text-6xl leading-tight text-glow">
             Your child becomes the hero. Their guests become the crew. One link does it all.
           </h1>
           <p className="mt-6 text-comet md:text-lg max-w-2xl mx-auto">
@@ -143,7 +234,7 @@ export default function HomePage() {
       </section>
 
       {/* === Trust Signals === */}
-      <section className="section">
+      <section className="section" aria-label="Trust signals">
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
             {["🔒 Secure Payhip checkout", "↩ 14-day refund", "📱 Works on any phone — no app"].map((t) => (
@@ -162,9 +253,9 @@ export default function HomePage() {
       </section>
 
       {/* === How It Works === */}
-      <section className="section">
+      <section className="section" aria-labelledby="how-heading">
         <div className="max-w-4xl mx-auto">
-          <h2 className="font-display text-2xl md:text-3xl text-center text-glow mb-10">
+          <h2 id="how-heading" className="font-display text-2xl md:text-3xl text-center text-glow mb-10">
             HOW IT WORKS
           </h2>
           <div className="grid md:grid-cols-3 gap-4">
@@ -188,9 +279,9 @@ export default function HomePage() {
       </section>
 
       {/* === Live Demo === */}
-      <section id="demo" className="section">
+      <section id="demo" className="section" aria-labelledby="demo-heading">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="font-display text-2xl md:text-3xl text-glow mb-6">
+          <h2 id="demo-heading" className="font-display text-2xl md:text-3xl text-glow mb-6">
             Try a live mission before you buy
           </h2>
           {!showDemo && (
@@ -211,11 +302,29 @@ export default function HomePage() {
       </section>
 
       {/* === Form === */}
-      <section id="form" className="section">
+      <section id="form" className="section" aria-labelledby="form-heading">
         <div className="max-w-2xl mx-auto">
-          <h2 className="font-display text-2xl md:text-3xl text-center text-glow mb-8">
+          <h2 id="form-heading" className="font-display text-2xl md:text-3xl text-center text-glow mb-8">
             Create your child&apos;s birthday mission
           </h2>
+          {draftRestored && (
+            <div
+              className="card p-4 mb-4 text-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+              role="status"
+            >
+              <span className="text-star">
+                We restored your details from earlier.
+              </span>
+              <button
+                type="button"
+                onClick={startOver}
+                className="btn-secondary"
+                style={{ minHeight: 48, padding: "0.35rem 0.9rem", fontSize: "0.85rem" }}
+              >
+                Start over
+              </button>
+            </div>
+          )}
           <form onSubmit={handleSubmit} noValidate className="space-y-4">
             <Field
               id="field-childName"
@@ -420,9 +529,9 @@ export default function HomePage() {
       </section>
 
       {/* === Final CTA === */}
-      <section className="section text-center">
+      <section className="section text-center" aria-labelledby="final-cta-heading">
         <div className="max-w-2xl mx-auto card p-8">
-          <h2 className="font-display text-2xl md:text-3xl text-glow mb-3">
+          <h2 id="final-cta-heading" className="font-display text-2xl md:text-3xl text-glow mb-3">
             One form. One payment. One magic link.
           </h2>
           <p className="text-comet mb-6">
