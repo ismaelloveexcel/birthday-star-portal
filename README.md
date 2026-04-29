@@ -40,10 +40,11 @@ Useful scripts:
 ### About `NEXT_PUBLIC_PING_URL`
 
 When set, the app fires a `navigator.sendBeacon` POST containing exactly
-`{ "event": "...", "ts": <unix-ms> }` for two events:
+`{ "event": "...", "ts": <unix-ms> }` for three events:
 
 - `portal_form_submit` — right before redirecting to checkout
 - `portal_link_generated` — when `/success` finishes building the magic link
+- `portal_link_opened` — when `/pack` successfully decodes a shared link
 
 **This never sends user data.** No party details, no contact info, no IDs.
 If `NEXT_PUBLIC_PING_URL` is unset, no request is made.

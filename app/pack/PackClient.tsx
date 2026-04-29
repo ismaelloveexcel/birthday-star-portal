@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import BirthdayPortal from "@/components/BirthdayPortal";
-import { decodePortalData } from "@/lib/utils";
+import { decodePortalData, pingEvent } from "@/lib/utils";
 import { config } from "@/lib/config";
 
 interface RawData {
@@ -73,6 +73,12 @@ export default function PackClient({ encoded }: { encoded: string | null }) {
       },
     };
   }, [encoded]);
+
+  useEffect(() => {
+    if (result.ok) {
+      pingEvent("portal_link_opened");
+    }
+  }, [result.ok]);
 
   if (!result.ok) {
     return (
