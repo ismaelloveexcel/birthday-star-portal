@@ -298,7 +298,7 @@ export default function HomePage() {
               <input
                 id="field-parentContact"
                 className={`input ${errors.parentContact ? "input-error" : ""}`}
-                placeholder="For guests to RSVP to you"
+                placeholder="+971 50 123 4567 or you@example.com"
                 value={form.parentContact}
                 onChange={(e) => update("parentContact", e.target.value)}
               />

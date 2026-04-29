@@ -90,8 +90,8 @@ export function detectContactType(contact: string): ContactType {
   const trimmed = contact.trim();
   const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
   const isPhone =
-    trimmed.startsWith("+") ||
-    /^[\d\s\-()]{7,}$/.test(trimmed);
+    trimmed.startsWith("+") &&
+    /^\+[\d\s\-()+]{6,}$/.test(trimmed);
   if (isEmail && !isPhone) return "email";
   if (isPhone && !isEmail) return "whatsapp";
   if (isEmail && isPhone) return "email";
