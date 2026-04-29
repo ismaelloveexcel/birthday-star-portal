@@ -1,0 +1,49 @@
+name: Agent Dispatch
+
+# Reads .github/agent-backlog.yml and opens an issue (assigned to @copilot)
+# for every backlog item whose dependencies are merged and that has no open
+# issue/PR yet. Idempotent via per-id labels.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Log decisions without creating issues'
+        type: boolean
+        default: true
+  schedule:
+    - cron: '*/30 * * * *'
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+concurrency:
+  group: agent-dispatch
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    if: vars.AUTONOMY_PAUSED != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install runtime deps
+        run: npm install --no-save --no-audit --no-fund js-yaml@4.1.0
+
+      - name: Run dispatcher
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+          MAX_OPEN: ${{ vars.AGENT_MAX_OPEN || '5' }}
+        run: node .github/scripts/agent-dispatch.mjs

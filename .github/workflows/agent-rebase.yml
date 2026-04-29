@@ -1,0 +1,31 @@
+name: Agent Rebase
+
+# When `main` advances, rebase every open agent-pr branch via the GitHub
+# update-branch API so siblings always test against the latest base.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: agent-rebase
+  cancel-in-progress: false
+
+jobs:
+  rebase:
+    if: vars.AUTONOMY_PAUSED != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rebase open agent PRs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: node .github/scripts/agent-rebase.mjs
