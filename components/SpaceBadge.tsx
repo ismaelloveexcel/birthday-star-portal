@@ -2,26 +2,33 @@
 
 import { useState } from "react";
 import { config } from "@/lib/config";
+import { interpolate } from "@/lib/experience/interpolate";
+import type { Experience } from "@/lib/schemas/experience";
 import { copyToClipboard } from "@/lib/utils";
 
 interface SpaceBadgeProps {
   score: number;
   childName: string;
   totalQuestions: number;
+  badgeCopy: Experience["badge"];
+  editionName: string;
 }
 
-function rankFor(score: number): { title: string; line: string } {
-  if (score >= 5) return { title: "MISSION COMMANDER", line: "Perfect score, elite cadet!" };
-  if (score === 4) return { title: "STAR NAVIGATOR", line: "Excellent mission knowledge!" };
-  if (score === 3) return { title: "SPACE CADET", line: "Mission accepted!" };
-  return { title: "JUNIOR RECRUIT", line: "Keep training, the mission needs you!" };
+function rankFor(score: number, badgeCopy: Experience["badge"]): { title: string; line: string } {
+  const ranks = badgeCopy.ranks.slice().sort((left, right) => right.minScore - left.minScore);
+  return ranks.find((rank) => score >= rank.minScore) ?? ranks[ranks.length - 1];
 }
 
-export default function SpaceBadge({ score, childName, totalQuestions }: SpaceBadgeProps) {
-  const rank = rankFor(score);
+export default function SpaceBadge({ score, childName, totalQuestions, badgeCopy, editionName }: SpaceBadgeProps) {
+  const rank = rankFor(score, badgeCopy);
   const [copied, setCopied] = useState(false);
 
-  const caption = `I earned ${score}/${totalQuestions} Space Badges at Captain ${childName}'s Birthday Mission! 🚀 ${config.BASE_URL}`;
+  const caption = interpolate(badgeCopy.shareCaptionTemplate, {
+    baseUrl: config.BASE_URL,
+    childName,
+    score: String(score),
+    totalQuestions: String(totalQuestions),
+  });
 
   async function handleShare() {
     if (typeof navigator !== "undefined" && (navigator as Navigator & { share?: (d: ShareData) => Promise<void> }).share) {
@@ -55,11 +62,11 @@ export default function SpaceBadge({ score, childName, totalQuestions }: SpaceBa
         }}
       />
       <div className="text-xs uppercase tracking-widest text-comet mb-2">
-        Wandering Dodo · Space Badge Certificate
+        {badgeCopy.eyebrow}
       </div>
 
       <h3 id="space-badge-heading" className="font-display text-2xl md:text-3xl text-glow mb-4">
-        SPACE CADET CERTIFICATE
+        {badgeCopy.heading}
       </h3>
 
       <div className="flex justify-center gap-1 mb-4 text-2xl" role="img" aria-label={`${score} out of ${totalQuestions} stars`}>
@@ -76,15 +83,21 @@ export default function SpaceBadge({ score, childName, totalQuestions }: SpaceBa
       <div className="text-comet mb-4">{rank.line}</div>
 
       <div className="text-star mb-1">
-        You earned <span className="font-display">{score}/{totalQuestions}</span> Space Badges
+        {interpolate(badgeCopy.earnedTemplate, {
+          score: String(score),
+          totalQuestions: String(totalQuestions),
+        })}
       </div>
       <div className="text-comet text-sm">
-        Captain {childName}&apos;s Birthday Mission · {config.PRODUCT_EDITION}
+        {interpolate(badgeCopy.missionLineTemplate, {
+          childName,
+          editionName,
+        })}
       </div>
 
       <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
         <button onClick={handleShare} className="btn-primary">
-          📲 Share My Badge
+          {badgeCopy.shareLabel}
         </button>
         <button
           onClick={async () => {
@@ -96,7 +109,7 @@ export default function SpaceBadge({ score, childName, totalQuestions }: SpaceBa
           }}
           className="btn-secondary"
         >
-          {copied ? "Copied!" : "Copy caption"}
+          {copied ? badgeCopy.copiedLabel : badgeCopy.copyLabel}
         </button>
       </div>
 

@@ -1,18 +1,21 @@
 "use client";
 
 import { config } from "@/lib/config";
+import { interpolate } from "@/lib/experience/interpolate";
+import type { Experience } from "@/lib/schemas/experience";
 import { detectContactType, sanitizePhoneForWhatsApp } from "@/lib/utils";
 
 interface RSVPActionProps {
   parentContact: string;
   childName: string;
+  copy: Experience["copy"]["rsvp"];
 }
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export default function RSVPAction({ parentContact, childName }: RSVPActionProps) {
+export default function RSVPAction({ parentContact, childName, copy }: RSVPActionProps) {
   const type = detectContactType(parentContact);
-  const message = `Hi! We confirm that we are joining Captain ${childName}'s birthday mission! 🚀`;
+  const message = interpolate(copy.messageTemplate, { childName });
 
   const waNumber = sanitizePhoneForWhatsApp(parentContact);
   const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`;
@@ -24,7 +27,7 @@ export default function RSVPAction({ parentContact, childName }: RSVPActionProps
   const isValidEmail = EMAIL_REGEX.test(trimmedContact);
   const mailRecipient = isValidEmail ? trimmedContact : config.SUPPORT_EMAIL;
   const mailtoUrl = `mailto:${encodeURIComponent(mailRecipient)}?subject=${encodeURIComponent(
-    `RSVP: Captain ${childName}'s Birthday Mission`
+    interpolate(copy.emailSubjectTemplate, { childName })
   )}&body=${encodeURIComponent(message)}`;
 
   const showWhatsApp = (type === "whatsapp" || type === "both") && waNumber.length >= 7;
@@ -39,12 +42,12 @@ export default function RSVPAction({ parentContact, childName }: RSVPActionProps
           rel="noopener noreferrer"
           className="btn-primary"
         >
-          ✅ Confirm via WhatsApp
+          {copy.whatsappCta}
         </a>
       )}
       {showEmail && (
         <a href={mailtoUrl} className="btn-secondary">
-          ✅ Confirm via Email
+          {copy.emailCta}
         </a>
       )}
     </div>

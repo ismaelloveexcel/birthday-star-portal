@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo } from "react";
 import BirthdayPortal from "@/components/BirthdayPortal";
+import { spaceMissionExperience } from "@/lib/experience/spaceMission";
 import { decodePortalData, pingEvent } from "@/lib/utils";
 import { config } from "@/lib/config";
 
@@ -110,5 +111,5 @@ export default function PackClient({ encoded }: { encoded: string | null }) {
     );
   }
 
-  return <BirthdayPortal {...result.data} isDemo={false} />;
+  return <BirthdayPortal experience={spaceMissionExperience} {...result.data} isDemo={false} />;
 }
