@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import BirthdayPortal from "@/components/BirthdayPortal";
+import BirthdayPortal from "@/features/portal/BirthdayPortal";
+import spaceMission from "@/content/experiences/space-mission.json";
+import type { Experience } from "@/features/portal/types";
 import { config } from "@/lib/config";
 import { validateForm, hasErrors, type FormData, type FormErrors } from "@/lib/validation";
 import { copyToClipboard, pingEvent } from "@/lib/utils";
@@ -296,7 +298,7 @@ export default function HomePage() {
         </div>
         {showDemo && (
           <div className="mt-10 max-w-5xl mx-auto rounded-2xl overflow-hidden border border-white/10">
-            <BirthdayPortal {...demoData} />
+            <BirthdayPortal experience={spaceMission as Experience} {...demoData} />
           </div>
         )}
       </section>

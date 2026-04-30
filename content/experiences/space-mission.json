@@ -1,0 +1,48 @@
+{
+  "id": "space-mission",
+  "sections": [
+    { "type": "portal-ignition" },
+    { "type": "captain-reveal" },
+    { "type": "mission-briefing" },
+    { "type": "countdown" },
+    { "type": "rsvp" },
+    { "type": "cadet-challenge" },
+    { "type": "space-badge" },
+    { "type": "star-log" },
+    { "type": "viral-loop" }
+  ],
+  "copy": {
+    "portalIgnition.heading": "MISSION ACCESS GRANTED",
+    "portalIgnition.subtitle": "Initiating birthday mission sequence\u2026",
+
+    "captainReveal.eyebrow": "Captain Reveal",
+    "captainReveal.srOnly": "Captain {{childName}}\u2019s {{ageOrdinal}} Birthday Mission",
+    "captainReveal.line1": "CAPTAIN {{upperName}}\u2019S",
+    "captainReveal.line2": "{{ageOrdinal}} BIRTHDAY MISSION",
+    "captainReveal.subtitle": "A special mission briefing has been prepared for all crew members.",
+
+    "missionBriefing.eyebrow": "Classified \u00b7 Galactic Mission Briefing",
+    "missionBriefing.heading": "ATTENTION CREW",
+    "missionBriefing.intro": "You are hereby invited to join Captain {{childName}}\u2019s {{age}}th Birthday Mission.",
+    "missionBriefing.dateLabel": "Mission Date",
+    "missionBriefing.timeLabel": "Launch Time",
+    "missionBriefing.locationLabel": "Mission Base",
+    "missionBriefing.themeLabel": "Mission Theme",
+
+    "countdown.heading": "MISSION LAUNCH COUNTDOWN",
+
+    "rsvp.heading": "FORCEFIELD CREW CHECK-IN",
+    "rsvp.subtitle": "Confirm your mission attendance",
+
+    "cadetChallenge.heading": "CADET CHALLENGE",
+    "cadetChallenge.subtitle": "Complete your training to earn Space Badges",
+
+    "starLog.eyebrow": "Classified",
+    "starLog.heading": "SECRET STAR LOG",
+    "starLog.subtitle": "Classified mission intelligence \u2014 for crew eyes only",
+    "starLog.seal": "Mission Seal \u2014 Captain {{childName}}",
+
+    "viralLoop.message": "Want to create a magical birthday mission for your child?",
+    "viralLoop.cta": "Create your own Birthday Star Portal \u2192"
+  }
+}
