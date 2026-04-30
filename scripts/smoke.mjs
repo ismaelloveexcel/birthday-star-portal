@@ -42,7 +42,7 @@ const FIXTURE = Buffer.from(JSON.stringify(FIXTURE_DATA), "utf-8").toString("bas
 const CHECKS = [
   ["/", "Birthday Star Portal"],
   ["/success?_test=1", "PREPARING YOUR PORTAL"],
-  [`/pack?data=${FIXTURE}`, "MISSION ACCESS GRANTED"],
+  [`/pack?data=${encodeURIComponent(FIXTURE)}`, "MISSION ACCESS GRANTED"],
 ];
 
 // ---------------------------------------------------------------------------
@@ -62,14 +62,28 @@ function getFreePort() {
 }
 
 /** GET a URL and return the response body as a string. */
-async function httpGet(url) {
+async function httpGet(url, timeoutMs = 5_000) {
   const { default: lib } = await import(url.startsWith("https") ? "https" : "http");
   return new Promise((resolve, reject) => {
-    lib.get(url, (res) => {
+    const req = lib.get(url, (res) => {
+      const { statusCode = 0 } = res;
+
+      if (statusCode < 200 || statusCode >= 300) {
+        res.resume();
+        reject(new Error(`GET ${url} failed with status ${statusCode}`));
+        return;
+      }
+
       let body = "";
       res.on("data", (chunk) => (body += chunk));
       res.on("end", () => resolve(body));
-    }).on("error", reject);
+    });
+
+    req.setTimeout(timeoutMs, () => {
+      req.destroy(new Error(`GET ${url} timed out after ${timeoutMs}ms`));
+    });
+
+    req.on("error", reject);
   });
 }
 
@@ -100,9 +114,10 @@ async function main() {
 
   console.log(`smoke: starting next start on port ${port} …`);
 
+  const nextCli = path.join(ROOT, "node_modules", "next", "dist", "bin", "next");
   const server = spawn(
     process.execPath,
-    ["node_modules/.bin/next", "start", "--port", String(port)],
+    [nextCli, "start", "--port", String(port)],
     {
       cwd: ROOT,
       stdio: ["ignore", "pipe", "pipe"],
@@ -152,7 +167,12 @@ async function main() {
     console.error("smoke: " + err.message);
     exitCode = 1;
   } finally {
-    server.kill("SIGTERM");
+    // Graceful shutdown: SIGTERM, then hard-kill after 5 s if still running.
+    const killed = new Promise((resolve) => server.once("exit", resolve));
+    server.kill(process.platform === "win32" ? undefined : "SIGTERM");
+    const timer = setTimeout(() => server.kill(), 5_000);
+    await killed;
+    clearTimeout(timer);
   }
 
   process.exit(exitCode);
