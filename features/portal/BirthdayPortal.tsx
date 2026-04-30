@@ -76,10 +76,10 @@ export default function BirthdayPortal(props: BirthdayPortalProps) {
         </div>
       )}
 
-      {experience.sections.map((section, index) => {
+      {experience.sections.map((section) => {
         const SectionComponent = sectionRegistry[section.type];
         if (!SectionComponent) return null;
-        return <SectionComponent key={`${section.type}-${index}`} {...sectionProps} />;
+        return <SectionComponent key={section.type} {...sectionProps} />;
       })}
 
       {isDemo && (
