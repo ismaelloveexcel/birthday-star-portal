@@ -86,7 +86,7 @@ export default function PackClient({ encoded }: { encoded: string | null }) {
 
   if (!result.ok) {
     return (
-      <main className="min-h-screen flex items-center justify-center px-5 text-center relative">
+      <main id="main" className="min-h-screen flex items-center justify-center px-5 text-center relative">
         <div className="star-field" aria-hidden />
         <div className="relative z-10 card p-8 max-w-md">
           <h1 className="font-display text-2xl md:text-3xl text-glow mb-3">
@@ -111,5 +111,9 @@ export default function PackClient({ encoded }: { encoded: string | null }) {
     );
   }
 
-  return <BirthdayPortal experience={spaceMissionExperience} {...result.data} isDemo={false} />;
+  return (
+    <div id="main">
+      <BirthdayPortal experience={spaceMissionExperience} {...result.data} isDemo={false} />
+    </div>
+  );
 }

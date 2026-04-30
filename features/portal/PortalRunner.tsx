@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useReducer } from "react";
+import PortalErrorBoundary from "@/features/portal/PortalErrorBoundary";
 import { sectionRegistry, type PortalSectionContext } from "@/features/portal/sectionRegistry";
 import { createFlowReducer, createInitialFlowState } from "@/features/portal/flow";
 import type { Experience } from "@/lib/schemas/experience";
@@ -36,46 +37,48 @@ export default function PortalRunner({ experience, ...context }: PortalRunnerPro
   };
 
   return (
-    <div className="relative overflow-hidden" style={{ background: "var(--color-void)" }}>
-      {DemoBanner && demoBannerSection ? (
-        <DemoBanner context={sectionContext} props={demoBannerSection.props} />
-      ) : null}
+    <PortalErrorBoundary>
+      <div className="relative overflow-hidden" style={{ background: "var(--color-void)" }}>
+        {DemoBanner && demoBannerSection ? (
+          <DemoBanner context={sectionContext} props={demoBannerSection.props} />
+        ) : null}
 
-      {Section && currentSection ? (
-        <Section context={sectionContext} props={currentSection.props} />
-      ) : null}
+        {Section && currentSection ? (
+          <Section context={sectionContext} props={currentSection.props} />
+        ) : null}
 
-      {isLastStep && context.isDemo && DemoCta && demoCtaSection ? (
-        <DemoCta context={sectionContext} props={demoCtaSection.props} />
-      ) : null}
+        {isLastStep && context.isDemo && DemoCta && demoCtaSection ? (
+          <DemoCta context={sectionContext} props={demoCtaSection.props} />
+        ) : null}
 
-      <div className="px-5 pb-10">
-        <div className="max-w-3xl mx-auto card p-4 flex flex-col sm:flex-row gap-3 justify-between items-center">
-          <div className="text-xs uppercase tracking-widest text-comet">
-            Step {Math.max(currentIndex + 1, 1)} of {flow.length}
-          </div>
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => dispatch({ type: canGoBack ? "back" : "restart" })}
-              className="btn-secondary"
-            >
-              {canGoBack ? "Back" : "Restart"}
-            </button>
-            {!isLastStep ? (
+        <div className="px-5 pb-10">
+          <div className="max-w-3xl mx-auto card p-4 flex flex-col sm:flex-row gap-3 justify-between items-center">
+            <div className="text-xs uppercase tracking-widest text-comet" aria-live="polite">
+              Step {Math.max(currentIndex + 1, 1)} of {flow.length}
+            </div>
+            <div className="flex gap-3">
               <button
                 type="button"
-                onClick={() => dispatch({ type: "next" })}
-                disabled={!canGoNext}
-                className="btn-primary"
-                style={{ opacity: canGoNext ? 1 : 0.5 }}
+                onClick={() => dispatch({ type: canGoBack ? "back" : "restart" })}
+                className="btn-secondary"
               >
-                Next
+                {canGoBack ? "Back" : "Restart"}
               </button>
-            ) : null}
+              {!isLastStep ? (
+                <button
+                  type="button"
+                  onClick={() => dispatch({ type: "next" })}
+                  disabled={!canGoNext}
+                  className="btn-primary"
+                  style={{ opacity: canGoNext ? 1 : 0.5 }}
+                >
+                  Next
+                </button>
+              ) : null}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </PortalErrorBoundary>
   );
 }
