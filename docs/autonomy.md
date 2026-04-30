@@ -134,7 +134,7 @@ stalls** until someone manually clicks "Assign to Agent" on the issue.
    - **Resource owner:** the account that owns this repo.
    - **Repository access:** Only this repository.
    - **Repository permissions:** `Issues: Read and write`,
-     `Pull requests: Read and write`, `Metadata: Read-only`.
+     `Metadata: Read-only`.
    - **Expiration:** as short as you can tolerate; rotate on schedule.
 3. Add it as repo secret **`COPILOT_ASSIGN_TOKEN`** (Settings → Secrets and
    variables → Actions → Secrets → New repository secret).
