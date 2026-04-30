@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import BirthdayPortal from "@/components/BirthdayPortal";
 import CreateForm from "@/features/create/CreateForm";
+import { spaceMissionExperience } from "@/lib/experience/spaceMission";
 import { config } from "@/lib/config";
 
 export default function HomePage() {
@@ -134,7 +135,7 @@ export default function HomePage() {
         </div>
         {showDemo && (
           <div className="mt-10 max-w-5xl mx-auto rounded-2xl overflow-hidden border border-white/10">
-            <BirthdayPortal {...demoData} />
+            <BirthdayPortal experience={spaceMissionExperience} {...demoData} />
           </div>
         )}
       </section>
