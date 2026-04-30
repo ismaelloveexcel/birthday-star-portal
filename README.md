@@ -100,6 +100,16 @@ There is no API integration — the payment platform redirects the parent back
 to `/success` after checkout, and `/success` reads the form data from
 `localStorage` to build the portal link.
 
+### Solo-operator checklist
+
+1. Set `NEXT_PUBLIC_CHECKOUT_URL` to your Payhip or Lemon Squeezy product link.
+2. Set the product redirect URL to `https://yourdomain.com/success`.
+3. Tell customers to fill the form and pay in Safari or Chrome.
+4. The app shows a recovery code before payment; customers should save it.
+5. In the normal case, `/success` builds the portal link automatically after payment.
+6. If checkout returns without the stored form data, the customer pastes the recovery code on `/success`.
+7. If they lose both the portal link and the recovery code, handle it manually through support email.
+
 ### Option A — Payhip
 
 1. Create an account at [payhip.com](https://payhip.com).
@@ -121,13 +131,15 @@ launch stage with low traffic.
 
 1. Payment bypass is technically possible by navigating directly to
    `/success`. Acceptable at launch stage with zero traffic.
-2. `localStorage` is cleared if parent uses a different browser or private
-   browsing mode. Error state handles this gracefully.
+2. `localStorage` can fail if the parent uses a different browser, an in-app
+   browser, or private browsing mode. The checkout flow now recommends Safari
+   or Chrome and shows a recovery code as a fallback.
 3. Portal link contains all party data in base64 — visible to technical users
    who decode the URL. Data is party invite details only — this is intentional
    for v1.
-4. No portal link recovery if parent loses the link. Manual support via email
-   handles edge cases.
+4. Portal recovery is still browser-based in v1. The recovery code handles the
+   main checkout handoff failure, but manual support via email is still needed
+   if the customer loses both the link and the recovery code.
 5. No detailed analytics. At most, the app can send optional no-PII
    conversion pings when `NEXT_PUBLIC_PING_URL` is configured.
 6. Fonts are served from files committed in `app/fonts/` via `next/font/local`.
