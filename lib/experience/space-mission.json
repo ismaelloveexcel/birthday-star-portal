@@ -1,0 +1,106 @@
+{
+  "id": "01HZSPACE000000000000SPACE1",
+  "slug": "space-mission",
+  "name": "Space Mission Edition",
+  "theme": {
+    "colors": {
+      "void": "#04051a",
+      "star": "#e8eaf6",
+      "comet": "#a8b4d4",
+      "nova": "#e040fb",
+      "plasma": "#4fc3f7",
+      "gold": "#ffd54f",
+      "success": "#00e676",
+      "danger": "#ff5252"
+    },
+    "fonts": {
+      "display": "'Orbitron', 'Space Grotesk', sans-serif",
+      "body": "'Space Grotesk', system-ui, sans-serif"
+    }
+  },
+  "copy": {
+    "ignitionHeading": "MISSION ACCESS GRANTED",
+    "ignitionSubline": "Initiating birthday mission sequence…",
+
+    "captainRevealLabel": "Captain Reveal",
+    "captainRevealSrOnly": "Captain {{childName}}'s {{ageOrdinal}} Birthday Mission",
+
+    "briefingEyebrow": "Classified · Galactic Mission Briefing",
+    "briefingHeading": "ATTENTION CREW",
+    "briefingBody": "You are hereby invited to join Captain {{childName}}'s {{age}}th Birthday Mission.",
+    "briefingDateLabel": "Mission Date",
+    "briefingTimeLabel": "Launch Time",
+    "briefingLocationLabel": "Mission Base",
+    "briefingThemeLabel": "Mission Theme",
+
+    "countdownHeading": "MISSION LAUNCH COUNTDOWN",
+
+    "rsvpHeading": "FORCEFIELD CREW CHECK-IN",
+    "rsvpSubline": "Confirm your mission attendance",
+
+    "cadetChallengeHeading": "CADET CHALLENGE",
+    "cadetChallengeSubline": "Complete your training to earn Space Badges",
+
+    "starLogEyebrow": "🛰 Classified",
+    "starLogHeading": "SECRET STAR LOG",
+    "starLogSubline": "Classified mission intelligence — for crew eyes only",
+    "starLogSeal": "★ Mission Seal — Captain {{childName}}",
+
+    "viralLoopBody": "✨ Want to create a magical birthday mission for your child?",
+    "viralLoopCta": "Create your own Birthday Star Portal →",
+
+    "demoBannerText": "👀 This is a demo — Create yours for {{price}}",
+    "demoBannerCta": "Create My Portal →",
+
+    "demoCTAHeading": "Ready to launch your own birthday mission?",
+    "demoCTAButton": "Create My Portal — {{price}} →"
+  },
+  "sections": [
+    { "id": "s1-ignition",         "type": "portalIgnition",  "props": {} },
+    { "id": "s2-captain-reveal",   "type": "captainReveal",   "props": {} },
+    { "id": "s3-briefing",         "type": "missionBriefing", "props": {} },
+    { "id": "s4-countdown",        "type": "countdown",       "props": {} },
+    { "id": "s5-rsvp",             "type": "rsvp",            "props": {} },
+    { "id": "s6-cadet-challenge",  "type": "cadetChallenge",  "props": {} },
+    { "id": "s7-space-badge",      "type": "spaceBadge",      "props": {} },
+    { "id": "s8-star-log",         "type": "starLog",         "props": {} },
+    { "id": "s9-viral-loop",       "type": "viralLoop",       "props": {} }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1-age",
+        "prompt": "How old is Captain {{childName}} turning?",
+        "options": ["{{age}}", "{{ageMinus}}", "{{agePlus}}"]
+      },
+      {
+        "id": "q2-favorite",
+        "prompt": "What is Captain {{childName}}'s favourite thing?",
+        "options": ["{{favoriteThing}}", "dinosaurs", "unicorns"]
+      },
+      {
+        "id": "q3-star-log",
+        "prompt": "Which secret star log belongs to Captain {{childName}}?",
+        "options": [
+          "{{funFact1}}",
+          "once tried to teach a fish to sing",
+          "believes they invented the high five"
+        ]
+      },
+      {
+        "id": "q4-location",
+        "prompt": "Where is the mission taking place?",
+        "options": ["{{location}}", "Galaxy Garden", "Moon Base Camp"]
+      },
+      {
+        "id": "q5-edition",
+        "prompt": "Which mission are you joining today?",
+        "options": [
+          "Space Mission Edition",
+          "Ocean Explorer Edition",
+          "Jungle Safari Edition"
+        ]
+      }
+    ]
+  }
+}
