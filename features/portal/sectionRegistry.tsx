@@ -5,6 +5,7 @@ import QuizGame from "@/components/QuizGame";
 import RSVPAction from "@/components/RSVPAction";
 import SpaceBadge from "@/components/SpaceBadge";
 import { config } from "@/lib/config";
+import { buildQuizQuestions } from "@/lib/experience/buildQuizQuestions";
 import { interpolate } from "@/lib/experience/interpolate";
 import { formatDate } from "@/lib/utils";
 import type { Experience, ExperienceSectionType } from "@/lib/schemas/experience";
@@ -213,6 +214,15 @@ function RsvpSection({ context }: PortalSectionProps) {
 }
 
 function QuizSection({ context }: PortalSectionProps) {
+  const questions = buildQuizQuestions({
+    childName: context.childName,
+    age: context.age,
+    favoriteThing: context.favoriteThing,
+    funFacts: context.funFacts,
+    location: context.location,
+    questions: context.experience.quiz.questions,
+  });
+
   return (
     <section className="section" aria-labelledby="cadet-challenge-heading">
       <div className="max-w-2xl mx-auto">
@@ -225,11 +235,10 @@ function QuizSection({ context }: PortalSectionProps) {
           </p>
         </div>
         <QuizGame
-          childName={context.childName}
-          age={context.age}
-          favoriteThing={context.favoriteThing}
-          funFacts={context.funFacts}
-          location={context.location}
+          questions={questions}
+          questionLabelTemplate={context.experience.quiz.questionLabelTemplate}
+          submitLabel={context.experience.quiz.submitLabel}
+          incompleteLabel={context.experience.quiz.incompleteLabel}
           onComplete={context.onQuizComplete}
         />
       </div>
