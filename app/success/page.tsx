@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from "react";
 import { config } from "@/lib/config";
-import { copyToClipboard, decodePortalData, encodePortalData, sanitizePhoneForWhatsApp, detectContactType, pingEvent } from "@/lib/utils";
+import { buildPortalShareText, copyToClipboard, decodePortalData, encodePortalData, sanitizePhoneForWhatsApp, detectContactType, pingEvent } from "@/lib/utils";
 import type { FormData } from "@/lib/validation";
 
 interface State {
@@ -109,7 +109,7 @@ export default function SuccessPage() {
   const url = state.url!;
   const contactType = detectContactType(data.parentContact);
   const waNumber = sanitizePhoneForWhatsApp(data.parentContact);
-  const waText = `🚀 Here's Captain ${data.childName}'s Birthday Mission portal! Open it to see the mission briefing, countdown, and complete the Cadet Challenge: ${url}`;
+  const waText = buildPortalShareText(data.childName, url);
   const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(waText)}`;
   const showWhatsApp = contactType === "whatsapp" || contactType === "both";
 

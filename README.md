@@ -176,6 +176,11 @@ inbox: **support@wanderingdodo.com** (the only path until Phase 2 ships
 verified payment tokens — anyone who loses their portal link must email this
 address to be reissued one manually).
 
+Related operator docs:
+
+- `docs/launch-checklist.md` — go-live checklist for payment, redirect, recovery, and smoke validation.
+- `docs/support-templates.md` — ready-to-paste replies for lost-link, checkout handoff, and refund requests.
+
 ### Reading conversion-funnel pings (Cloudflare Worker)
 
 The optional `NEXT_PUBLIC_PING_URL` endpoint receives `sendBeacon` POSTs of
