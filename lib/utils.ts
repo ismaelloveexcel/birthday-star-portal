@@ -120,6 +120,16 @@ export function sanitizePhoneForWhatsApp(contact: string): string {
   return (contact || "").replace(/[^\d]/g, "");
 }
 
+export function buildPortalShareText(childName: string, url: string): string {
+  const safeName = (childName || "your child").trim();
+  const safeUrl = (url || "").trim();
+
+  return [
+    `🚀 Here's Captain ${safeName}'s Birthday Mission portal! Open it to see the mission briefing, countdown, and complete the Cadet Challenge: ${safeUrl}`,
+    "Made with Birthday Star Portal — wanderingdodo.com",
+  ].join("\n\n");
+}
+
 /**
  * Best-effort, no-PII conversion ping.
  *

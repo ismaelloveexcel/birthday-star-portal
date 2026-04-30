@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  buildPortalShareText,
   formatPartyDate,
   detectContactType,
   encodePortalData,
@@ -98,5 +99,22 @@ describe("encodePortalData / decodePortalData", () => {
   it("returns null when decoding malformed input", () => {
     expect(decodePortalData("not-base64-!@#")).toBeNull();
     expect(decodePortalData("")).toBeNull();
+  });
+});
+
+describe("buildPortalShareText", () => {
+  it("includes the portal URL and brand footer", () => {
+    const text = buildPortalShareText("Ayaan", "https://example.com/pack?data=abc");
+
+    expect(text).toContain("Captain Ayaan's Birthday Mission portal");
+    expect(text).toContain("https://example.com/pack?data=abc");
+    expect(text).toContain("Made with Birthday Star Portal");
+    expect(text).toContain("wanderingdodo.com");
+  });
+
+  it("falls back gracefully when the child name is empty", () => {
+    const text = buildPortalShareText("", "https://example.com/pack?data=abc");
+
+    expect(text).toContain("Captain your child's Birthday Mission portal");
   });
 });
