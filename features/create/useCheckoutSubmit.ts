@@ -8,7 +8,7 @@ import {
   type FormData,
   type FormErrors,
 } from "@/lib/validation";
-import { pingEvent } from "@/lib/utils";
+import { encodePortalData, pingEvent } from "@/lib/utils";
 
 const DRAFT_KEY = "bdp_draft";
 const SESSION_KEY = "bdp_session";
@@ -17,6 +17,7 @@ export function useCheckoutSubmit(form: FormData) {
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
   const [storageError, setStorageError] = useState(false);
+  const [recoveryCode, setRecoveryCode] = useState<string | null>(null);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -62,8 +63,18 @@ export function useCheckoutSubmit(form: FormData) {
       // Silent.
     }
 
+    setSubmitting(false);
+    setRecoveryCode(encodePortalData(form));
+  }
+
+  function continueToCheckout() {
+    setSubmitting(true);
     pingEvent("portal_form_submit");
     window.location.href = config.CHECKOUT_URL;
+  }
+
+  function dismissRecoveryCode() {
+    setRecoveryCode(null);
   }
 
   return {
@@ -72,5 +83,8 @@ export function useCheckoutSubmit(form: FormData) {
     submitting,
     storageError,
     handleSubmit,
+    recoveryCode,
+    continueToCheckout,
+    dismissRecoveryCode,
   };
 }

@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from "react";
 import { config } from "@/lib/config";
-import { copyToClipboard, encodePortalData, sanitizePhoneForWhatsApp, detectContactType, pingEvent } from "@/lib/utils";
+import { copyToClipboard, decodePortalData, encodePortalData, sanitizePhoneForWhatsApp, detectContactType, pingEvent } from "@/lib/utils";
 import type { FormData } from "@/lib/validation";
 
 interface State {
@@ -16,6 +16,8 @@ interface State {
 export default function SuccessPage() {
   const [state, setState] = useState<State>({ status: "loading" });
   const [copied, setCopied] = useState(false);
+  const [recoveryCode, setRecoveryCode] = useState("");
+  const [recoveryError, setRecoveryError] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -64,6 +66,9 @@ export default function SuccessPage() {
             This can happen if you opened this page in a different browser or
             cleared your browser data.
           </p>
+          <p className="text-comet text-sm mb-3">
+            If you saved your recovery code before payment, paste it below to rebuild your portal link instantly.
+          </p>
           <p className="text-comet text-sm">
             Please contact us at{" "}
             <a className="underline" href={`mailto:${config.SUPPORT_EMAIL}`}>
@@ -71,6 +76,30 @@ export default function SuccessPage() {
             </a>{" "}
             with your payment receipt and we will help you manually.
           </p>
+          <div className="mt-5 text-left">
+            <label htmlFor="recovery-code" className="label">
+              Recovery code
+            </label>
+            <textarea
+              id="recovery-code"
+              className="input"
+              style={{ minHeight: 160 }}
+              placeholder="Paste the recovery code you copied before payment"
+              value={recoveryCode}
+              onChange={(event) => {
+                setRecoveryCode(event.target.value);
+                if (recoveryError) setRecoveryError(null);
+              }}
+            />
+            {recoveryError && (
+              <div className="field-error" role="alert">
+                {recoveryError}
+              </div>
+            )}
+            <button type="button" className="btn-primary w-full mt-3" onClick={restoreFromRecoveryCode}>
+              Restore my portal link
+            </button>
+          </div>
         </div>
       </main>
     );
@@ -90,6 +119,27 @@ export default function SuccessPage() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
+  }
+
+  function restoreFromRecoveryCode() {
+    const encoded = recoveryCode.trim();
+    if (!encoded) {
+      setRecoveryError("Paste your recovery code first.");
+      return;
+    }
+
+    const decoded = decodePortalData<FormData>(encoded);
+    if (!decoded || typeof decoded !== "object" || !decoded.childName) {
+      setRecoveryError("That recovery code is invalid.");
+      return;
+    }
+
+    setRecoveryError(null);
+    setState({
+      status: "ok",
+      data: decoded,
+      url: `${config.BASE_URL}/pack?data=${encoded}`,
+    });
   }
 
   return (

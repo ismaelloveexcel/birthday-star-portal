@@ -140,6 +140,18 @@ export default function HomePage() {
         )}
       </section>
 
+      <section className="section pt-0" aria-label="Browser guidance">
+        <div className="max-w-2xl mx-auto card p-5 text-center">
+          <h2 className="font-display text-xl text-glow mb-2">
+            Best checkout experience
+          </h2>
+          <p className="text-comet">
+            Open and complete payment in Safari or Chrome. Before checkout, you&apos;ll also get a recovery code
+            in case the payment page returns in a different browser context.
+          </p>
+        </div>
+      </section>
+
       <CreateForm />
 
       {/* === Final CTA === */}

@@ -26,10 +26,16 @@ export default function CreateForm() {
     submitting,
     storageError,
     handleSubmit,
+    recoveryCode,
+    continueToCheckout,
+    dismissRecoveryCode,
   } = useCheckoutSubmit(form);
 
   function update<K extends keyof FormData>(key: K, value: FormData[K]) {
     setForm((current) => ({ ...current, [key]: value }));
+    if (recoveryCode) {
+      dismissRecoveryCode();
+    }
     if (errors[key]) {
       setErrors((current) => ({ ...current, [key]: undefined }));
     }
@@ -218,6 +224,9 @@ export default function CreateForm() {
           <p className="text-xs text-comet text-center pt-2">
             Secure checkout · 14-day refund · Link arrives instantly.
           </p>
+          <p className="text-xs text-comet text-center">
+            Best results: complete payment in Safari or Chrome, then keep the recovery code as your backup.
+          </p>
           {storageError && (
             <div
               role="alert"
@@ -260,6 +269,51 @@ export default function CreateForm() {
                 >
                   ✉️ Email support
                 </a>
+              </div>
+            </div>
+          )}
+
+          {recoveryCode && (
+            <div
+              role="dialog"
+              aria-labelledby="recovery-code-heading"
+              className="card p-4 mt-4 text-sm"
+              style={{
+                borderColor: "rgba(255,215,0,0.4)",
+                background: "rgba(255,215,0,0.06)",
+              }}
+            >
+              <h3 id="recovery-code-heading" className="font-display text-lg text-glow mb-2">
+                Before payment: save your recovery code
+              </h3>
+              <p className="text-comet mb-3">
+                Continue in Safari or Chrome for the smoothest checkout return. If your portal link does not
+                appear after payment, paste this code on the success page to restore it.
+              </p>
+              <div className="card p-3 break-all text-xs md:text-sm text-comet mb-3" aria-label="Recovery code">
+                {recoveryCode}
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={async () => {
+                    const ok = await copyToClipboard(recoveryCode);
+                    if (ok) {
+                      alert("Recovery code copied.");
+                    } else {
+                      alert("Could not copy automatically. Please copy the recovery code manually.");
+                    }
+                  }}
+                >
+                  Copy recovery code
+                </button>
+                <button type="button" className="btn-primary" onClick={continueToCheckout}>
+                  Continue to payment
+                </button>
+                <button type="button" className="btn-secondary" onClick={dismissRecoveryCode}>
+                  Go back
+                </button>
               </div>
             </div>
           )}
