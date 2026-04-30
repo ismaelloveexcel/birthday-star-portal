@@ -12,6 +12,7 @@ const orbitron = localFont({
   ],
   variable: "--font-orbitron",
   display: "swap",
+  preload: true,
 });
 
 const dmSans = localFont({
@@ -22,6 +23,7 @@ const dmSans = localFont({
   ],
   variable: "--font-dm-sans",
   display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -46,7 +48,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${orbitron.variable} ${dmSans.variable}`}>
-      <body>{children}</body>
+      <body>
+        <a href="#main" className="skip-link">
+          Skip to main content
+        </a>
+        {children}
+      </body>
     </html>
   );
 }

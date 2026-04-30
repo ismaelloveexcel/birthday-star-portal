@@ -34,7 +34,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <main>
+    <main id="main">
       {/* === Nav === */}
       <header className="sticky top-0 z-40 backdrop-blur" style={{ background: "rgba(5,8,24,0.65)" }}>
         <div className="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">

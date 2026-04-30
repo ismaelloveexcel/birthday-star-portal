@@ -44,7 +44,7 @@ export default function SuccessPage() {
 
   if (state.status === "loading") {
     return (
-      <main className="min-h-screen flex items-center justify-center px-5">
+      <main id="main" className="min-h-screen flex items-center justify-center px-5">
         <div className="text-comet font-display tracking-widest">
           PREPARING YOUR PORTAL…
         </div>
@@ -54,7 +54,7 @@ export default function SuccessPage() {
 
   if (state.status === "error") {
     return (
-      <main className="min-h-screen flex items-center justify-center px-5 text-center">
+      <main id="main" className="min-h-screen flex items-center justify-center px-5 text-center">
         <div className="star-field" aria-hidden />
         <div className="relative z-10 card p-8 max-w-md">
           <h1 className="font-display text-2xl text-glow mb-3">
@@ -93,7 +93,7 @@ export default function SuccessPage() {
   }
 
   return (
-    <main className="min-h-screen relative">
+    <main id="main" className="min-h-screen relative">
       <div className="star-field" aria-hidden />
       <div className="section relative z-10 max-w-2xl mx-auto text-center">
         <h1 className="font-display text-3xl md:text-4xl text-glow mb-3">

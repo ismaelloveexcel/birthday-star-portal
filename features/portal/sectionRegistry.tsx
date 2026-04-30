@@ -1,7 +1,7 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Countdown from "@/components/Countdown";
-import QuizGame from "@/components/QuizGame";
 import RSVPAction from "@/components/RSVPAction";
 import SpaceBadge from "@/components/SpaceBadge";
 import { config } from "@/lib/config";
@@ -9,6 +9,8 @@ import { buildQuizQuestions } from "@/lib/experience/buildQuizQuestions";
 import { interpolate } from "@/lib/experience/interpolate";
 import { formatDate } from "@/lib/utils";
 import type { Experience, ExperienceSectionType } from "@/lib/schemas/experience";
+
+const QuizGame = dynamic(() => import("@/components/QuizGame"), { ssr: false });
 
 export interface PortalSectionContext {
   experience: Experience;
@@ -106,26 +108,18 @@ function CaptainRevealSection({ context }: PortalSectionProps) {
           <span className="sr-only" id="captain-reveal-heading">
             {interpolate(context.experience.copy.captainReveal.screenReaderTitleTemplate, vars)}
           </span>
-          {interpolate(context.experience.copy.captainReveal.titleTemplate, vars)
-            .split("")
-            .map((character, index) => (
-              <span key={index} aria-hidden="true" style={{ animationDelay: `${0.05 * index}s` }}>
-                {character === " " ? "\u00A0" : character}
-              </span>
-            ))}
+          <span aria-hidden="true" className="captain-reveal-text">
+            {interpolate(context.experience.copy.captainReveal.titleTemplate, vars)}
+          </span>
         </h1>
         <h2
           className="font-display text-3xl md:text-6xl mt-3 text-glow-violet captain-reveal-line"
           style={{ color: "var(--color-nova)" }}
           aria-hidden="true"
         >
-          {interpolate(context.experience.copy.captainReveal.subtitleTemplate, vars)
-            .split("")
-            .map((character, index) => (
-              <span key={index} style={{ animationDelay: `${0.6 + 0.05 * index}s` }}>
-                {character === " " ? "\u00A0" : character}
-              </span>
-            ))}
+          <span className="captain-reveal-text is-delayed">
+            {interpolate(context.experience.copy.captainReveal.subtitleTemplate, vars)}
+          </span>
         </h2>
         <p className="mt-6 text-comet max-w-xl mx-auto fade-up" style={{ animationDelay: "1.4s" }}>
           {context.experience.copy.captainReveal.description}
