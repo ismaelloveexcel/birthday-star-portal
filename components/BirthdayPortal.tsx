@@ -319,7 +319,7 @@ export default function BirthdayPortal(props: BirthdayPortalProps) {
               className="border-l-2 pl-4 italic text-star"
               style={{ borderColor: "var(--color-gold)" }}
             >
-              &ldquo;{funFacts[1]}&rdquo;
+              &ldquo;{funFacts[1] ?? ""}&rdquo;
             </blockquote>
             <div className="mt-4 text-right text-xs uppercase tracking-widest text-comet">
               <span aria-hidden="true">★ </span>Mission Seal — Captain {childName}
