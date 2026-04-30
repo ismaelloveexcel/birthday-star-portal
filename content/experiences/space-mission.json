@@ -1,0 +1,239 @@
+{
+  "id": "space-mission",
+  "slug": "space-mission",
+  "theme": {
+    "editionName": "Space Mission Edition",
+    "roleName": "Captain",
+    "palette": {
+      "void": "#050818",
+      "nova": "#7c4dff",
+      "plasma": "#4fc3f7",
+      "gold": "#ffd54f",
+      "comet": "#a8b4d4",
+      "star": "#f7f9ff",
+      "success": "#00e676",
+      "danger": "#ff5252"
+    },
+    "fonts": {
+      "display": "font-display",
+      "body": "font-sans"
+    }
+  },
+  "sections": [
+    {
+      "id": "demo-banner",
+      "type": "demoBanner",
+      "props": {
+        "demoOnly": true
+      }
+    },
+    {
+      "id": "portal-ignition",
+      "type": "portalIgnition",
+      "props": {}
+    },
+    {
+      "id": "captain-reveal",
+      "type": "captainReveal",
+      "props": {}
+    },
+    {
+      "id": "mission-briefing",
+      "type": "missionBriefing",
+      "props": {}
+    },
+    {
+      "id": "countdown",
+      "type": "countdown",
+      "props": {}
+    },
+    {
+      "id": "rsvp",
+      "type": "rsvp",
+      "props": {}
+    },
+    {
+      "id": "quiz",
+      "type": "quiz",
+      "props": {}
+    },
+    {
+      "id": "badge",
+      "type": "badge",
+      "props": {
+        "requiresScore": true
+      }
+    },
+    {
+      "id": "star-log",
+      "type": "starLog",
+      "props": {}
+    },
+    {
+      "id": "viral-loop",
+      "type": "viralLoop",
+      "props": {}
+    },
+    {
+      "id": "demo-cta",
+      "type": "demoCta",
+      "props": {
+        "demoOnly": true
+      }
+    }
+  ],
+  "copy": {
+    "demoBanner": {
+      "labelTemplate": "👀 This is a demo — Create yours for {{price}}",
+      "ctaLabel": "Create My Portal →"
+    },
+    "portalIgnition": {
+      "heading": "MISSION ACCESS GRANTED",
+      "subheading": "Initiating birthday mission sequence…"
+    },
+    "captainReveal": {
+      "eyebrow": "Captain Reveal",
+      "screenReaderTitleTemplate": "Captain {{childName}}'s {{ageOrdinal}} Birthday Mission",
+      "titleTemplate": "CAPTAIN {{upperChildName}}'S",
+      "subtitleTemplate": "{{ageOrdinal}} BIRTHDAY MISSION",
+      "description": "A special mission briefing has been prepared for all crew members."
+    },
+    "missionBriefing": {
+      "eyebrow": "Classified · Galactic Mission Briefing",
+      "heading": "ATTENTION CREW",
+      "invitationTemplate": "You are hereby invited to join Captain {{childName}}'s {{age}}th Birthday Mission.",
+      "labels": {
+        "missionDate": "Mission Date",
+        "launchTime": "Launch Time",
+        "missionBase": "Mission Base",
+        "missionTheme": "Mission Theme"
+      }
+    },
+    "countdown": {
+      "heading": "MISSION LAUNCH COUNTDOWN",
+      "timezoneTemplate": "Timezone: {{timezone}}"
+    },
+    "rsvp": {
+      "heading": "FORCEFIELD CREW CHECK-IN",
+      "description": "Confirm your mission attendance",
+      "whatsappCta": "✅ Confirm via WhatsApp",
+      "emailCta": "✅ Confirm via Email",
+      "messageTemplate": "Hi! We confirm that we are joining Captain {{childName}}'s birthday mission! 🚀",
+      "emailSubjectTemplate": "RSVP: Captain {{childName}}'s Birthday Mission"
+    },
+    "starLog": {
+      "eyebrow": "🛰 Classified",
+      "heading": "SECRET STAR LOG",
+      "description": "Classified mission intelligence — for crew eyes only",
+      "quoteTemplate": "“{{funFact2}}”",
+      "sealTemplate": "Mission Seal — Captain {{childName}}"
+    },
+    "viralLoop": {
+      "prompt": "✨ Want to create a magical birthday mission for your child?",
+      "ctaLabel": "Create your own Birthday Star Portal →",
+      "brandFooter": "Wandering Dodo"
+    },
+    "demoCta": {
+      "heading": "Ready to launch your own birthday mission?",
+      "ctaLabelTemplate": "Create My Portal — {{price}} →"
+    }
+  },
+  "quiz": {
+    "heading": "CADET CHALLENGE",
+    "description": "Complete your training to earn Space Badges",
+    "questionLabelTemplate": "Question {{current}} of {{total}}",
+    "submitLabel": "Submit Mission",
+    "incompleteLabel": "Answer every question to submit.",
+    "questions": [
+      {
+        "id": "turning-age",
+        "promptTemplate": "How old is Captain {{childName}} turning?",
+        "correctAnswerTemplate": "{{age}}",
+        "wrongAnswers": [
+          "{{ageMinusOne}}",
+          "{{agePlusTwo}}"
+        ]
+      },
+      {
+        "id": "favorite-thing",
+        "promptTemplate": "What is Captain {{childName}}'s favourite thing?",
+        "correctAnswerTemplate": "{{favoriteThing}}",
+        "wrongAnswers": [
+          "dinosaurs",
+          "unicorns"
+        ],
+        "legacyBehavior": {
+          "wrongAnswersByFavoriteThing": {
+            "dinosaurs": [
+              "dragons",
+              "unicorns"
+            ],
+            "unicorns": [
+              "dinosaurs",
+              "rockets"
+            ]
+          }
+        }
+      },
+      {
+        "id": "secret-star-log",
+        "promptTemplate": "Which secret star log belongs to Captain {{childName}}?",
+        "correctAnswerTemplate": "{{funFact1}}",
+        "wrongAnswers": [
+          "once tried to teach a fish to sing",
+          "believes they invented the high five"
+        ]
+      },
+      {
+        "id": "mission-location",
+        "promptTemplate": "Where is the mission taking place?",
+        "correctAnswerTemplate": "{{location}}",
+        "wrongAnswers": [
+          "Galaxy Garden",
+          "Moon Base Camp"
+        ]
+      },
+      {
+        "id": "mission-edition",
+        "promptTemplate": "Which mission are you joining today?",
+        "correctAnswerTemplate": "Space Mission Edition",
+        "wrongAnswers": [
+          "Ocean Explorer Edition",
+          "Jungle Safari Edition"
+        ]
+      }
+    ]
+  },
+  "badge": {
+    "eyebrow": "Wandering Dodo · Space Badge Certificate",
+    "heading": "SPACE CADET CERTIFICATE",
+    "earnedTemplate": "You earned {{score}}/{{totalQuestions}} Space Badges",
+    "missionLineTemplate": "Captain {{childName}}'s Birthday Mission · Space Mission Edition",
+    "shareLabel": "📲 Share My Badge",
+    "copyLabel": "Copy caption",
+    "copiedLabel": "Copied!",
+    "shareCaptionTemplate": "I earned {{score}}/{{totalQuestions}} Space Badges at Captain {{childName}}'s Birthday Mission! 🚀 {{baseUrl}}",
+    "ranks": [
+      {
+        "minScore": 5,
+        "title": "MISSION COMMANDER",
+        "line": "Perfect score, elite cadet!"
+      },
+      {
+        "minScore": 4,
+        "title": "STAR NAVIGATOR",
+        "line": "Excellent mission knowledge!"
+      },
+      {
+        "minScore": 3,
+        "title": "SPACE CADET",
+        "line": "Mission accepted!"
+      },
+      {
+        "minScore": 0,
+        "title": "JUNIOR RECRUIT",
+        "line": "Keep training, the mission needs you!"
+      }
+    ]
+  }
+}
