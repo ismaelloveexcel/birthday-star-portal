@@ -1,0 +1,239 @@
+{
+  "id": "princess-quest",
+  "slug": "princess-quest",
+  "theme": {
+    "editionName": "Princess Quest Edition",
+    "roleName": "Princess",
+    "palette": {
+      "void": "#2a1024",
+      "nova": "#ff77c8",
+      "plasma": "#ffb7e8",
+      "gold": "#ffd166",
+      "comet": "#f5d9eb",
+      "star": "#fff7fb",
+      "success": "#37d39a",
+      "danger": "#ff6b81"
+    },
+    "fonts": {
+      "display": "font-display",
+      "body": "font-sans"
+    }
+  },
+  "sections": [
+    {
+      "id": "demo-banner",
+      "type": "demoBanner",
+      "props": {
+        "demoOnly": true
+      }
+    },
+    {
+      "id": "portal-ignition",
+      "type": "portalIgnition",
+      "props": {}
+    },
+    {
+      "id": "captain-reveal",
+      "type": "captainReveal",
+      "props": {}
+    },
+    {
+      "id": "mission-briefing",
+      "type": "missionBriefing",
+      "props": {}
+    },
+    {
+      "id": "countdown",
+      "type": "countdown",
+      "props": {}
+    },
+    {
+      "id": "rsvp",
+      "type": "rsvp",
+      "props": {}
+    },
+    {
+      "id": "quiz",
+      "type": "quiz",
+      "props": {}
+    },
+    {
+      "id": "badge",
+      "type": "badge",
+      "props": {
+        "requiresScore": true
+      }
+    },
+    {
+      "id": "star-log",
+      "type": "starLog",
+      "props": {}
+    },
+    {
+      "id": "viral-loop",
+      "type": "viralLoop",
+      "props": {}
+    },
+    {
+      "id": "demo-cta",
+      "type": "demoCta",
+      "props": {
+        "demoOnly": true
+      }
+    }
+  ],
+  "copy": {
+    "demoBanner": {
+      "labelTemplate": "👑 This is a demo — Create yours for {{price}}",
+      "ctaLabel": "Create My Princess Portal →"
+    },
+    "portalIgnition": {
+      "heading": "ROYAL ACCESS GRANTED",
+      "subheading": "Opening the castle gates…"
+    },
+    "captainReveal": {
+      "eyebrow": "Royal Reveal",
+      "screenReaderTitleTemplate": "Princess {{childName}}'s {{ageOrdinal}} Royal Celebration",
+      "titleTemplate": "PRINCESS {{upperChildName}}'S",
+      "subtitleTemplate": "{{ageOrdinal}} ROYAL CELEBRATION",
+      "description": "A royal invitation has been prepared for every honored guest."
+    },
+    "missionBriefing": {
+      "eyebrow": "Classified · Royal Celebration Briefing",
+      "heading": "ATTENTION GUESTS",
+      "invitationTemplate": "You are hereby invited to join Princess {{childName}}'s {{age}}th Royal Celebration.",
+      "labels": {
+        "missionDate": "Celebration Date",
+        "launchTime": "Grand Entrance Time",
+        "missionBase": "Royal Venue",
+        "missionTheme": "Celebration Theme"
+      }
+    },
+    "countdown": {
+      "heading": "ROYAL COUNTDOWN",
+      "timezoneTemplate": "Timezone: {{timezone}}"
+    },
+    "rsvp": {
+      "heading": "ROYAL RSVP",
+      "description": "Confirm your attendance at the royal celebration",
+      "whatsappCta": "💌 Confirm via WhatsApp",
+      "emailCta": "💌 Confirm via Email",
+      "messageTemplate": "Hi! We confirm that we are joining Princess {{childName}}'s royal celebration! 👑",
+      "emailSubjectTemplate": "RSVP: Princess {{childName}}'s Royal Celebration"
+    },
+    "starLog": {
+      "eyebrow": "✨ Confidential",
+      "heading": "ROYAL SECRET",
+      "description": "Confidential royal sparkle — for invited guests only",
+      "quoteTemplate": "“{{funFact2}}”",
+      "sealTemplate": "Royal Seal — Princess {{childName}}"
+    },
+    "viralLoop": {
+      "prompt": "✨ Want to create a magical royal celebration for your child?",
+      "ctaLabel": "Create your own Birthday Star Portal →",
+      "brandFooter": "Wandering Dodo"
+    },
+    "demoCta": {
+      "heading": "Ready to launch your own royal celebration?",
+      "ctaLabelTemplate": "Create My Princess Portal — {{price}} →"
+    }
+  },
+  "quiz": {
+    "heading": "ROYAL CHALLENGE",
+    "description": "Complete your quest to earn Royal Badges",
+    "questionLabelTemplate": "Question {{current}} of {{total}}",
+    "submitLabel": "Submit Quest",
+    "incompleteLabel": "Answer every question to submit.",
+    "questions": [
+      {
+        "id": "turning-age",
+        "promptTemplate": "How old is Princess {{childName}} turning?",
+        "correctAnswerTemplate": "{{age}}",
+        "wrongAnswers": [
+          "{{ageMinusOne}}",
+          "{{agePlusTwo}}"
+        ]
+      },
+      {
+        "id": "favorite-thing",
+        "promptTemplate": "What is Princess {{childName}}'s favourite thing?",
+        "correctAnswerTemplate": "{{favoriteThing}}",
+        "wrongAnswers": [
+          "dragons",
+          "wizards"
+        ],
+        "legacyBehavior": {
+          "wrongAnswersByFavoriteThing": {
+            "dragons": [
+              "ponies",
+              "wizards"
+            ],
+            "wizards": [
+              "dragons",
+              "crowns"
+            ]
+          }
+        }
+      },
+      {
+        "id": "royal-secret",
+        "promptTemplate": "Which royal secret belongs to Princess {{childName}}?",
+        "correctAnswerTemplate": "{{funFact1}}",
+        "wrongAnswers": [
+          "once taught a dragon to curtsy",
+          "believes she invented glitter"
+        ]
+      },
+      {
+        "id": "celebration-location",
+        "promptTemplate": "Where is the royal celebration taking place?",
+        "correctAnswerTemplate": "{{location}}",
+        "wrongAnswers": [
+          "Rainbow Castle",
+          "Crystal Garden"
+        ]
+      },
+      {
+        "id": "celebration-edition",
+        "promptTemplate": "Which celebration are you joining today?",
+        "correctAnswerTemplate": "Princess Quest Edition",
+        "wrongAnswers": [
+          "Mermaid Lagoon Edition",
+          "Enchanted Forest Edition"
+        ]
+      }
+    ]
+  },
+  "badge": {
+    "eyebrow": "Wandering Dodo · Royal Badge Certificate",
+    "heading": "ROYAL QUEST CERTIFICATE",
+    "earnedTemplate": "You earned {{score}}/{{totalQuestions}} Royal Badges",
+    "missionLineTemplate": "Princess {{childName}}'s Royal Celebration · {{editionName}}",
+    "shareLabel": "👑 Share My Badge",
+    "copyLabel": "Copy caption",
+    "copiedLabel": "Copied!",
+    "shareCaptionTemplate": "I earned {{score}}/{{totalQuestions}} Royal Badges at Princess {{childName}}'s Royal Celebration! 👑 {{baseUrl}}",
+    "ranks": [
+      {
+        "minScore": 5,
+        "title": "ROYAL COMMANDER",
+        "line": "Perfect score, crown-worthy knowledge!"
+      },
+      {
+        "minScore": 4,
+        "title": "CASTLE NAVIGATOR",
+        "line": "Excellent royal knowledge!"
+      },
+      {
+        "minScore": 3,
+        "title": "ROYAL CADET",
+        "line": "The quest is yours!"
+      },
+      {
+        "minScore": 0,
+        "title": "JUNIOR PAGE",
+        "line": "Keep practicing, the kingdom needs you!"
+      }
+    ]
+  }
+}
