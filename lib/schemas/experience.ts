@@ -42,6 +42,7 @@ const quizQuestionSchema = z.object({
 export const experienceSchema = z.object({
   id: z.string().min(1),
   slug: z.string().min(1),
+  flow: z.array(z.string().min(1)).min(1),
   theme: z.object({
     editionName: z.string().min(1),
     roleName: z.string().min(1),

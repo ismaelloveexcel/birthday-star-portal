@@ -26,6 +26,12 @@ describe("experienceSchema", () => {
     ]);
   });
 
+  it("includes a flow path that references configured sections", () => {
+    const experience = experienceSchema.parse(spaceMission);
+    const sectionIds = new Set(experience.sections.map((section) => section.id));
+    expect(experience.flow.every((stepId) => sectionIds.has(stepId))).toBe(true);
+  });
+
   it("keeps the default space experience unchanged", () => {
     const experience = experienceSchema.parse(spaceMission);
     expect(experience.quiz.questions[4].correctAnswerTemplate).toBe("Space Mission Edition");

@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { sectionRegistry } from "@/features/portal/sectionRegistry";
+import PortalRunner from "@/features/portal/PortalRunner";
 import type { Experience } from "@/lib/schemas/experience";
 
 export interface BirthdayPortalProps {
@@ -33,35 +32,19 @@ export default function BirthdayPortal(props: BirthdayPortalProps) {
     isDemo = false,
   } = props;
 
-  const [score, setScore] = useState<number | null>(null);
-
   return (
-    <div className="relative overflow-hidden" style={{ background: "var(--color-void)" }}>
-      {experience.sections.map((section) => {
-        const Section = sectionRegistry[section.type];
-
-        return (
-          <Section
-            key={section.id}
-            context={{
-              experience,
-              childName,
-              age,
-              partyDate,
-              partyTime,
-              location,
-              parentContact,
-              favoriteThing,
-              funFacts,
-              timezone,
-              isDemo,
-              score,
-              onQuizComplete: setScore,
-            }}
-            props={section.props}
-          />
-        );
-      })}
-    </div>
+    <PortalRunner
+      experience={experience}
+      childName={childName}
+      age={age}
+      partyDate={partyDate}
+      partyTime={partyTime}
+      location={location}
+      parentContact={parentContact}
+      favoriteThing={favoriteThing}
+      funFacts={funFacts}
+      timezone={timezone}
+      isDemo={isDemo}
+    />
   );
 }

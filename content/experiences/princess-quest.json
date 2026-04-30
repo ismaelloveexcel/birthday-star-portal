@@ -1,6 +1,17 @@
 {
   "id": "princess-quest",
   "slug": "princess-quest",
+  "flow": [
+    "portal-ignition",
+    "captain-reveal",
+    "mission-briefing",
+    "countdown",
+    "rsvp",
+    "quiz",
+    "badge",
+    "star-log",
+    "viral-loop"
+  ],
   "theme": {
     "editionName": "Princess Quest Edition",
     "roleName": "Princess",
