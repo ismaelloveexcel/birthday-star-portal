@@ -1,6 +1,17 @@
 {
   "id": "space-mission",
   "slug": "space-mission",
+  "flow": [
+    "portal-ignition",
+    "captain-reveal",
+    "mission-briefing",
+    "countdown",
+    "rsvp",
+    "quiz",
+    "badge",
+    "star-log",
+    "viral-loop"
+  ],
   "theme": {
     "editionName": "Space Mission Edition",
     "roleName": "Captain",
