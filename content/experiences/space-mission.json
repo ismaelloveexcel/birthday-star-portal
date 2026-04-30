@@ -1,0 +1,36 @@
+{
+  "id": "space-mission",
+  "name": "Space Mission Edition",
+  "quiz": {
+    "questions": [
+      {
+        "prompt": "How old is Captain {{childName}} turning?",
+        "correct": "{{age}}",
+        "wrong": ["{{agePrev}}", "{{agePlusTwo}}"]
+      },
+      {
+        "prompt": "What is Captain {{childName}}'s favourite thing?",
+        "correct": "{{favoriteThing}}",
+        "wrong": ["{{favoriteThingWrong1}}", "{{favoriteThingWrong2}}"]
+      },
+      {
+        "prompt": "Which secret star log belongs to Captain {{childName}}?",
+        "correct": "{{funFact1}}",
+        "wrong": [
+          "once tried to teach a fish to sing",
+          "believes they invented the high five"
+        ]
+      },
+      {
+        "prompt": "Where is the mission taking place?",
+        "correct": "{{location}}",
+        "wrong": ["Galaxy Garden", "Moon Base Camp"]
+      },
+      {
+        "prompt": "Which mission are you joining today?",
+        "correct": "Space Mission Edition",
+        "wrong": ["Ocean Explorer Edition", "Jungle Safari Edition"]
+      }
+    ]
+  }
+}

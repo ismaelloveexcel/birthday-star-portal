@@ -1,93 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import type { QuizQuestion } from "@/lib/experience";
 
 interface QuizGameProps {
-  childName: string;
-  age: string;
-  favoriteThing: string;
-  funFacts: [string, string, string];
-  location: string;
+  questions: QuizQuestion[];
   onComplete: (score: number) => void;
 }
 
-interface Question {
-  prompt: string;
-  options: string[];
-  correctIndex: number;
-}
-
-// Deterministic seeded shuffle so server/client render the same order.
-function shuffle<T>(arr: T[], seed: number): T[] {
-  const a = arr.slice();
-  let s = seed || 1;
-  for (let i = a.length - 1; i > 0; i--) {
-    s = (s * 9301 + 49297) % 233280;
-    const j = Math.floor((s / 233280) * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function buildQuestions(p: Omit<QuizGameProps, "onComplete">): Question[] {
-  const ageNum = Math.max(1, parseInt(p.age, 10) || 1);
-  const ageMinus = Math.max(1, ageNum - 1);
-  const agePlus = ageNum + 2;
-
-  // Q2 fallback wrong options
-  const fav = p.favoriteThing.trim().toLowerCase();
-  let q2Wrong: string[];
-  if (fav === "dinosaurs") q2Wrong = ["dragons", "unicorns"];
-  else if (fav === "unicorns") q2Wrong = ["dinosaurs", "rockets"];
-  else q2Wrong = ["dinosaurs", "unicorns"];
-
-  const raw: Array<{ prompt: string; correct: string; wrong: [string, string] }> = [
-    {
-      prompt: `How old is Captain ${p.childName} turning?`,
-      correct: String(ageNum),
-      wrong: [String(ageMinus === ageNum ? ageNum + 1 : ageMinus), String(agePlus)],
-    },
-    {
-      prompt: `What is Captain ${p.childName}'s favourite thing?`,
-      correct: p.favoriteThing,
-      wrong: [q2Wrong[0], q2Wrong[1]],
-    },
-    {
-      prompt: `Which secret star log belongs to Captain ${p.childName}?`,
-      correct: p.funFacts[0],
-      wrong: [
-        "once tried to teach a fish to sing",
-        "believes they invented the high five",
-      ],
-    },
-    {
-      prompt: "Where is the mission taking place?",
-      correct: p.location,
-      wrong: ["Galaxy Garden", "Moon Base Camp"],
-    },
-    {
-      prompt: "Which mission are you joining today?",
-      correct: "Space Mission Edition",
-      wrong: ["Ocean Explorer Edition", "Jungle Safari Edition"],
-    },
-  ];
-
-  return raw.map((q, idx) => {
-    const all = [q.correct, ...q.wrong];
-    // seed per question using name length + index for stability
-    const seed = (p.childName.length + 1) * (idx + 7);
-    const shuffled = shuffle(all, seed);
-    return {
-      prompt: q.prompt,
-      options: shuffled,
-      correctIndex: shuffled.indexOf(q.correct),
-    };
-  });
-}
-
 export default function QuizGame(props: QuizGameProps) {
-  const { onComplete } = props;
-  const questions = useMemo(() => buildQuestions(props), [props]);
+  const { questions, onComplete } = props;
   const [answers, setAnswers] = useState<Array<number | null>>(
     () => new Array(questions.length).fill(null)
   );

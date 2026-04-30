@@ -1,0 +1,36 @@
+{
+  "id": "princess-quest",
+  "name": "Princess Quest Edition",
+  "quiz": {
+    "questions": [
+      {
+        "prompt": "How old is Princess {{childName}} turning?",
+        "correct": "{{age}}",
+        "wrong": ["{{agePrev}}", "{{agePlusTwo}}"]
+      },
+      {
+        "prompt": "What is Princess {{childName}}'s favourite thing?",
+        "correct": "{{favoriteThing}}",
+        "wrong": ["{{favoriteThingWrong1}}", "{{favoriteThingWrong2}}"]
+      },
+      {
+        "prompt": "Which royal secret belongs to Princess {{childName}}?",
+        "correct": "{{funFact1}}",
+        "wrong": [
+          "once taught a dragon to curtsy",
+          "believes they invented the royal wave"
+        ]
+      },
+      {
+        "prompt": "Where is the royal celebration taking place?",
+        "correct": "{{location}}",
+        "wrong": ["Enchanted Forest Glade", "Crystal Balloon Palace"]
+      },
+      {
+        "prompt": "Which quest are you joining today?",
+        "correct": "Princess Quest Edition",
+        "wrong": ["Space Mission Edition", "Ocean Explorer Edition"]
+      }
+    ]
+  }
+}

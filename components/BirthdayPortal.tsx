@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Countdown from "./Countdown";
 import RSVPAction from "./RSVPAction";
 import QuizGame from "./QuizGame";
 import SpaceBadge from "./SpaceBadge";
 import { config } from "@/lib/config";
 import { formatDate } from "@/lib/utils";
+import { buildQuizQuestions } from "@/lib/experience";
+import spaceMission from "@/content/experiences/space-mission.json";
 
 export interface BirthdayPortalProps {
   childName: string;
@@ -36,6 +38,18 @@ export default function BirthdayPortal(props: BirthdayPortalProps) {
   } = props;
 
   const [score, setScore] = useState<number | null>(null);
+
+  const quizQuestions = useMemo(
+    () =>
+      buildQuizQuestions(spaceMission.quiz.questions, {
+        childName,
+        age,
+        favoriteThing,
+        funFact1: funFacts[0],
+        location,
+      }),
+    [childName, age, favoriteThing, funFacts, location]
+  );
 
   const upperName = childName.toUpperCase();
   const ageOrdinal = `${age}TH`;
@@ -184,11 +198,7 @@ export default function BirthdayPortal(props: BirthdayPortalProps) {
             </p>
           </div>
           <QuizGame
-            childName={childName}
-            age={age}
-            favoriteThing={favoriteThing}
-            funFacts={funFacts}
-            location={location}
+            questions={quizQuestions}
             onComplete={(s) => setScore(s)}
           />
         </div>
