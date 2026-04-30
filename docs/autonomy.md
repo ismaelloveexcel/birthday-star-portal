@@ -114,9 +114,35 @@ cannot merge a CODEOWNERS-protected change without a human approval.
 
 ## Required permissions
 
-The default `GITHUB_TOKEN` is sufficient for issues, PR labels, comments, and
-`update-branch`. To assign issues to **Copilot** (which actually triggers the
-Copilot coding agent), the repo must have Copilot coding agent enabled in
-**Settings → Code & automation → Copilot**. If Copilot assignment fails the
-dispatcher logs and continues; the issue is still created for a human to pick
-up.
+The default `GITHUB_TOKEN` is sufficient for opening issues, applying PR
+labels and comments, and calling `update-branch` — i.e. everything the
+auto-merge and rebase workflows do.
+
+**Assigning Copilot to a dispatched issue requires a PAT.** The default
+`GITHUB_TOKEN` cannot perform the GraphQL `replaceActorsForAssignable`
+mutation against the Copilot bot and fails with `Bot does not have access to
+the repository`. When that happens the issue is created but left unassigned,
+and the Copilot SWE agent never picks it up — **the entire autonomous loop
+stalls** until someone manually clicks "Assign to Agent" on the issue.
+
+### One-time setup
+
+1. Confirm Copilot coding agent is enabled: **Settings → Code & automation
+   → Copilot → Coding agent**.
+2. Create a fine-grained PAT (your account → Settings → Developer settings →
+   Personal access tokens → Fine-grained tokens):
+   - **Resource owner:** the account that owns this repo.
+   - **Repository access:** Only this repository.
+   - **Repository permissions:** `Issues: Read and write`,
+     `Metadata: Read-only`.
+   - **Expiration:** as short as you can tolerate; rotate on schedule.
+3. Add it as repo secret **`COPILOT_ASSIGN_TOKEN`** (Settings → Secrets and
+   variables → Actions → Secrets → New repository secret).
+
+The dispatcher uses `COPILOT_ASSIGN_TOKEN` *only* for the
+`gh issue edit --add-assignee Copilot` call. Every other API call still uses
+the workflow's `GITHUB_TOKEN`.
+
+If `COPILOT_ASSIGN_TOKEN` is unset the dispatcher logs a clear `WARN` line
+and leaves the issue unassigned (so a human can assign it manually); it does
+not fail the workflow.

@@ -3,7 +3,15 @@
 // ready item assigned to @copilot.
 //
 // Required env: GH_TOKEN, GITHUB_REPOSITORY (owner/repo).
-// Optional env: DRY_RUN ("true" to log only), MAX_OPEN (default 5).
+// Optional env:
+//   DRY_RUN              "true" to log without creating issues
+//   MAX_OPEN             max simultaneously open agent-pr PRs (default 5)
+//   COPILOT_ASSIGN_TOKEN PAT used ONLY to assign Copilot to the created
+//                        issue (default GITHUB_TOKEN cannot perform the
+//                        replaceActorsForAssignable mutation against the
+//                        Copilot bot). Needs Issues:write + Metadata:read
+//                        on this repo. If unset, the issue is created but
+//                        left unassigned and a WARN is logged.
 
 import { readFileSync } from 'node:fs';
 import { execSync } from 'node:child_process';
@@ -173,17 +181,41 @@ for (const it of ready) {
   ).trim();
   console.log(`  created ${issueUrl}`);
 
-  // Best-effort: assign to Copilot. If Copilot coding agent is not enabled
-  // for this repo the assignment fails harmlessly and a human can pick up
-  // the issue manually.
+  // Best-effort: assign to Copilot. This requires a PAT scoped with the
+  // least privilege needed for this path: `Issues: write` (and
+  // `Metadata: read` for repo access). The default GITHUB_TOKEN cannot
+  // perform the GraphQL `replaceActorsForAssignable` mutation against the
+  // Copilot bot and will fail with "Bot does not have access to the
+  // repository". Set the repo secret COPILOT_ASSIGN_TOKEN to a
+  // fine-grained PAT scoped to this repo. Without it, the issue is
+  // created but the Copilot SWE agent never picks it up — the loop stalls
+  // until a human clicks "Assign to Agent" on the issue.
   const issueNum = issueUrl.split('/').pop();
-  try {
-    execSync(
-      `gh issue edit ${issueNum} --repo ${repo} --add-assignee Copilot`,
-      { stdio: 'inherit', env: process.env },
+  const assignToken = process.env.COPILOT_ASSIGN_TOKEN;
+  if (!assignToken) {
+    console.warn(
+      `  COPILOT_ASSIGN_TOKEN secret is not set; issue #${issueNum} ` +
+        'left unassigned. The Copilot SWE agent will NOT pick this up ' +
+        'automatically. See docs/autonomy.md "Required permissions".',
     );
-  } catch {
-    console.log('  (could not assign Copilot; issue left unassigned)');
+  } else {
+    try {
+      execSync(
+        `gh issue edit ${issueNum} --repo ${repo} --add-assignee Copilot`,
+        {
+          stdio: 'inherit',
+          env: { ...process.env, GH_TOKEN: assignToken, GITHUB_TOKEN: assignToken },
+        },
+      );
+      console.log(`  assigned Copilot to #${issueNum}`);
+    } catch {
+      console.warn(
+        `  COPILOT_ASSIGN_TOKEN is set but assigning Copilot to ` +
+          `#${issueNum} failed. Verify the PAT has Issues:write on this ` +
+          'repo and that Copilot coding agent is enabled in Settings → ' +
+          'Code & automation → Copilot.',
+      );
+    }
   }
 
   budget--;
