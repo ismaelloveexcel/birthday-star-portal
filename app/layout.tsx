@@ -1,18 +1,25 @@
 import type { Metadata } from "next";
-import { Orbitron, DM_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { config } from "@/lib/config";
 
-const orbitron = Orbitron({
-  subsets: ["latin"],
-  weight: ["400", "600", "700", "800"],
+const orbitron = localFont({
+  src: [
+    { path: "./fonts/Orbitron-400.woff2", weight: "400" },
+    { path: "./fonts/Orbitron-600.woff2", weight: "600" },
+    { path: "./fonts/Orbitron-700.woff2", weight: "700" },
+    { path: "./fonts/Orbitron-800.woff2", weight: "800" },
+  ],
   variable: "--font-orbitron",
   display: "swap",
 });
 
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
+const dmSans = localFont({
+  src: [
+    { path: "./fonts/DMSans-400.woff2", weight: "400" },
+    { path: "./fonts/DMSans-500.woff2", weight: "500" },
+    { path: "./fonts/DMSans-700.woff2", weight: "700" },
+  ],
   variable: "--font-dm-sans",
   display: "swap",
 });

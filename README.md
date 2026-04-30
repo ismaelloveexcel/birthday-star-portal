@@ -28,6 +28,7 @@ Useful scripts:
 | `npm run build`  | Production build                         |
 | `npm run lint`   | ESLint (Next core-web-vitals)            |
 | `npm test`       | Vitest pure-logic suite                  |
+| `npm run smoke`  | End-to-end smoke test (requires a build) |
 
 ## Environment variables
 
@@ -129,34 +130,32 @@ launch stage with low traffic.
    handles edge cases.
 5. No detailed analytics. At most, the app can send optional no-PII
    conversion pings when `NEXT_PUBLIC_PING_URL` is configured.
-6. `npm run build` requires outbound network access to `fonts.googleapis.com`
-   the first time it runs in a given environment. `app/layout.tsx` uses
-   `next/font/google` (Orbitron + DM Sans), which Next 15 fetches at build
-   time and caches inside `.next/cache`. Vercel and standard GitHub-hosted
-   runners can reach Google Fonts so this is invisible in real CI and
-   production. Restricted sandboxes that block egress to `fonts.googleapis.com`
-   cannot run `next build` without first warming the `.next/cache` directory
-   from an environment that does have network. Next 15 exposes no
-   `next.config.js` switch to point `next/font/google` at preexisting font
-   files, and switching fonts or adding a font-loading library is explicitly
-   out of scope for v1. Revisit if a different host platform is adopted.
+6. Fonts are served from files committed in `app/fonts/` via `next/font/local`.
+   No outbound network access is required at build time.
 
 ## Roadmap
 
 - **Phase 2 (after first 10 paid sales):** replace localStorage + base64 URL
   with verified payment token flow.
 
-## Phase 1 manual smoke test
+## Smoke test
 
-- [ ] Form draft restores after refresh
-- [ ] "Start over" clears draft
-- [ ] OG image renders correctly when sharing the URL on WhatsApp
-- [ ] Favicon appears in browser tab
-- [ ] Tabbing through landing page shows visible focus outlines
-- [ ] Quiz buttons announce selection to screen readers (test with VoiceOver/NVDA)
-- [ ] /robots.txt and /sitemap.xml return 200
-- [ ] CI workflow passes on the PR
-- [ ] No console errors on /, /success, /pack
+Run after every production build to verify the three main routes respond
+correctly:
+
+```bash
+npm run build && npm run smoke
+```
+
+`npm run smoke` boots `next start` on a random free port, GETs `/`,
+`/success?_test=1`, and `/pack?data=<fixture>`, and verifies that each
+response contains a known string. It exits non-zero on any miss.
+
+Checks performed automatically:
+
+- `/` returns a page containing "Birthday Star Portal"
+- `/success?_test=1` returns a page containing "PREPARING YOUR PORTAL"
+- `/pack?data=<fixture>` returns a page containing "MISSION ACCESS GRANTED"
 
 ## Operations
 
