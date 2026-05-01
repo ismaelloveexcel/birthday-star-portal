@@ -12,6 +12,7 @@ describe("pack preview helpers", () => {
       childName: "Zara",
       age: "6",
       partyDate: "2026-06-15",
+      location: "Star Base HQ",
       favoriteThing: "rockets",
     });
 
@@ -19,6 +20,7 @@ describe("pack preview helpers", () => {
       childName: "Zara",
       age: "6",
       partyDate: "2026-06-15",
+      location: "Star Base HQ",
       favoriteThing: "rockets",
     });
   });
@@ -28,6 +30,7 @@ describe("pack preview helpers", () => {
       childName: "Birthday Star",
       age: "",
       partyDate: "",
+      location: "",
       favoriteThing: "birthday magic",
     });
   });

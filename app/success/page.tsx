@@ -16,6 +16,7 @@ interface State {
 export default function SuccessPage() {
   const [state, setState] = useState<State>({ status: "loading" });
   const [copied, setCopied] = useState(false);
+  const [guestMessageCopied, setGuestMessageCopied] = useState(false);
   const [teaserCopied, setTeaserCopied] = useState(false);
   const [recoveryCode, setRecoveryCode] = useState("");
   const [recoveryError, setRecoveryError] = useState<string | null>(null);
@@ -132,6 +133,14 @@ export default function SuccessPage() {
     }
   }
 
+  async function handleGuestMessageCopy() {
+    const ok = await copyToClipboard(waText);
+    if (ok) {
+      setGuestMessageCopied(true);
+      setTimeout(() => setGuestMessageCopied(false), 2000);
+    }
+  }
+
   function restoreFromRecoveryCode() {
     const encoded = recoveryCode.trim();
     if (!encoded) {
@@ -163,6 +172,13 @@ export default function SuccessPage() {
         <p className="text-comet mb-2">
           Save this link — it&apos;s your portal. Share it with every guest.
         </p>
+        <div className="card mt-4 p-4 text-left text-sm text-comet">
+          <ol className="space-y-2 list-decimal pl-5">
+            <li>Open your portal.</li>
+            <li>Copy your link.</li>
+            <li>Share it with guests.</li>
+          </ol>
+        </div>
         <div
           className="card p-3 text-xs md:text-sm mt-4 break-all text-comet"
           aria-label="Your portal link"
@@ -203,6 +219,9 @@ export default function SuccessPage() {
               📲 Share on WhatsApp
             </a>
           )}
+          <button onClick={handleGuestMessageCopy} className="btn-secondary">
+            {guestMessageCopied ? "Guest message copied!" : "Copy guest message"}
+          </button>
         </div>
 
         <div className="card mt-6 p-4 text-left">

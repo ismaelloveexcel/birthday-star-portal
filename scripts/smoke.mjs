@@ -3,7 +3,8 @@
  * scripts/smoke.mjs
  *
  * Boots the production build on a random free port, curls three routes,
- * verifies a known string appears in each response body, then shuts down.
+ * verifies a known string appears in each response body, checks the OG image
+ * route returns an image content type, then shuts down.
  * Exits non-zero on the first miss or on any start-up failure.
  *
  * Usage:
@@ -45,6 +46,8 @@ const CHECKS = [
   [`/pack?data=${encodeURIComponent(FIXTURE)}`, "MISSION ACCESS GRANTED"],
 ];
 
+const OG_CHECK = `/pack/og?data=${encodeURIComponent(FIXTURE)}`;
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -63,6 +66,12 @@ function getFreePort() {
 
 /** GET a URL and return the response body as a string. */
 async function httpGet(url, timeoutMs = 5_000) {
+  const response = await httpGetResponse(url, timeoutMs);
+  return response.body;
+}
+
+/** GET a URL and return body plus headers. */
+async function httpGetResponse(url, timeoutMs = 5_000) {
   const { default: lib } = await import(url.startsWith("https") ? "https" : "http");
   return new Promise((resolve, reject) => {
     const req = lib.get(url, (res) => {
@@ -76,7 +85,7 @@ async function httpGet(url, timeoutMs = 5_000) {
 
       let body = "";
       res.on("data", (chunk) => (body += chunk));
-      res.on("end", () => resolve(body));
+      res.on("end", () => resolve({ body, headers: res.headers }));
     });
 
     req.setTimeout(timeoutMs, () => {
@@ -125,6 +134,7 @@ async function main() {
         ...process.env,
         PORT: String(port),
         NEXT_PUBLIC_BASE_URL: base,
+        NEXT_PUBLIC_CHECKOUT_URL: "https://payhip.com/b/smoke-test",
       },
     }
   );
@@ -162,6 +172,20 @@ async function main() {
         console.error(`smoke: FAIL  GET ${route}  —  missing: ${JSON.stringify(needle)}`);
         exitCode = 1;
       }
+    }
+
+    try {
+      const response = await httpGetResponse(base + OG_CHECK, 20_000);
+      const contentType = String(response.headers["content-type"] ?? "");
+      if (contentType.startsWith("image/")) {
+        console.log(`smoke: OK    GET ${OG_CHECK}  (content-type: ${contentType})`);
+      } else {
+        console.error(`smoke: FAIL  GET ${OG_CHECK}  —  expected image content-type, got: ${contentType || "missing"}`);
+        exitCode = 1;
+      }
+    } catch (err) {
+      console.error(`smoke: FAIL  GET ${OG_CHECK}  —  fetch error: ${err.message}`);
+      exitCode = 1;
     }
   } catch (err) {
     console.error("smoke: " + err.message);

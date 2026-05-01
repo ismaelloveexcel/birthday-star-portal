@@ -4,6 +4,7 @@ export interface PackPreviewData {
   childName: string;
   age: string;
   partyDate: string;
+  location: string;
   favoriteThing: string;
 }
 
@@ -11,6 +12,7 @@ interface RawPreviewData {
   childName?: string;
   age?: string;
   partyDate?: string;
+  location?: string;
   favoriteThing?: string;
 }
 
@@ -18,6 +20,7 @@ const FALLBACK_PREVIEW: PackPreviewData = {
   childName: "Birthday Star",
   age: "",
   partyDate: "",
+  location: "",
   favoriteThing: "birthday magic",
 };
 
@@ -35,6 +38,7 @@ export function getPackPreviewData(encoded: string | null | undefined): PackPrev
     childName: clean(decoded.childName) || FALLBACK_PREVIEW.childName,
     age: clean(decoded.age),
     partyDate: clean(decoded.partyDate),
+    location: clean(decoded.location),
     favoriteThing: clean(decoded.favoriteThing) || FALLBACK_PREVIEW.favoriteThing,
   };
 }

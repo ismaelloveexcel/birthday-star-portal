@@ -129,8 +129,8 @@ export function buildPortalShareText(childName: string, url: string): string {
   const safeUrl = (url || "").trim();
 
   return [
-    `🚀 Here's Captain ${safeName}'s Birthday Mission portal! Open it to see the mission briefing, countdown, and complete the Cadet Challenge: ${safeUrl}`,
-    "Made with Birthday Star Portal — wanderingdodo.com",
+    `Open Captain ${safeName}'s birthday mission: ${safeUrl}`,
+    "Made with Birthday Star Portal by Wandering Dodo.",
   ].join("\n\n");
 }
 

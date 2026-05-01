@@ -113,16 +113,15 @@ describe("buildPortalShareText", () => {
   it("includes the portal URL and brand footer", () => {
     const text = buildPortalShareText("Ayaan", "https://example.com/pack?data=abc");
 
-    expect(text).toContain("Captain Ayaan's Birthday Mission portal");
+    expect(text).toContain("Open Captain Ayaan's birthday mission");
     expect(text).toContain("https://example.com/pack?data=abc");
-    expect(text).toContain("Made with Birthday Star Portal");
-    expect(text).toContain("wanderingdodo.com");
+    expect(text).toContain("Made with Birthday Star Portal by Wandering Dodo.");
   });
 
   it("falls back gracefully when the child name is empty", () => {
     const text = buildPortalShareText("", "https://example.com/pack?data=abc");
 
-    expect(text).toContain("Captain your child's Birthday Mission portal");
+    expect(text).toContain("Open Captain your child's birthday mission");
   });
 });
 

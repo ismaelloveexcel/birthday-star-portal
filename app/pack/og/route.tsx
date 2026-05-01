@@ -2,6 +2,7 @@ import { ImageResponse } from "next/og";
 import type { NextRequest } from "next/server";
 import { config } from "@/lib/config";
 import { getMissionCountdownLabel, getPackPreviewData } from "@/lib/experience/packPreview";
+import { formatDate } from "@/lib/utils";
 
 export const runtime = "nodejs";
 
@@ -10,6 +11,8 @@ export async function GET(request: NextRequest) {
   const preview = getPackPreviewData(encoded);
   const countdown = getMissionCountdownLabel(preview.partyDate);
   const ageLine = preview.age ? `Turning ${preview.age}` : "Birthday Mission";
+  const detailLine = [formatDate(preview.partyDate), preview.location].filter(Boolean).join(" · ");
+  const nameFontSize = preview.childName.length > 24 ? 58 : preview.childName.length > 16 ? 74 : 98;
 
   return new ImageResponse(
     (
@@ -76,7 +79,8 @@ export async function GET(request: NextRequest) {
           <div
             style={{
               display: "flex",
-              fontSize: preview.childName.length > 14 ? 82 : 104,
+              width: 860,
+              fontSize: nameFontSize,
               lineHeight: 0.95,
               fontWeight: 900,
               letterSpacing: 2,
@@ -90,6 +94,11 @@ export async function GET(request: NextRequest) {
             <span style={{ color: "#ffd54f" }}>•</span>
             <span>{preview.favoriteThing}</span>
           </div>
+          {detailLine && (
+            <div style={{ display: "flex", fontSize: 28, color: "#a8b4d4", maxWidth: 900 }}>
+              {detailLine}
+            </div>
+          )}
         </div>
         <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 18, color: "#a8b4d4", fontSize: 24 }}>
           <div style={{ display: "flex", width: 72, height: 6, borderRadius: 999, background: "#4fc3f7" }} />

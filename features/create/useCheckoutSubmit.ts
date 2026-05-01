@@ -17,7 +17,9 @@ export function useCheckoutSubmit(form: FormData) {
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
   const [storageError, setStorageError] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [recoveryCode, setRecoveryCode] = useState<string | null>(null);
+  const checkoutUnavailable = !config.CHECKOUT_URL || config.CHECKOUT_URL === "#";
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -35,6 +37,7 @@ export function useCheckoutSubmit(form: FormData) {
 
     setSubmitting(true);
     setStorageError(false);
+    setCheckoutError(null);
 
     const serialised = JSON.stringify(form);
     let saved = false;
@@ -68,6 +71,14 @@ export function useCheckoutSubmit(form: FormData) {
   }
 
   function continueToCheckout() {
+    if (checkoutUnavailable) {
+      setSubmitting(false);
+      setCheckoutError(
+        "Checkout is not configured for this environment yet. Add NEXT_PUBLIC_CHECKOUT_URL to continue."
+      );
+      return;
+    }
+
     setSubmitting(true);
     pingEvent("portal_form_submit");
     window.location.href = config.CHECKOUT_URL;
@@ -82,6 +93,8 @@ export function useCheckoutSubmit(form: FormData) {
     setErrors,
     submitting,
     storageError,
+    checkoutError,
+    checkoutUnavailable,
     handleSubmit,
     recoveryCode,
     continueToCheckout,

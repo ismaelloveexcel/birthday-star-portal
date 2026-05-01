@@ -242,7 +242,7 @@
     "shareLabel": "📲 Share My Badge",
     "copyLabel": "Copy caption",
     "copiedLabel": "Copied!",
-    "shareCaptionTemplate": "I earned {{score}}/{{totalQuestions}} Space Badges at Captain {{childName}}'s Birthday Mission! 🚀 {{baseUrl}}",
+    "shareCaptionTemplate": "I earned {{score}}/{{totalQuestions}} Space Badges at Captain {{childName}}'s Birthday Mission. Make one for your child: {{baseUrl}}",
     "ranks": [
       {
         "minScore": 5,

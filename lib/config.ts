@@ -1,4 +1,5 @@
 const _rawBaseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+const _rawCheckoutUrl = process.env.NEXT_PUBLIC_CHECKOUT_URL;
 const _isProd = process.env.NODE_ENV === "production";
 
 if (
@@ -11,6 +12,13 @@ if (
   );
 }
 
+if (_isProd && (!_rawCheckoutUrl || _rawCheckoutUrl === "#")) {
+  throw new Error(
+    "[config] NEXT_PUBLIC_CHECKOUT_URL is not set in a production build. " +
+      "Set it in your Vercel environment variables to your Payhip product URL."
+  );
+}
+
 export const config = {
   PRODUCT_NAME: "Birthday Star Portal",
   PRODUCT_EDITION: "Space Mission Edition",
@@ -20,5 +28,5 @@ export const config = {
   LAUNCH_BADGE: "Launch price — $14",
   SUPPORT_EMAIL: "support@wanderingdodo.com",
   BASE_URL: _rawBaseUrl ?? "http://localhost:3000",
-  CHECKOUT_URL: process.env.NEXT_PUBLIC_CHECKOUT_URL ?? "#",
+  CHECKOUT_URL: _rawCheckoutUrl ?? "#",
 };

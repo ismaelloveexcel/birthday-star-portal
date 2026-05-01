@@ -12,50 +12,22 @@ export default function HomePage() {
 
   const demoGames = [
     {
-      title: "Rocket Dash",
-      blurb: "A fast launch-day challenge for guests who want to tap, laugh, and screenshot their score.",
-      accent: "Comet Sprint",
+      title: "Captain Reveal",
+      blurb: "The birthday child opens the portal as the hero of the mission.",
+      accent: "Hero Moment",
+      glyph: "story",
+    },
+    {
+      title: "Mission Countdown",
+      blurb: "Guests see the launch date, time, location, and RSVP action in one mobile-friendly flow.",
+      accent: "Party Ready",
       glyph: "rocket",
     },
     {
-      title: "Star Quiz",
-      blurb: "A personal trivia mission built from the child's favorite things and funniest facts.",
-      accent: "Crew Challenge",
+      title: "Cadet Challenge",
+      blurb: "A personalised quiz turns the invite into a playful badge-earning moment guests can share.",
+      accent: "Quiz Badge",
       glyph: "quiz",
-    },
-    {
-      title: "Mission Story",
-      blurb: "A story-led invite that feels like opening a secret birthday transmission.",
-      accent: "Story Signal",
-      glyph: "story",
-    },
-  ];
-
-  const productScenarios = [
-    {
-      title: "Digital Invitation",
-      customer: "Parent planning the party",
-      promise: "A beautiful animated invite with RSVP basics and a shareable link.",
-      status: "Coming next",
-      anchor: `mailto:${config.SUPPORT_EMAIL}`,
-      tone: "Simple",
-    },
-    {
-      title: "Birthday Star Portal",
-      customer: "Parent who wants the wow moment",
-      promise: "The child becomes the hero inside a mini birthday world with countdown, reveal, RSVP, and quiz.",
-      status: `Available now - ${config.PRICE}`,
-      anchor: "#form",
-      tone: "Best seller",
-      featured: true,
-    },
-    {
-      title: "Gift Experience",
-      customer: "Auntie, uncle, friend, or grandparent",
-      promise: "A magical birthday link sent as a thoughtful digital gift for another family.",
-      status: "Manual request",
-      anchor: `mailto:${config.SUPPORT_EMAIL}`,
-      tone: "Giftable",
     },
   ];
 
@@ -116,16 +88,15 @@ export default function HomePage() {
             </div>
             <DodoGuide
               mood="excited"
-              message="Let's choose the right birthday magic."
+              message="Let's build one unforgettable birthday mission."
               className="mobile-inline-dodo"
             />
-            <p className="eyebrow mb-4">Wandering Dodo Birthday Studio</p>
+            <p className="eyebrow mb-4">Birthday Star Portal</p>
             <h1 id="hero-heading" className="font-display text-4xl md:text-7xl leading-tight text-glow hero-title">
-              Pick the birthday magic. Dodo builds the world.
+              A playable birthday invite where your child becomes the hero.
             </h1>
             <p className="mt-6 text-comet md:text-xl max-w-2xl hero-subcopy">
-              A premium digital birthday experience for parents who want more than a flat invite:
-              a heroic reveal, playful guest moments, and one link that feels made for the child.
+              Create one magical link with a hero reveal, party countdown, RSVP, quiz, badge, and personalised WhatsApp preview.
             </p>
             <div className="hero-action-row mt-8">
               <a href="#demo" className="btn-primary">
@@ -161,7 +132,7 @@ export default function HomePage() {
             <div className="hero-portal-shell">
               <DodoGuide
                 mood="celebrating"
-                message="Tell me who you're buying for and I'll point you to the right birthday magic."
+                message="The birthday child becomes Captain. Guests become the crew."
                 className="hero-dodo-art"
               />
               <div className="hero-portal-core" />
@@ -173,8 +144,8 @@ export default function HomePage() {
                 </div>
               </div>
               <div className="hero-signal-card signal-top">
-                <span>Customer path</span>
-                <strong>Parent, gift buyer, or party planner</strong>
+                <span>Guest path</span>
+                <strong>Open link, RSVP, play quiz</strong>
               </div>
               <div className="hero-signal-card signal-bottom">
                 <span>Output</span>
@@ -193,121 +164,15 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="products" className="section product-section" aria-labelledby="products-heading">
-        <div className="max-w-6xl mx-auto">
-          <div className="section-heading-row product-heading">
-            <div>
-              <p className="eyebrow mb-3">Dodo asks first</p>
-              <h2 id="products-heading" className="font-display text-2xl md:text-5xl text-glow">
-                What kind of birthday magic do you need?
-              </h2>
-            </div>
-            <p className="text-comet max-w-md">
-              Competitors start with templates. Wandering Dodo starts with the buyer&apos;s situation, then routes them to the right experience.
-            </p>
-          </div>
-          <div className="product-scenario-grid">
-            {productScenarios.map((scenario) => (
-              <a
-                key={scenario.title}
-                href={scenario.anchor}
-                className={`scenario-card ${scenario.featured ? "scenario-card-featured" : ""}`}
-              >
-                <div className="scenario-art" aria-hidden="true">
-                  <span className="scenario-art-ring" />
-                  <span className="scenario-art-core" />
-                </div>
-                <div className="scenario-topline">
-                  <span>{scenario.tone}</span>
-                  <strong>{scenario.status}</strong>
-                </div>
-                <h3 className="font-display text-xl text-star">{scenario.title}</h3>
-                <p className="scenario-customer">{scenario.customer}</p>
-                <p className="text-comet">{scenario.promise}</p>
-              </a>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="section pt-0" aria-label="Trust signals">
-        <div className="max-w-6xl mx-auto mission-ribbon">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
-            {["Secure Payhip checkout", "14-day refund", "Works on any phone - no app"].map((t) => (
-              <div key={t} className="mission-ribbon-card">
-                {t}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="section story-section" aria-labelledby="story-heading">
-        <div className="max-w-6xl mx-auto story-grid">
-          <div className="story-panel story-panel-quote">
-            <p className="eyebrow mb-4">Why parents buy</p>
-            <h2 id="story-heading" className="font-display text-3xl md:text-5xl text-glow mb-6">
-              It should feel like opening a secret transmission, not another invitation link.
-            </h2>
-            <blockquote className="story-quote">
-              <p className="text-star italic">
-                “Zara&apos;s guests thought it was the coolest invite they&apos;d ever seen.”
-              </p>
-              <div className="text-comet text-sm mt-3">— Priya, mum of a 6-year-old</div>
-            </blockquote>
-          </div>
-          <div className="story-panel story-panel-dossier">
-            <div className="dossier-head">
-              <span className="eyebrow">Mission ingredients</span>
-              <strong>What the world includes</strong>
-            </div>
-            <ul className="story-list">
-              <li>Cinematic Captain Reveal</li>
-              <li>Countdown to launch day</li>
-              <li>Guest-ready RSVP prompt</li>
-              <li>Playable Cadet Challenge quiz</li>
-              <li>One portal link to share everywhere</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <section className="section" aria-labelledby="how-heading">
-        <div className="max-w-6xl mx-auto">
-          <div className="section-heading-row">
-            <div>
-              <p className="eyebrow mb-3">Mission sequence</p>
-              <h2 id="how-heading" className="font-display text-2xl md:text-4xl text-glow">
-                From briefing to blast-off in three clean steps
-              </h2>
-            </div>
-          </div>
-          <div className="grid md:grid-cols-3 gap-4 mt-10">
-            {[
-              "Fill in your child's birthday details — takes 2 minutes.",
-              "Pay once — $14. No subscription.",
-              "Get your magic link. Share it with every guest.",
-            ].map((step, i) => (
-              <div key={i} className="sequence-card">
-                <div className="sequence-index">
-                  {String(i + 1).padStart(2, "0")}
-                </div>
-                <p>{step}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <section id="demo" className="section" aria-labelledby="demo-heading">
         <div className="max-w-6xl mx-auto demo-shell">
           <div className="demo-copy">
-            <p className="eyebrow mb-3">Live transmission</p>
+            <p className="eyebrow mb-3">Live demo</p>
             <h2 id="demo-heading" className="font-display text-2xl md:text-4xl text-glow mb-4">
-              Try a live mission before you buy
+              Try the mission before you buy
             </h2>
             <p className="text-comet max-w-xl">
-              Let parents see the portal atmosphere before they commit. This is the moment the idea needs to feel real.
+              See the actual portal moments guests receive: Captain Reveal, Mission Countdown, RSVP, Cadet Challenge, and badge.
             </p>
           </div>
           {!showDemo && (
@@ -337,6 +202,75 @@ export default function HomePage() {
             <BirthdayPortal experience={spaceMissionExperience} {...demoData} />
           </div>
         )}
+      </section>
+
+      <section className="section" aria-labelledby="how-heading">
+        <div className="max-w-6xl mx-auto">
+          <div className="section-heading-row">
+            <div>
+              <p className="eyebrow mb-3">Mission sequence</p>
+              <h2 id="how-heading" className="font-display text-2xl md:text-4xl text-glow">
+                From briefing to blast-off in three clean steps
+              </h2>
+            </div>
+          </div>
+          <div className="grid md:grid-cols-3 gap-4 mt-10">
+            {[
+              "Fill in your child's birthday details — takes 2 minutes.",
+              "Pay once — $14. No subscription.",
+              "Get your magic link. Share it with every guest.",
+            ].map((step, i) => (
+              <div key={i} className="sequence-card">
+                <div className="sequence-index">
+                  {String(i + 1).padStart(2, "0")}
+                </div>
+                <p>{step}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section pt-0" aria-label="Trust signals">
+        <div className="max-w-6xl mx-auto mission-ribbon">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-center">
+            {["Secure Payhip checkout", "14-day refund", "No account or app", "Works on WhatsApp"].map((t) => (
+              <div key={t} className="mission-ribbon-card">
+                {t}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section story-section" aria-labelledby="guests-heading">
+        <div className="max-w-6xl mx-auto story-grid">
+          <div className="story-panel story-panel-quote">
+            <p className="eyebrow mb-4">What guests receive</p>
+            <h2 id="guests-heading" className="font-display text-3xl md:text-5xl text-glow mb-6">
+              One link that feels like a birthday mission, not a plain invite.
+            </h2>
+            <blockquote className="story-quote">
+              <p className="text-star italic">
+                “Zara&apos;s guests thought it was the coolest invite they&apos;d ever seen.”
+              </p>
+              <div className="text-comet text-sm mt-3">— Priya, mum of a 6-year-old</div>
+            </blockquote>
+          </div>
+          <div className="story-panel story-panel-dossier">
+            <div className="dossier-head">
+              <span className="eyebrow">Guest output</span>
+              <strong>Ready to share after checkout</strong>
+            </div>
+            <ul className="story-list">
+              <li>Personalised WhatsApp preview</li>
+              <li>Hero portal reveal</li>
+              <li>RSVP action for parents</li>
+              <li>Playable Cadet Challenge quiz</li>
+              <li>Shareable Space Badge caption</li>
+            </ul>
+          </div>
+        </div>
       </section>
 
       <section className="section dossier-section" aria-label="Mission briefing and form">

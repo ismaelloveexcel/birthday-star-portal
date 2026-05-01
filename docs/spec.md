@@ -30,7 +30,7 @@ One link does it all.
 Target Buyer: Parents planning kids' birthday parties, plus family or friends buying a digital birthday gift.
 
 Current Storefront Direction:
-The landing page may present Wandering Dodo as a guided birthday studio with scenario cards for Digital Invitation, Birthday Star Portal, and Gift Experience. Birthday Star Portal remains the only self-serve paid checkout flow in V1; non-active products must route to manual support/contact until they are deliberately launched.
+The landing page should make Birthday Star Portal the dominant self-serve paid path. Scenario cards for Digital Invitation or Gift Experience are not part of the pre-purchase v1 path unless deliberately reintroduced later.
 
 ---
 
@@ -71,7 +71,7 @@ Do not build any of the following under any circumstance:
 - Tailwind CSS
 - Pure CSS animations only
 - Vercel deployment
-- One static checkout URL from environment variable (Payhip or Lemon Squeezy static link)
+- One static checkout URL from environment variable (Payhip/external checkout link)
 
 ---
 
@@ -91,32 +91,37 @@ USE THIS FLOW:
 
 Step 1: Parent fills form on landing page.
 
-Step 2: On form submit, save form data to localStorage:
+Step 2: On form submit, save form data to browser storage:
   localStorage.setItem('bdp_session', JSON.stringify(formData))
 
-Step 3: Redirect parent to checkout URL from env:
+Step 3: Show the parent a recovery code before payment. The recovery code is the same encoded data used to rebuild the portal link if browser storage is lost during checkout.
+
+Step 4: Redirect parent to checkout URL from env:
   window.location.href = process.env.NEXT_PUBLIC_CHECKOUT_URL
 
-Step 4: After payment, platform redirects parent to /success.
+Step 5: After payment, platform redirects parent to /success.
 
-Step 5: /success reads localStorage:
+Step 6: /success reads browser storage:
   const raw = localStorage.getItem('bdp_session')
   const data = JSON.parse(raw)
 
-Step 6: /success generates portal link:
+Step 7: /success generates portal link:
   const encoded = btoa(JSON.stringify(data))
   const portalUrl = `${BASE_URL}/pack?data=${encoded}`
 
-Step 7: /success shows:
+Step 8: /success shows:
   - "Open My Birthday Star Portal" button
   - Copy link button
+  - Copy guest message button
   - Friendly message: "Share this link with your guests. Save it — this is your portal link."
 
-Step 8: /pack reads data param, decodes, renders full Birthday Star Portal.
+Step 9: If browser storage is missing, /success lets the parent paste the recovery code to rebuild the same /pack?data=... link.
+
+Step 10: /pack reads data param, decodes, renders full Birthday Star Portal.
 
 The app does not care which payment platform is used.
 It only reads NEXT_PUBLIC_CHECKOUT_URL from env.
-This can be a Payhip link or a Lemon Squeezy static product link.
+This should be a Payhip/external static checkout link in v1.
 
 Add this comment in /success and /pack — do not build it:
 // TODO v2: Replace localStorage + encoded URL with verified payment token after first sales.
@@ -169,22 +174,26 @@ export const config = {
   BRAND_NAME: "Wandering Dodo",
   BRAND_TAGLINE: "Premium digital birthday experiences.",
   PRICE: "$14",
-  LAUNCH_BADGE: "Early Access — $14",
+  LAUNCH_BADGE: "Launch price — $14",
   SUPPORT_EMAIL: "support@wanderingdodo.com",
   BASE_URL: process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000",
   CHECKOUT_URL: process.env.NEXT_PUBLIC_CHECKOUT_URL ?? "#",
 };
 
+Production builds must fail if NEXT_PUBLIC_BASE_URL is missing/localhost or NEXT_PUBLIC_CHECKOUT_URL is missing/#.
+
 ---
 
 # ENV VARIABLES
 
-Create .env.local.example with exactly:
+Create .env.local.example with:
 
 NEXT_PUBLIC_CHECKOUT_URL=https://payhip.com/b/YOUR_PRODUCT_ID
-NEXT_PUBLIC_BASE_URL=https://yourdomain.com
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
+# Optional: any endpoint that returns 200 OK to a POST. Leave blank to disable.
+NEXT_PUBLIC_PING_URL=
 
-That is all. Two variables. Nothing else.
+TOKEN_SECRET is not required in v1.
 
 ---
 
@@ -315,7 +324,7 @@ Support: support@wanderingdodo.com
 
 ## Route 2: app/success/page.tsx — Post-Payment Page
 
-This page renders after Payhip/Lemon Squeezy redirects parent back.
+This page renders after Payhip/external checkout redirects parent back.
 
 On mount:
 1. Read localStorage: const raw = localStorage.getItem('bdp_session')
@@ -777,8 +786,9 @@ After generating all files, provide:
    npm run dev
 
 2. Exact env variables with explanations:
-   NEXT_PUBLIC_CHECKOUT_URL — your Payhip or Lemon Squeezy static product link
+  NEXT_PUBLIC_CHECKOUT_URL — your Payhip/external static checkout link
    NEXT_PUBLIC_BASE_URL — your deployed domain (use http://localhost:3000 for local)
+  NEXT_PUBLIC_PING_URL — optional no-PII POST receiver; leave blank to disable
 
 3. Vercel deployment steps:
    - Push to GitHub
@@ -787,17 +797,11 @@ After generating all files, provide:
    - Deploy
 
 4. Payment platform setup:
-   Option A — Payhip:
+  Payhip:
    - Create account at payhip.com
    - Add Product → Digital Download → "Birthday Star Portal" → $14
    - Settings → set Thank You / Redirect URL to: https://yourdomain.com/success
    - Copy product link → paste as NEXT_PUBLIC_CHECKOUT_URL
-
-   Option B — Lemon Squeezy (static link only):
-   - Create product in Lemon Squeezy dashboard
-   - Set price to $14
-   - Under Checkout Settings → set Redirect URL to: https://yourdomain.com/success
-   - Copy the static product link → paste as NEXT_PUBLIC_CHECKOUT_URL
 
 ---
 
@@ -807,7 +811,7 @@ After build is complete, verify each item:
 
 Landing:
 [ ] Landing page loads on mobile (390px)
-[ ] All 3 trust badges visible
+[ ] All 4 trust badges visible
 [ ] Testimonial displays
 [ ] "See a Live Mission Demo" button opens demo portal
 [ ] Demo sticky bar visible throughout demo scroll
@@ -818,7 +822,8 @@ Landing:
 [ ] Form validation shows inline errors for missing fields
 [ ] Form validation rejects invalid parentContact
 [ ] Form submit saves to localStorage correctly
-[ ] Form submit redirects to NEXT_PUBLIC_CHECKOUT_URL
+[ ] Form submit shows recovery code before checkout
+[ ] Continue to payment redirects to NEXT_PUBLIC_CHECKOUT_URL
 
 Success:
 [ ] /success reads localStorage and generates portal URL
@@ -826,7 +831,9 @@ Success:
 [ ] "Open My Birthday Star Portal" opens correct link
 [ ] Copy link button copies URL and shows confirmation
 [ ] WhatsApp share button opens WhatsApp with prefilled text
+[ ] Copy guest message copies the guest-ready share text
 [ ] Error state renders if localStorage is empty
+[ ] Recovery code restores the portal link when browser storage is empty
 
 Pack (valid portal):
 [ ] /pack?data=... decodes and renders portal
@@ -860,16 +867,14 @@ Mobile:
 
 Document these in a README section — do not fix them:
 
-1. Payment bypass is technically possible by navigating directly to /success. Acceptable at launch stage with zero traffic.
-2. localStorage is cleared if parent uses a different browser or private browsing mode. Error state handles this gracefully.
+1. Payment bypass is technically possible because v1 uses a static external checkout and does not verify orders. Acceptable at launch stage while demand is being proven.
+2. Browser storage can fail if the parent uses a different browser, an in-app browser, or private browsing mode. The recovery code handles the main checkout handoff failure.
 3. Portal link contains all party data in base64 — visible to technical users who decode the URL. Data is party invite details only — this is intentional for v1.
-4. No portal link recovery if parent loses the link. Manual support via email handles edge cases.
-5. No analytics. You will not know how many portals have been generated.
+4. Manual support via email is still needed if the customer loses both the portal link and the recovery code.
+5. No detailed analytics. Optional `NEXT_PUBLIC_PING_URL` pings are aggregate only and send no PII.
 
 Upgrade path (do not build now):
-// TODO v2: Replace localStorage + base64 URL with verified payment token flow
-// Trigger: first 5-10 paid sales confirm product demand
-// Adds: Lemon Squeezy API verification, Upstash Redis session, signed/encrypted JWT token
+// TODO later: Replace localStorage + base64 URL with verified payment handling only after proof of demand.
 
 ---
 

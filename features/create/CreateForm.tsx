@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { config } from "@/lib/config";
 import { copyToClipboard } from "@/lib/utils";
 import { type FormData } from "@/lib/validation";
@@ -19,12 +20,15 @@ const TIMEZONES = [
 ];
 
 export default function CreateForm() {
+  const [recoveryCopied, setRecoveryCopied] = useState(false);
   const { form, setForm, draftRestored, startOver } = useDraft();
   const {
     errors,
     setErrors,
     submitting,
     storageError,
+    checkoutError,
+    checkoutUnavailable,
     handleSubmit,
     recoveryCode,
     continueToCheckout,
@@ -35,6 +39,7 @@ export default function CreateForm() {
     setForm((current) => ({ ...current, [key]: value }));
     if (recoveryCode) {
       dismissRecoveryCode();
+      setRecoveryCopied(false);
     }
     if (errors[key]) {
       setErrors((current) => ({ ...current, [key]: undefined }));
@@ -44,6 +49,7 @@ export default function CreateForm() {
   function handleStartOver() {
     startOver();
     setErrors({});
+    setRecoveryCopied(false);
   }
 
   return (
@@ -225,7 +231,7 @@ export default function CreateForm() {
             Secure checkout · 14-day refund · Link arrives instantly.
           </p>
           <p className="text-xs text-comet text-center">
-            Best results: complete payment in Safari or Chrome, then keep the recovery code as your backup.
+            We&apos;ll show a backup code before checkout. Save it in case your browser does not return automatically.
           </p>
           {storageError && (
             <div
@@ -287,8 +293,7 @@ export default function CreateForm() {
                 Before payment: save your recovery code
               </h3>
               <p className="text-comet mb-3">
-                Continue in Safari or Chrome for the smoothest checkout return. If your portal link does not
-                appear after payment, paste this code on the success page to restore it.
+                Save this backup code in case your browser does not return automatically after payment. You can paste it on the success page to rebuild your portal link.
               </p>
               <div className="card p-3 break-all text-xs md:text-sm text-comet mb-3" aria-label="Recovery code">
                 {recoveryCode}
@@ -300,21 +305,52 @@ export default function CreateForm() {
                   onClick={async () => {
                     const ok = await copyToClipboard(recoveryCode);
                     if (ok) {
+                      setRecoveryCopied(true);
                       alert("Recovery code copied.");
                     } else {
+                      setRecoveryCopied(true);
                       alert("Could not copy automatically. Please copy the recovery code manually.");
                     }
                   }}
                 >
                   Copy recovery code
                 </button>
-                <button type="button" className="btn-primary" onClick={continueToCheckout}>
+                <button
+                  type="button"
+                  className={recoveryCopied && !checkoutUnavailable ? "btn-primary" : "btn-secondary"}
+                  onClick={continueToCheckout}
+                  disabled={!recoveryCopied || checkoutUnavailable}
+                  aria-disabled={!recoveryCopied || checkoutUnavailable}
+                  style={!recoveryCopied || checkoutUnavailable ? { opacity: 0.68, cursor: "not-allowed" } : undefined}
+                >
                   Continue to payment
                 </button>
-                <button type="button" className="btn-secondary" onClick={dismissRecoveryCode}>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => {
+                    dismissRecoveryCode();
+                    setRecoveryCopied(false);
+                  }}
+                >
                   Go back
                 </button>
               </div>
+              {!recoveryCopied && (
+                <p className="text-xs text-comet mt-3">
+                  Copy or save the recovery code first, then continue to payment.
+                </p>
+              )}
+              {checkoutUnavailable && (
+                <p className="field-error mt-3" role="alert">
+                  Checkout is not configured for this environment yet.
+                </p>
+              )}
+              {checkoutError && (
+                <p className="field-error mt-3" role="alert">
+                  {checkoutError}
+                </p>
+              )}
             </div>
           )}
         </form>
