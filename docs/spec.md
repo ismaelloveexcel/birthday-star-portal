@@ -27,7 +27,10 @@ Your child becomes the hero.
 Their guests become the crew.
 One link does it all.
 
-Target Buyer: Parents planning kids' birthday parties.
+Target Buyer: Parents planning kids' birthday parties, plus family or friends buying a digital birthday gift.
+
+Current Storefront Direction:
+The landing page may present Wandering Dodo as a guided birthday studio with scenario cards for Digital Invitation, Birthday Star Portal, and Gift Experience. Birthday Star Portal remains the only self-serve paid checkout flow in V1; non-active products must route to manual support/contact until they are deliberately launched.
 
 ---
 
@@ -55,7 +58,7 @@ Do not build any of the following under any circumstance:
 - Complex game engine
 - Subscription billing
 - Analytics dashboard
-- Multiple products or editions in UI
+- Automated purchase flows for multiple paid products or editions
 - Canvas, Pixi.js, Babylon.js, A-Frame, React Native, Expo
 - Framer Motion, GSAP, or any heavy animation library
 
