@@ -2,6 +2,8 @@
 
 import type { Metadata } from "next";
 import { decodePortalData } from "@/lib/utils";
+import { buildPackOgImageUrl } from "@/lib/experience/packPreview";
+import { config } from "@/lib/config";
 import PackClient from "./PackClient";
 
 interface PortalData {
@@ -39,12 +41,27 @@ export async function generateMetadata(
     }
   }
   const description = "Accept your mission briefing. Cadet training required.";
+  const imageUrl = buildPackOgImageUrl(config.BASE_URL, encoded);
   return {
     title,
     description,
     openGraph: {
       title,
       description,
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [imageUrl],
     },
   };
 }

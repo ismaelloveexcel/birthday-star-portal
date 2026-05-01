@@ -6,7 +6,7 @@ import { sectionRegistry, type PortalSectionContext } from "@/features/portal/se
 import { createFlowReducer, createInitialFlowState } from "@/features/portal/flow";
 import type { Experience } from "@/lib/schemas/experience";
 
-type PortalRunnerProps = Omit<PortalSectionContext, "score" | "onQuizComplete"> & {
+type PortalRunnerProps = Omit<PortalSectionContext, "answers" | "score" | "onChoiceSelect" | "onQuizComplete"> & {
   experience: Experience;
 };
 
@@ -21,6 +21,7 @@ export default function PortalRunner({ experience, ...context }: PortalRunnerPro
   const isLastStep = currentIndex === flow.length - 1;
   const canGoBack = state.history.length > 0;
   const canGoNext = currentSection?.type !== "quiz" || score !== null;
+  const showNext = currentSection?.type !== "choice" && !isLastStep;
   const Section = currentSection ? sectionRegistry[currentSection.type] : null;
   const demoCtaSection = experience.sections.find((section) => section.type === "demoCta");
   const DemoCta = demoCtaSection ? sectionRegistry[demoCtaSection.type] : null;
@@ -30,9 +31,13 @@ export default function PortalRunner({ experience, ...context }: PortalRunnerPro
   const sectionContext: PortalSectionContext = {
     ...context,
     experience,
+    answers: state.answers,
     score,
     onQuizComplete: (nextScore) => {
       dispatch({ type: "setAnswer", key: "quizScore", value: nextScore });
+    },
+    onChoiceSelect: (key, value, targetStepId) => {
+      dispatch({ type: "choose", key, value, targetStepId });
     },
   };
 
@@ -64,7 +69,7 @@ export default function PortalRunner({ experience, ...context }: PortalRunnerPro
               >
                 {canGoBack ? "Back" : "Restart"}
               </button>
-              {!isLastStep ? (
+              {showNext ? (
                 <button
                   type="button"
                   onClick={() => dispatch({ type: "next" })}

@@ -128,12 +128,20 @@ export default function HomePage() {
               a heroic reveal, playful guest moments, and one link that feels made for the child.
             </p>
             <div className="hero-action-row mt-8">
-              <a href="#products" className="btn-primary">
-                Choose My Birthday Magic →
+              <a href="#demo" className="btn-primary">
+                Try the Live Mission →
               </a>
               <a href="#form" className="btn-secondary">
                 Create My Portal — {config.PRICE}
               </a>
+            </div>
+            <div className="hero-micro-demo hero-micro-inline">
+              <span className="hero-micro-kicker">Live preview</span>
+              <strong>Tap choices. Unlock Captain Zara.</strong>
+              <div className="hero-micro-actions" aria-hidden="true">
+                <span>Open comet vault</span>
+                <span>Follow star trail</span>
+              </div>
             </div>
             <div className="hero-proof-grid mt-10">
               <div className="hero-proof-card">
@@ -171,6 +179,14 @@ export default function HomePage() {
               <div className="hero-signal-card signal-bottom">
                 <span>Output</span>
                 <strong>One polished share link</strong>
+              </div>
+              <div className="hero-micro-demo">
+                <span className="hero-micro-kicker">Live preview</span>
+                <strong>Tap choices. Unlock Captain Zara.</strong>
+                <div className="hero-micro-actions" aria-hidden="true">
+                  <span>Open comet vault</span>
+                  <span>Follow star trail</span>
+                </div>
               </div>
             </div>
           </div>

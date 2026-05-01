@@ -15,6 +15,7 @@ const sectionTypeSchema = z.enum([
   "demoBanner",
   "portalIgnition",
   "captainReveal",
+  "choice",
   "missionBriefing",
   "countdown",
   "rsvp",

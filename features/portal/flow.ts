@@ -44,10 +44,30 @@ export function setAnswer(state: FlowState, key: string, value: unknown): FlowSt
   };
 }
 
+export function choose(
+  state: FlowState,
+  flow: string[],
+  key: string,
+  value: unknown,
+  targetStepId: string
+): FlowState {
+  if (!flow.includes(targetStepId)) return state;
+
+  return {
+    stepId: targetStepId,
+    history: [...state.history, state.stepId],
+    answers: {
+      ...state.answers,
+      [key]: value,
+    },
+  };
+}
+
 export type FlowAction =
   | { type: "next" }
   | { type: "back" }
   | { type: "setAnswer"; key: string; value: unknown }
+  | { type: "choose"; key: string; value: unknown; targetStepId: string }
   | { type: "restart" };
 
 export function createFlowReducer(flow: string[]) {
@@ -59,6 +79,8 @@ export function createFlowReducer(flow: string[]) {
         return back(state);
       case "setAnswer":
         return setAnswer(state, action.key, action.value);
+      case "choose":
+        return choose(state, flow, action.key, action.value, action.targetStepId);
       case "restart":
         return createInitialFlowState(flow);
       default:

@@ -687,6 +687,66 @@ textarea {
   bottom: 4rem;
 }
 
+.hero-micro-demo {
+  position: absolute;
+  left: 50%;
+  bottom: 0.2rem;
+  z-index: 8;
+  width: min(21rem, 92vw);
+  padding: 1rem;
+  transform: translateX(-50%);
+  border-radius: 8px;
+  border: 1px solid rgba(79, 195, 247, 0.28);
+  background: linear-gradient(180deg, rgba(9, 14, 40, 0.96), rgba(18, 30, 72, 0.88));
+  box-shadow: 0 22px 54px rgba(0, 0, 0, 0.36), 0 0 34px rgba(79, 195, 247, 0.16);
+}
+
+.hero-micro-kicker {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--color-gold);
+}
+
+.hero-micro-demo strong {
+  display: block;
+  font-family: var(--font-orbitron), sans-serif;
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+.hero-micro-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.hero-micro-actions span {
+  min-height: 2.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid rgba(168, 180, 212, 0.2);
+  color: var(--color-star);
+  font-size: 0.72rem;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.hero-micro-actions span:first-child {
+  border-color: rgba(255, 215, 0, 0.35);
+  background: rgba(255, 215, 0, 0.08);
+}
+
+.hero-micro-inline {
+  display: none;
+}
+
 .mission-ribbon {
   margin-top: -1.4rem;
 }
@@ -736,6 +796,40 @@ textarea {
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.choice-card {
+  min-height: 8.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.15rem;
+  border-radius: 8px;
+  border: 1px solid rgba(168, 180, 212, 0.22);
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--color-star);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.choice-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(79, 195, 247, 0.56);
+  background: rgba(79, 195, 247, 0.08);
+}
+
+.choice-card span {
+  font-family: var(--font-orbitron), sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.choice-card strong {
+  color: var(--color-comet);
+  font-size: 0.9rem;
+  line-height: 1.55;
 }
 
 .section-heading-row {
@@ -1223,6 +1317,16 @@ textarea {
 
   .premium-hero-stage {
     display: none;
+  }
+
+  .hero-micro-inline {
+    display: block;
+    position: relative;
+    left: auto;
+    bottom: auto;
+    width: 100%;
+    margin-top: 1rem;
+    transform: none;
   }
 
   .hero-action-row {

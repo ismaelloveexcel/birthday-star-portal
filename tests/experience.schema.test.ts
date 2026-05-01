@@ -15,6 +15,7 @@ describe("experienceSchema", () => {
       "demoBanner",
       "portalIgnition",
       "captainReveal",
+      "choice",
       "missionBriefing",
       "countdown",
       "rsvp",

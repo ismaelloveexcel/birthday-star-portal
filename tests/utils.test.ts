@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   buildPortalShareText,
+  buildPortalTeaserText,
   formatPartyDate,
   detectContactType,
   encodePortalData,
@@ -100,6 +101,12 @@ describe("encodePortalData / decodePortalData", () => {
     expect(decodePortalData("not-base64-!@#")).toBeNull();
     expect(decodePortalData("")).toBeNull();
   });
+
+  it("tolerates querystring plus signs that were decoded as spaces", () => {
+    const encoded = encodePortalData({ value: ">>>" });
+    expect(encoded).toContain("+");
+    expect(decodePortalData(encoded.replace(/\+/g, " "))).toEqual({ value: ">>>" });
+  });
 });
 
 describe("buildPortalShareText", () => {
@@ -116,5 +123,16 @@ describe("buildPortalShareText", () => {
     const text = buildPortalShareText("", "https://example.com/pack?data=abc");
 
     expect(text).toContain("Captain your child's Birthday Mission portal");
+  });
+});
+
+describe("buildPortalTeaserText", () => {
+  it("creates a curiosity-led teaser with the portal URL", () => {
+    const text = buildPortalTeaserText("Zara", "https://example.com/pack?data=abc");
+
+    expect(text).toContain("secret birthday transmission");
+    expect(text).toContain("Captain Zara");
+    expect(text).toContain("https://example.com/pack?data=abc");
+    expect(text).toContain("Do not brief the crew too early");
   });
 });

@@ -9,11 +9,15 @@ export function encodePortalData(data: object): string {
 
 export function decodePortalData<T = unknown>(encoded: string): T | null {
   try {
-    if (typeof window === "undefined") {
-      const json = Buffer.from(encoded, "base64").toString("utf-8");
+    const normalized = encoded.replace(/ /g, "+");
+    if (typeof Buffer !== "undefined") {
+      const json = Buffer.from(normalized, "base64").toString("utf-8");
       return JSON.parse(json) as T;
     }
-    return JSON.parse(decodeURIComponent(escape(atob(encoded)))) as T;
+    if (typeof atob === "function") {
+      return JSON.parse(decodeURIComponent(escape(atob(normalized)))) as T;
+    }
+    return null;
   } catch {
     return null;
   }
@@ -127,6 +131,16 @@ export function buildPortalShareText(childName: string, url: string): string {
   return [
     `🚀 Here's Captain ${safeName}'s Birthday Mission portal! Open it to see the mission briefing, countdown, and complete the Cadet Challenge: ${safeUrl}`,
     "Made with Birthday Star Portal — wanderingdodo.com",
+  ].join("\n\n");
+}
+
+export function buildPortalTeaserText(childName: string, url: string): string {
+  const safeName = (childName || "your child").trim();
+  const safeUrl = (url || "").trim();
+
+  return [
+    `A secret birthday transmission has been prepared for Captain ${safeName}. Mission access opens here: ${safeUrl}`,
+    "Do not brief the crew too early.",
   ].join("\n\n");
 }
 

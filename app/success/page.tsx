@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from "react";
 import { config } from "@/lib/config";
-import { buildPortalShareText, copyToClipboard, decodePortalData, encodePortalData, sanitizePhoneForWhatsApp, detectContactType, pingEvent } from "@/lib/utils";
+import { buildPortalShareText, buildPortalTeaserText, copyToClipboard, decodePortalData, encodePortalData, sanitizePhoneForWhatsApp, detectContactType, pingEvent } from "@/lib/utils";
 import type { FormData } from "@/lib/validation";
 
 interface State {
@@ -16,6 +16,7 @@ interface State {
 export default function SuccessPage() {
   const [state, setState] = useState<State>({ status: "loading" });
   const [copied, setCopied] = useState(false);
+  const [teaserCopied, setTeaserCopied] = useState(false);
   const [recoveryCode, setRecoveryCode] = useState("");
   const [recoveryError, setRecoveryError] = useState<string | null>(null);
 
@@ -110,7 +111,9 @@ export default function SuccessPage() {
   const contactType = detectContactType(data.parentContact);
   const waNumber = sanitizePhoneForWhatsApp(data.parentContact);
   const waText = buildPortalShareText(data.childName, url);
+  const teaserText = buildPortalTeaserText(data.childName, url);
   const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(waText)}`;
+  const teaserWaUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(teaserText)}`;
   const showWhatsApp = contactType === "whatsapp" || contactType === "both";
 
   async function handleCopy() {
@@ -118,6 +121,14 @@ export default function SuccessPage() {
     if (ok) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  }
+
+  async function handleTeaserCopy() {
+    const ok = await copyToClipboard(teaserText);
+    if (ok) {
+      setTeaserCopied(true);
+      setTimeout(() => setTeaserCopied(false), 2000);
     }
   }
 
@@ -192,6 +203,30 @@ export default function SuccessPage() {
               📲 Share on WhatsApp
             </a>
           )}
+        </div>
+
+        <div className="card mt-6 p-4 text-left">
+          <div className="text-xs uppercase tracking-widest text-comet mb-2">
+            Anticipation teaser
+          </div>
+          <p className="text-comet text-sm mb-3">
+            Send this first if you want the birthday link to feel like a secret transmission before guests open it.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <button type="button" onClick={handleTeaserCopy} className="btn-secondary">
+              {teaserCopied ? "Teaser copied!" : "Copy teaser message"}
+            </button>
+            {showWhatsApp && (
+              <a
+                href={teaserWaUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary"
+              >
+                Send teaser on WhatsApp
+              </a>
+            )}
+          </div>
         </div>
       </div>
     </main>

@@ -24,8 +24,10 @@ export interface PortalSectionContext {
   funFacts: [string, string, string];
   timezone: string;
   isDemo: boolean;
+  answers: Record<string, unknown>;
   score: number | null;
   onQuizComplete: (score: number) => void;
+  onChoiceSelect: (key: string, value: string, targetStepId: string) => void;
 }
 
 interface PortalSectionProps {
@@ -46,12 +48,18 @@ function templateVars(context: PortalSectionContext) {
     funFact2: context.funFacts[1],
     funFact3: context.funFacts[2],
     location: context.location,
+    missionPath: typeof context.answers.missionPath === "string" ? context.answers.missionPath : "secret star trail",
     price: config.PRICE,
     score: context.score === null ? "" : String(context.score),
     timezone: context.timezone,
     totalQuestions: String(context.experience.quiz.questions.length),
     upperChildName: context.childName.toUpperCase(),
   };
+}
+
+function propText(props: Record<string, string | number | boolean>, key: string, fallback = ""): string {
+  const value = props[key];
+  return typeof value === "string" ? value : fallback;
 }
 
 function DemoBannerSection({ context }: PortalSectionProps) {
@@ -124,6 +132,55 @@ function CaptainRevealSection({ context }: PortalSectionProps) {
         <p className="mt-6 text-comet max-w-xl mx-auto fade-up" style={{ animationDelay: "1.4s" }}>
           {context.experience.copy.captainReveal.description}
         </p>
+      </div>
+    </section>
+  );
+}
+
+function ChoiceSection({ context, props }: PortalSectionProps) {
+  const vars = templateVars(context);
+  const answerKey = propText(props, "answerKey", "missionPath");
+  const options = [
+    {
+      label: propText(props, "optionOneLabel"),
+      value: propText(props, "optionOneValue"),
+      target: propText(props, "optionOneTarget"),
+      line: propText(props, "optionOneLine"),
+    },
+    {
+      label: propText(props, "optionTwoLabel"),
+      value: propText(props, "optionTwoValue"),
+      target: propText(props, "optionTwoTarget"),
+      line: propText(props, "optionTwoLine"),
+    },
+  ].filter((option) => option.label && option.value && option.target);
+
+  return (
+    <section className="section" aria-labelledby="choice-heading">
+      <div className="star-field" aria-hidden="true" />
+      <div className="relative z-10 max-w-2xl mx-auto card p-6 md:p-10 fade-up">
+        <div className="text-xs uppercase tracking-widest text-comet">
+          {interpolate(propText(props, "eyebrow", "Mission choice"), vars)}
+        </div>
+        <h3 id="choice-heading" className="font-display text-2xl md:text-3xl text-glow mt-2 mb-3">
+          {interpolate(propText(props, "heading", "Choose your mission path"), vars)}
+        </h3>
+        <p className="text-comet mb-6">
+          {interpolate(propText(props, "description", "Pick the route that feels most like the birthday star."), vars)}
+        </p>
+        <div className="grid sm:grid-cols-2 gap-3">
+          {options.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => context.onChoiceSelect(answerKey, option.value, option.target)}
+              className="choice-card"
+            >
+              <span>{interpolate(option.label, vars)}</span>
+              <strong>{interpolate(option.line, vars)}</strong>
+            </button>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -336,6 +393,7 @@ export const sectionRegistry: Record<ExperienceSectionType, (props: PortalSectio
   demoBanner: DemoBannerSection,
   portalIgnition: PortalIgnitionSection,
   captainReveal: CaptainRevealSection,
+  choice: ChoiceSection,
   missionBriefing: MissionBriefingSection,
   countdown: CountdownSection,
   rsvp: RsvpSection,

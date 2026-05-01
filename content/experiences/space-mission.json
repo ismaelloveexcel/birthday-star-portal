@@ -4,6 +4,7 @@
   "flow": [
     "portal-ignition",
     "captain-reveal",
+    "mission-choice",
     "mission-briefing",
     "countdown",
     "rsvp",
@@ -47,6 +48,24 @@
       "id": "captain-reveal",
       "type": "captainReveal",
       "props": {}
+    },
+    {
+      "id": "mission-choice",
+      "type": "choice",
+      "props": {
+        "eyebrow": "Crew decision",
+        "heading": "Choose Captain {{childName}}'s first mission route",
+        "description": "Every birthday mission needs a route. Pick the one the crew will remember when the final briefing unlocks.",
+        "answerKey": "missionPath",
+        "optionOneLabel": "Open the comet vault",
+        "optionOneValue": "the comet vault route",
+        "optionOneTarget": "mission-briefing",
+        "optionOneLine": "A glittering launch path for a crew that loves bold surprises.",
+        "optionTwoLabel": "Follow the star trail",
+        "optionTwoValue": "the secret star trail",
+        "optionTwoTarget": "mission-briefing",
+        "optionTwoLine": "A mystery route for a crew that wants hidden signals and clues."
+      }
     },
     {
       "id": "mission-briefing",
@@ -112,7 +131,7 @@
     "missionBriefing": {
       "eyebrow": "Classified · Galactic Mission Briefing",
       "heading": "ATTENTION CREW",
-      "invitationTemplate": "You are hereby invited to join Captain {{childName}}'s {{age}}th Birthday Mission.",
+      "invitationTemplate": "You are hereby invited to join Captain {{childName}}'s {{age}}th Birthday Mission. The crew has selected {{missionPath}}.",
       "labels": {
         "missionDate": "Mission Date",
         "launchTime": "Launch Time",
@@ -136,7 +155,7 @@
       "eyebrow": "🛰 Classified",
       "heading": "SECRET STAR LOG",
       "description": "Classified mission intelligence — for crew eyes only",
-      "quoteTemplate": "“{{funFact2}}”",
+      "quoteTemplate": "“Captain {{childName}} chose {{missionPath}}. Mission intelligence confirms: {{funFact2}}.”",
       "sealTemplate": "Mission Seal — Captain {{childName}}"
     },
     "viralLoop": {
