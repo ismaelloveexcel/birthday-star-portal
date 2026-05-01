@@ -1,6 +1,7 @@
 const _rawBaseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 const _rawCheckoutUrl = process.env.NEXT_PUBLIC_CHECKOUT_URL;
 const _isProd = process.env.NODE_ENV === "production";
+const PRODUCT_PRICE = "$14";
 
 if (
   _isProd &&
@@ -24,8 +25,8 @@ export const config = {
   PRODUCT_EDITION: "Space Mission Edition",
   BRAND_NAME: "Wandering Dodo",
   BRAND_TAGLINE: "Premium digital birthday experiences.",
-  PRICE: "$14",
-  LAUNCH_BADGE: "Launch price — $14",
+  PRICE: PRODUCT_PRICE,
+  LAUNCH_BADGE: `Launch price — ${PRODUCT_PRICE}`,
   SUPPORT_EMAIL: "support@wanderingdodo.com",
   BASE_URL: _rawBaseUrl ?? "http://localhost:3000",
   CHECKOUT_URL: _rawCheckoutUrl ?? "#",

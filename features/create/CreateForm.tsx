@@ -144,7 +144,7 @@ export default function CreateForm() {
             <input
               id="field-location"
               className={`input ${errors.location ? "input-error" : ""}`}
-              placeholder="e.g. Fun Planet, Abu Dhabi"
+              placeholder="e.g. Galaxy Play Cafe or your party venue"
               value={form.location}
               onChange={(e) => update("location", e.target.value)}
             />
@@ -219,6 +219,9 @@ export default function CreateForm() {
                 </option>
               ))}
             </select>
+            <p className="text-xs text-comet mt-2">
+              Used only for the countdown.
+            </p>
           </Field>
 
           <p className="text-xs text-comet pt-2">
@@ -229,6 +232,9 @@ export default function CreateForm() {
           </button>
           <p className="text-xs text-comet text-center pt-2">
             Secure checkout · 14-day refund · Link arrives instantly.
+          </p>
+          <p className="text-xs text-comet text-center">
+            Optional printable mission pack may be available at checkout.
           </p>
           <p className="text-xs text-comet text-center">
             We&apos;ll show a backup code before checkout. Save it in case your browser does not return automatically.

@@ -1,6 +1,12 @@
 import type { MetadataRoute } from "next";
 import { config } from "@/lib/config";
 
+export const seoRoutes = [
+  "/playable-birthday-invitation",
+  "/whatsapp-birthday-invitation",
+  "/space-birthday-invitation",
+];
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = config.BASE_URL.replace(/\/$/, "");
   return [
@@ -8,6 +14,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${base}/`,
       priority: 1.0,
     },
+    ...seoRoutes.map((route) => ({
+      url: `${base}${route}`,
+      priority: 0.7,
+    })),
     {
       url: `${base}/success`,
       priority: 0.3,

@@ -13,7 +13,7 @@ Name: Birthday Star Portal
 Edition: Space Mission Edition
 Brand: Wandering Dodo
 Brand Tagline: Premium digital birthday experiences.
-Launch Price: $14
+Launch Price: controlled by `config.PRICE` in `lib/config.ts`.
 
 ---
 
@@ -168,13 +168,15 @@ Do not create:
 
 Create lib/config.ts:
 
+const PRODUCT_PRICE = "$14";
+
 export const config = {
   PRODUCT_NAME: "Birthday Star Portal",
   PRODUCT_EDITION: "Space Mission Edition",
   BRAND_NAME: "Wandering Dodo",
   BRAND_TAGLINE: "Premium digital birthday experiences.",
-  PRICE: "$14",
-  LAUNCH_BADGE: "Launch price — $14",
+  PRICE: PRODUCT_PRICE,
+  LAUNCH_BADGE: `Launch price — ${PRODUCT_PRICE}`,
   SUPPORT_EMAIL: "support@wanderingdodo.com",
   BASE_URL: process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000",
   CHECKOUT_URL: process.env.NEXT_PUBLIC_CHECKOUT_URL ?? "#",
@@ -224,10 +226,10 @@ CTA button:
 (scrolls to demo section)
 
 Secondary CTA:
-"Create My Portal — $14"
+"Create My Portal — {config.PRICE}"
 
 Launch badge near CTA:
-"🚀 Early Access — $14"
+"Launch price — {config.PRICE}"
 
 ### Trust Signals
 
@@ -244,7 +246,7 @@ Parent testimonial:
 
 Three steps, visually numbered:
 1. Fill in your child's birthday details — takes 2 minutes.
-2. Pay once — $14. No subscription.
+2. Pay once — {config.PRICE}. No subscription.
 3. Get your magic link. Share it with every guest.
 
 ### Live Demo Section
@@ -274,11 +276,11 @@ Demo hardcoded data:
 
 When BirthdayPortal is in demo mode (isDemo === true):
 - Show sticky bar fixed at top of portal:
-  "👀 This is a demo — Create yours for $14  [Create My Portal →]"
+  "This is a demo — Create yours for {config.PRICE}  [Create My Portal]"
   This bar must not block content but remain visible throughout.
 - At the very bottom of demo portal, show CTA overlay:
   "Ready to launch your own birthday mission?"
-  Button: "Create My Portal — $14 →"
+  Button: "Create My Portal — {config.PRICE}"
 
 ### Form Section
 
@@ -289,7 +291,7 @@ Form fields in this order:
 - Age they are turning* (number, min 1, max 15)
 - Party date* (date input)
 - Party time* (time input)
-- Party location* (text, placeholder: "e.g. Fun Planet, Abu Dhabi")
+- Party location* (text, country-neutral placeholder)
 - Your WhatsApp or email* (text, placeholder: "For guests to RSVP to you")
 - Their favourite thing* (text, placeholder: "e.g. rockets, dinosaurs, unicorns")
 - Fun fact 1* (text, placeholder: "e.g. once stayed awake for 24 hours straight")
@@ -301,7 +303,7 @@ Privacy note above submit button:
 "Only include details you are comfortable sharing with invited guests."
 
 Submit button:
-"Launch My Birthday Mission — $14 →"
+"Launch My Birthday Mission — {config.PRICE}"
 
 On submit:
 1. Validate all required fields — show inline errors if missing
@@ -799,7 +801,7 @@ After generating all files, provide:
 4. Payment platform setup:
   Payhip:
    - Create account at payhip.com
-   - Add Product → Digital Download → "Birthday Star Portal" → $14
+  - Add Product → Digital Download → "Birthday Star Portal" → current launch price
    - Settings → set Thank You / Redirect URL to: https://yourdomain.com/success
    - Copy product link → paste as NEXT_PUBLIC_CHECKOUT_URL
 

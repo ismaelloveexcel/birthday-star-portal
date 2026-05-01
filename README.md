@@ -82,6 +82,7 @@ birthday-star-portal/
 ├── tests/                      # Vitest pure-logic suite
 │
 ├── docs/spec.md                # original product spec
+├── docs/global-growth-plan.md  # global promotion and monetisation playbook
 ├── .env.local.example
 └── vercel.json
 ```
@@ -117,7 +118,7 @@ required.
 ### Payhip setup
 
 1. Create an account at [payhip.com](https://payhip.com).
-2. Add a Product → Digital Download → "Birthday Star Portal" → $14.
+2. Add a Product → Digital Download → "Birthday Star Portal" → current launch price.
 3. Settings → set Thank You / Redirect URL to `https://yourdomain.com/success`.
 4. Copy the product link → paste as `NEXT_PUBLIC_CHECKOUT_URL`.
 
@@ -174,7 +175,7 @@ Checks performed automatically:
 ## Operations
 
 Live ops runbook for v1. Owner: Wandering Dodo. Customer-facing recovery
-inbox: **support@wanderingdodo.com** (the only path until Phase 2 ships
+inbox: **support@wanderingdodo.com** (the only path until later verified
 verified payment handling — anyone who loses their portal link must email this
 address to be reissued one manually).
 
@@ -182,6 +183,18 @@ Related operator docs:
 
 - `docs/launch-checklist.md` — go-live checklist for payment, redirect, recovery, and smoke validation.
 - `docs/support-templates.md` — ready-to-paste replies for lost-link, checkout handoff, and refund requests.
+- `docs/global-growth-plan.md` — Payhip global selling, order-bump ideas, outreach scripts, and manual metrics.
+
+## Global growth / monetisation
+
+The v1 monetisation model stays deliberately light: one static Payhip/external
+checkout URL, optional Payhip-native order bump copy, and manual founder-led
+outreach. There are no bundles, dashboards, affiliate codes, payment APIs, or
+PDF generation in the app.
+
+See `docs/global-growth-plan.md` for the 14-day global promotion plan,
+multi-currency recommendation, venue/party-planner outreach, parent-community
+templates, and manual metrics to track from Payhip plus optional no-PII pings.
 
 ### Reading conversion-funnel pings (Cloudflare Worker)
 
@@ -218,14 +231,14 @@ required.
 
 ### Updating the Payhip price
 
-Prices are not stored in this repo. To change the $14 price:
+Visible price copy is controlled in `lib/config.ts` as `config.PRICE`. To
+change the live price:
 
 1. Log into [payhip.com](https://payhip.com) → Products → "Birthday Star
    Portal" → Edit.
 2. Update the price and save.
-3. Update the headline price copy on the landing page (`app/page.tsx`) only
-   if the displayed price has actually changed, and ship that as a normal
-   PR. The `NEXT_PUBLIC_CHECKOUT_URL` value does not need to change.
+3. Update `PRICE` in `lib/config.ts` and ship that as a normal PR. The
+   `NEXT_PUBLIC_CHECKOUT_URL` value does not need to change.
 
 ### Rolling back a bad Vercel deploy
 

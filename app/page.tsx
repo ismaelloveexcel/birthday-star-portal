@@ -84,7 +84,7 @@ export default function HomePage() {
           <div className="hero-copy">
             <div className="badge-pill mb-6">
               <span aria-hidden="true">✦</span>
-              Premium launch studio - {config.PRICE} first edition
+              {config.LAUNCH_BADGE}
             </div>
             <DodoGuide
               mood="excited"
@@ -217,7 +217,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-4 mt-10">
             {[
               "Fill in your child's birthday details — takes 2 minutes.",
-              "Pay once — $14. No subscription.",
+              `Pay once — ${config.PRICE}. No subscription.`,
               "Get your magic link. Share it with every guest.",
             ].map((step, i) => (
               <div key={i} className="sequence-card">
@@ -310,8 +310,7 @@ export default function HomePage() {
             One form. One payment. One magic link.
           </h2>
           <p className="text-comet mb-6">
-            Give your child a birthday they&apos;ll talk about long after the candles
-            are out.
+            Create from anywhere and share with guests across family chats, school groups, and party lists.
           </p>
           <a href="#form" className="btn-primary">
             Create My Portal — {config.PRICE} →

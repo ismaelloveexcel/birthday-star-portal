@@ -35,6 +35,15 @@ Use this checklist before turning on paid traffic.
 3. Keep the support inbox open for the first 10 orders.
 4. Keep the lost-link and refund templates ready to paste.
 
+## Before global promotion
+
+1. Payhip checkout tested end-to-end, including redirect back to `/success`.
+2. Multi-currency display checked in Payhip if enabled.
+3. Refund and support templates ready.
+4. Homepage checked on mobile with the live demo, form, and checkout CTA visible.
+5. SEO pages reviewed: `/playable-birthday-invitation`, `/whatsapp-birthday-invitation`, and `/space-birthday-invitation`.
+6. First 10 outreach contacts prepared before posting publicly.
+
 ## Known v1 risks to accept before launch
 
 1. No database, authentication, payment API, webhook, order verification, or dashboard exists in v1.
