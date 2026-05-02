@@ -130,7 +130,7 @@ export function buildPortalShareText(childName: string, url: string): string {
 
   return [
     `Open Captain ${safeName}'s birthday mission: ${safeUrl}`,
-    "Made with Birthday Star Portal by Wandering Dodo.",
+    "Made with By Ismael.",
   ].join("\n\n");
 }
 

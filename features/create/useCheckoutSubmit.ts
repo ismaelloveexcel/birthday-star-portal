@@ -70,18 +70,20 @@ export function useCheckoutSubmit(form: FormData) {
     setRecoveryCode(encodePortalData(form));
   }
 
-  function continueToCheckout() {
-    if (checkoutUnavailable) {
+  function continueToCheckout(checkoutUrl?: string) {
+    const url = checkoutUrl ?? config.CHECKOUT_URL;
+    if (!url || url === "#") {
       setSubmitting(false);
-      setCheckoutError(
-        "Checkout is not configured for this environment yet. Add NEXT_PUBLIC_CHECKOUT_URL to continue."
-      );
+      setCheckoutError("Checkout not configured.");
       return;
     }
 
     setSubmitting(true);
+    const encoded = encodePortalData(form);
+    const separator = url.includes("?") ? "&" : "?";
+    const checkoutWithReturn = `${url}${separator}checkout[custom][portal_data]=${encodeURIComponent(encoded)}`;
     pingEvent("portal_form_submit");
-    window.location.href = config.CHECKOUT_URL;
+    window.location.href = checkoutWithReturn;
   }
 
   function dismissRecoveryCode() {

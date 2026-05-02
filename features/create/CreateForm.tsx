@@ -324,7 +324,7 @@ export default function CreateForm() {
                 <button
                   type="button"
                   className={recoveryCopied && !checkoutUnavailable ? "btn-primary" : "btn-secondary"}
-                  onClick={continueToCheckout}
+                  onClick={() => continueToCheckout()}
                   disabled={!recoveryCopied || checkoutUnavailable}
                   aria-disabled={!recoveryCopied || checkoutUnavailable}
                   style={!recoveryCopied || checkoutUnavailable ? { opacity: 0.68, cursor: "not-allowed" } : undefined}

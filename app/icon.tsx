@@ -14,14 +14,14 @@ export default function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#4fc3f7",
-          color: "#050818",
-          fontFamily: "Orbitron, sans-serif",
-          fontWeight: 800,
-          fontSize: 22,
+          background: "#1a0a2e",
+          color: "#f5c842",
+          fontFamily: "Georgia, serif",
+          fontWeight: 700,
+          fontSize: 16,
         }}
       >
-        B
+        BI
       </div>
     ),
     { ...size }

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo } from "react";
 import BirthdayPortal from "@/components/BirthdayPortal";
+import { loadExperience } from "@/lib/experience/loadExperience";
 import { spaceMissionExperience } from "@/lib/experience/spaceMission";
 import { decodePortalData, pingEvent } from "@/lib/utils";
 import { config } from "@/lib/config";
@@ -19,6 +20,7 @@ interface RawData {
   funFact3?: string;
   funFacts?: string[];
   timezone?: string;
+  experienceId?: string;
 }
 
 export default function PackClient({ encoded }: { encoded: string | null }) {
@@ -59,8 +61,12 @@ export default function PackClient({ encoded }: { encoded: string | null }) {
       return { ok: false as const, reason: "malformed" as const };
     }
 
+    const experienceId = decoded.experienceId ?? "space-mission";
+    const experience = loadExperience(experienceId) ?? spaceMissionExperience;
+
     return {
       ok: true as const,
+      experience,
       data: {
         childName: decoded.childName!,
         age: decoded.age!,
@@ -113,7 +119,7 @@ export default function PackClient({ encoded }: { encoded: string | null }) {
 
   return (
     <div id="main">
-      <BirthdayPortal experience={spaceMissionExperience} {...result.data} isDemo={false} />
+      <BirthdayPortal experience={result.experience} {...result.data} isDemo={false} />
     </div>
   );
 }

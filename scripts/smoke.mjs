@@ -16,6 +16,9 @@ import { spawn } from "child_process";
 import { fileURLToPath } from "url";
 import path from "path";
 
+const GAME_MAIN_CHECKOUT_URL =
+  "https://byismael.lemonsqueezy.com/checkout/buy/game-main";
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 // ---------------------------------------------------------------------------
@@ -134,10 +137,14 @@ async function main() {
         ...process.env,
         PORT: String(port),
         NEXT_PUBLIC_BASE_URL: base,
-        NEXT_PUBLIC_CHECKOUT_URL: "https://payhip.com/b/smoke-test",
+        NEXT_PUBLIC_CHECKOUT_URL: GAME_MAIN_CHECKOUT_URL,
       },
     }
   );
+
+  if (process.env.NODE_ENV === "production" && GAME_MAIN_CHECKOUT_URL === "#") {
+    throw new Error("smoke: NEXT_PUBLIC_CHECKOUT_URL cannot be '#'.");
+  }
 
   let serverOutput = "";
   server.stdout.on("data", (d) => { serverOutput += d; });

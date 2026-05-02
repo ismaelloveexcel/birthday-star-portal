@@ -13,6 +13,7 @@ export const formSchema = z
     funFact2: z.string(),
     funFact3: z.string(),
     timezone: z.string(),
+    experienceId: z.string().optional().default("space-mission"),
   })
   .superRefine((data, ctx) => {
     if (!data.childName.trim()) ctx.addIssue({ code: "custom", path: ["childName"], message: "Required" });
@@ -97,6 +98,7 @@ export const EMPTY_FORM_DATA: FormData = {
   funFact2: "",
   funFact3: "",
   timezone: "Asia/Dubai",
+  experienceId: "space-mission",
 };
 
 export function validateForm(data: FormData): FormErrors {

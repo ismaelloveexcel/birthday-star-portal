@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import Countdown from "@/components/Countdown";
 import RSVPAction from "@/components/RSVPAction";
-import SpaceBadge from "@/components/SpaceBadge";
+import CelebrationBadge from "@/components/CelebrationBadge";
 import { config } from "@/lib/config";
 import { buildQuizQuestions } from "@/lib/experience/buildQuizQuestions";
 import { interpolate } from "@/lib/experience/interpolate";
@@ -300,14 +300,20 @@ function QuizSection({ context }: PortalSectionProps) {
 function BadgeSection({ context, props }: PortalSectionProps) {
   if (context.score === null) return null;
 
+  const rank = context.experience.badge.ranks
+    .slice()
+    .sort((left, right) => right.minScore - left.minScore)
+    .find((item) => context.score !== null && context.score >= item.minScore);
+
   return (
-    <section className="section" aria-label="Space Cadet Certificate">
-      <SpaceBadge
-        score={context.score}
-        childName={context.childName}
-        totalQuestions={context.experience.quiz.questions.length}
-        badgeCopy={context.experience.badge}
-        editionName={context.experience.theme.editionName}
+    <section className="section" aria-label="Celebration badge">
+      <CelebrationBadge
+        title={rank?.title ?? context.experience.badge.heading}
+        subtitle={interpolate(context.experience.badge.earnedTemplate, {
+          score: String(context.score),
+          totalQuestions: String(context.experience.quiz.questions.length),
+        })}
+        accentColor="var(--color-gold)"
       />
     </section>
   );

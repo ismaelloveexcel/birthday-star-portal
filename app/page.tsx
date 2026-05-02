@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import BirthdayPortal from "@/components/BirthdayPortal";
-import DodoGuide from "@/components/DodoGuide";
+import CharacterGuide from "@/components/CharacterGuide";
 import CreateForm from "@/features/create/CreateForm";
 import { spaceMissionExperience } from "@/lib/experience/spaceMission";
 import { config } from "@/lib/config";
@@ -122,7 +122,7 @@ export default function HomePage() {
               <span aria-hidden="true">✦</span>
               {config.LAUNCH_BADGE}
             </div>
-            <DodoGuide
+            <CharacterGuide
               mood="excited"
               message="Let's build one unforgettable birthday mission."
               className="mobile-inline-dodo"
@@ -166,7 +166,7 @@ export default function HomePage() {
             <div className="hero-stage-orbit orbit-a" />
             <div className="hero-stage-orbit orbit-b" />
             <div className="hero-portal-shell">
-              <DodoGuide
+              <CharacterGuide
                 mood="celebrating"
                 message="The birthday child becomes Captain. Guests become the crew."
                 className="hero-dodo-art"
@@ -270,7 +270,7 @@ export default function HomePage() {
       <section className="section pt-0" aria-label="Trust signals">
         <div className="max-w-6xl mx-auto mission-ribbon">
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-center">
-            {["Secure Payhip checkout", "14-day refund", "No account or app", "Works on WhatsApp"].map((t) => (
+            {["Secure checkout", "14-day refund", "No account or app", "Works on WhatsApp"].map((t) => (
               <div key={t} className="mission-ribbon-card">
                 {t}
               </div>

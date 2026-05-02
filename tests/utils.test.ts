@@ -115,7 +115,7 @@ describe("buildPortalShareText", () => {
 
     expect(text).toContain("Open Captain Ayaan's birthday mission");
     expect(text).toContain("https://example.com/pack?data=abc");
-    expect(text).toContain("Made with Birthday Star Portal by Wandering Dodo.");
+    expect(text).toContain("Made with By Ismael.");
   });
 
   it("falls back gracefully when the child name is empty", () => {

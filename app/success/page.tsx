@@ -23,15 +23,26 @@ export default function SuccessPage() {
 
   useEffect(() => {
     try {
-      // Try localStorage first; fall back to sessionStorage (set when localStorage was unavailable on checkout)
-      const raw =
-        localStorage.getItem("bdp_session") ??
-        sessionStorage.getItem("bdp_session");
-      if (!raw) {
+      const rawLocal = localStorage.getItem("bdp_session");
+      const rawSession = sessionStorage.getItem("bdp_session");
+      const params = new URLSearchParams(window.location.search);
+      const encodedFromUrl =
+        params.get("portal_data") ?? params.get("checkout[custom][portal_data]");
+
+      let data: FormData | null = null;
+      if (rawLocal) {
+        data = JSON.parse(rawLocal) as FormData;
+      } else if (rawSession) {
+        data = JSON.parse(rawSession) as FormData;
+      } else if (encodedFromUrl) {
+        data = decodePortalData<FormData>(encodedFromUrl);
+      }
+
+      if (!data) {
         setState({ status: "error" });
         return;
       }
-      const data = JSON.parse(raw) as FormData;
+
       if (!data || typeof data !== "object" || !data.childName) {
         setState({ status: "error" });
         return;

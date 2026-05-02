@@ -20,8 +20,8 @@ module.exports = {
         danger: "var(--color-danger)",
       },
       fontFamily: {
-        display: ["var(--font-orbitron)", "sans-serif"],
-        body: ["var(--font-dm-sans)", "sans-serif"],
+        display: ["var(--font-display)", "serif"],
+        body: ["var(--font-body)", "sans-serif"],
       },
     },
   },
