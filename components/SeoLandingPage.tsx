@@ -7,6 +7,7 @@ interface SeoLandingPageProps {
   intro: string;
   proofPoints: string[];
   searchIntent: string;
+  currentPath?: string;
 }
 
 const includedMoments = [
@@ -18,13 +19,23 @@ const includedMoments = [
   "One guest link",
 ];
 
+const relatedLinks = [
+  { href: "/", label: "Birthday Star Portal home" },
+  { href: "/playable-birthday-invitation", label: "Playable birthday invitation" },
+  { href: "/whatsapp-birthday-invitation", label: "WhatsApp birthday invitation" },
+  { href: "/space-birthday-invitation", label: "Space birthday invitation" },
+];
+
 export default function SeoLandingPage({
   eyebrow,
   title,
   intro,
   proofPoints,
   searchIntent,
+  currentPath,
 }: SeoLandingPageProps) {
+  const visibleRelatedLinks = relatedLinks.filter((link) => link.href !== currentPath);
+
   return (
     <main id="main">
       <header className="site-header">
@@ -90,6 +101,26 @@ export default function SeoLandingPage({
                 <li key={moment}>{moment}</li>
               ))}
             </ul>
+          </div>
+        </div>
+      </section>
+
+      <section className="section pt-0" aria-labelledby="related-heading">
+        <div className="max-w-6xl mx-auto story-panel">
+          <div className="section-heading-row">
+            <div>
+              <p className="eyebrow mb-3">Explore invite types</p>
+              <h2 id="related-heading" className="font-display text-2xl md:text-3xl text-glow">
+                Related birthday invite searches
+              </h2>
+            </div>
+          </div>
+          <div className="hero-action-row mt-6">
+            {visibleRelatedLinks.map((link) => (
+              <Link key={link.href} href={link.href} className="btn-secondary">
+                {link.label}
+              </Link>
+            ))}
           </div>
         </div>
       </section>

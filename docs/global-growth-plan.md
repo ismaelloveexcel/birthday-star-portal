@@ -2,6 +2,11 @@
 
 Birthday Star Portal stays intentionally simple for global launch: one static Payhip checkout, one success page, one `/pack?data=...` guest link, no backend, and manual founder operations until demand is proven.
 
+Companion docs:
+- `docs/launch-assets.md` for ready-to-use short-form scripts, hooks, DMs, community posts, and outreach copy.
+- `docs/manual-metrics-template.md` for daily manual tracking without a dashboard.
+- `docs/support-templates.md` for buyer onboarding, recovery, handoff, timezone, and refund replies.
+
 ## Payhip Global Setup Checklist
 
 1. Confirm the Payhip product name is `Birthday Star Portal` and the live price matches `config.PRICE` in `lib/config.ts`.

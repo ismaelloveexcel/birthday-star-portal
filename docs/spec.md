@@ -238,9 +238,7 @@ Show three trust badges:
 - "No account required"
 - "Works on any device"
 
-Parent testimonial:
-"Zara's guests thought it was the coolest invite they'd ever seen."
-— Priya, mum of 6
+Do not include testimonials unless they come from real customers with permission.
 
 ### How It Works
 
@@ -814,7 +812,7 @@ After build is complete, verify each item:
 Landing:
 [ ] Landing page loads on mobile (390px)
 [ ] All 4 trust badges visible
-[ ] Testimonial displays
+[ ] FAQ / trust section displays
 [ ] "See a Live Mission Demo" button opens demo portal
 [ ] Demo sticky bar visible throughout demo scroll
 [ ] Demo countdown counts down to correct date

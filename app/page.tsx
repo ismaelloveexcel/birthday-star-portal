@@ -7,8 +7,44 @@ import CreateForm from "@/features/create/CreateForm";
 import { spaceMissionExperience } from "@/lib/experience/spaceMission";
 import { config } from "@/lib/config";
 
+const faqItems = [
+  {
+    question: "Do guests need an app?",
+    answer: "No. Guests open the birthday mission link in their browser.",
+  },
+  {
+    question: "Can I share it on WhatsApp?",
+    answer: "Yes. You can share the portal link directly on WhatsApp, family chats, SMS, or email.",
+  },
+  {
+    question: "What happens after payment?",
+    answer: "The checkout returns you to /success, where your browser builds the portal link for you to open, copy, and share.",
+  },
+  {
+    question: "What if checkout does not return automatically?",
+    answer: "Use the recovery code shown before payment. Paste it on the success page to rebuild your portal link.",
+  },
+  {
+    question: "Is party data private?",
+    answer: "Only include details you are comfortable sharing with invited guests. The link contains the invite details needed to open the portal.",
+  },
+];
+
 export default function HomePage() {
   const [showDemo, setShowDemo] = useState(false);
+
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqItems.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  };
 
   const demoGames = [
     {
@@ -243,6 +279,34 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="section pt-0" aria-labelledby="faq-heading">
+        <div className="max-w-6xl mx-auto story-grid">
+          <div className="story-panel">
+            <p className="eyebrow mb-4">Before you buy</p>
+            <h2 id="faq-heading" className="font-display text-2xl md:text-4xl text-glow mb-4">
+              Simple answers for sharing with real guests.
+            </h2>
+            <p className="text-comet">
+              Birthday Star Portal is built for the current v1 flow: external checkout, recovery code, success page, and one shareable portal link.
+            </p>
+          </div>
+          <div className="story-panel">
+            <div className="dossier-head">
+              <span className="eyebrow">Quick FAQ</span>
+              <strong>Honest v1 details</strong>
+            </div>
+            <ul className="story-list">
+              {faqItems.map((item) => (
+                <li key={item.question}>
+                  <strong className="text-star">{item.question}</strong>
+                  <p className="text-comet mt-2 mb-0">{item.answer}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
       <section className="section story-section" aria-labelledby="guests-heading">
         <div className="max-w-6xl mx-auto story-grid">
           <div className="story-panel story-panel-quote">
@@ -251,10 +315,9 @@ export default function HomePage() {
               One link that feels like a birthday mission, not a plain invite.
             </h2>
             <blockquote className="story-quote">
-              <p className="text-star italic">
-                “Zara&apos;s guests thought it was the coolest invite they&apos;d ever seen.”
+              <p className="text-star">
+                Open the live demo first, then decide if the mission format fits your party and guest group.
               </p>
-              <div className="text-comet text-sm mt-3">— Priya, mum of a 6-year-old</div>
             </blockquote>
           </div>
           <div className="story-panel story-panel-dossier">
@@ -328,6 +391,10 @@ export default function HomePage() {
           </a>
         </div>
       </footer>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
     </main>
   );
 }

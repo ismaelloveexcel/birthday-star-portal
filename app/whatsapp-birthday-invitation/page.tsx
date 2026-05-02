@@ -18,6 +18,7 @@ export default function WhatsAppBirthdayInvitationPage() {
       title="A birthday invite link made for family chats and parent groups."
       intro="Birthday Star Portal gives parents one polished link to share on WhatsApp, SMS, email, or any guest chat, with a playable mission behind the preview."
       searchIntent="For busy parents sharing party details across countries, schools, and family groups."
+      currentPath="/whatsapp-birthday-invitation"
       proofPoints={[
         "The guest link opens on mobile without an account or app install.",
         "Parents can copy a short guest message or share directly to WhatsApp.",

@@ -184,6 +184,8 @@ Related operator docs:
 - `docs/launch-checklist.md` — go-live checklist for payment, redirect, recovery, and smoke validation.
 - `docs/support-templates.md` — ready-to-paste replies for lost-link, checkout handoff, and refund requests.
 - `docs/global-growth-plan.md` — Payhip global selling, order-bump ideas, outreach scripts, and manual metrics.
+- `docs/launch-assets.md` — ready-to-use video scripts, hooks, DMs, community posts, and outreach copy.
+- `docs/manual-metrics-template.md` — simple daily table for manual source, purchase, support, and refund tracking.
 
 ## Global growth / monetisation
 
@@ -195,6 +197,8 @@ PDF generation in the app.
 See `docs/global-growth-plan.md` for the 14-day global promotion plan,
 multi-currency recommendation, venue/party-planner outreach, parent-community
 templates, and manual metrics to track from Payhip plus optional no-PII pings.
+Use `docs/launch-assets.md` for daily copy and `docs/manual-metrics-template.md`
+to review traction without adding analytics infrastructure.
 
 ### Reading conversion-funnel pings (Cloudflare Worker)
 
