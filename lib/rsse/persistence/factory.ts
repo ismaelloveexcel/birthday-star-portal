@@ -5,6 +5,11 @@ import { resetPgPoolForTests } from './pgPool'
 
 let cached: RssePersistence | null = null
 
+/** Introspection only; mirrors the branch `getRssePersistence` would take without instantiating. */
+export function getRssePersistenceMode(): 'postgres' | 'memory' {
+  return process.env.DATABASE_URL?.trim() ? 'postgres' : 'memory'
+}
+
 /**
  * RSSE persistence: Postgres when `DATABASE_URL` is set, otherwise in-memory (dev/tests).
  * Production requires `DATABASE_URL` so sessions survive restarts.

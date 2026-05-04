@@ -33,7 +33,10 @@ npm run verify:db
 ```powershell
 npm install
 npm run test
+npm run verify:env
 ```
+
+`verify:env` checks RSSE-related deployment variables (see script output). In `NODE_ENV=production`, missing `DATABASE_URL`, `NEXT_PUBLIC_BASE_URL`, or `NEXT_PUBLIC_CHECKOUT_URL` exits non-zero.
 
 Production-style Next build with placeholder public URLs:
 
@@ -46,6 +49,35 @@ Database schema smoke (only when `DATABASE_URL` is set):
 ```powershell
 npm run verify:db
 ```
+
+## Deployment verification order
+
+Use this sequence after configuring Supabase (Postgres) and Vercel (or your host):
+
+1. **Set environment variables** on the host (Vercel project / runtime): `DATABASE_URL`, `NEXT_PUBLIC_BASE_URL`, `NEXT_PUBLIC_CHECKOUT_URL`, and optionally `LEMON_SQUEEZY_WEBHOOK_SECRET`, `SMOKE_BASE_URL`.
+2. **Apply migrations** on the target database (Supabase SQL editor, `psql`, or your runner), in order:
+   - `db/migrations/001_rsse_foundation.sql`
+   - `db/migrations/002_rsse_idempotency_and_seed.sql`
+3. **From your machine** (with `DATABASE_URL` pointing at that DB when running DB checks):
+
+   ```powershell
+   npm run verify:env
+   npm run verify:db
+   ```
+
+4. **Deploy** the app.
+5. **Open** `https://<your-host>/api/rsse/health` — JSON should show `ok: true` when the stack is healthy.
+6. **Run RSSE smoke** against the deployed origin:
+
+   ```powershell
+   $env:SMOKE_BASE_URL='https://your-staging-url.example'; npm run smoke:rsse
+   ```
+
+### What good looks like
+
+- **`/api/rsse/health`** — `ok: true`, `persistence: "postgres"`, `databaseReachable: true` (when DB is configured and reachable).
+- **`npm run verify:db`** — exits 0 and prints `verify-rsse-db: OK`.
+- **`npm run smoke:rsse`** — ends with `RSSE smoke OK`.
 
 ## RSSE smoke test
 

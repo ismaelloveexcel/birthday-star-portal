@@ -29,6 +29,9 @@ Useful scripts:
 | `npm run lint`   | ESLint (Next core-web-vitals)            |
 | `npm test`       | Vitest pure-logic suite                  |
 | `npm run smoke`  | End-to-end smoke test (requires a build) |
+| `npm run verify:env` | RSSE deployment env check (see `docs/rsse-production-readiness.md`) |
+| `npm run verify:db` | RSSE Postgres schema read-only check (`DATABASE_URL` required) |
+| `npm run smoke:rsse` | RSSE HTTP API flow smoke (dev server or `SMOKE_BASE_URL` to staging) |
 
 ## Environment variables
 

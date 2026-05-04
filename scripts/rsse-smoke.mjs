@@ -131,8 +131,40 @@ function logStep(i, msg) {
   console.log(`[${i}/${TOTAL_STEPS}] ${msg}`)
 }
 
+async function probeRsseHealth() {
+  const r = await requestJson('GET', '/api/rsse/health', undefined)
+  if (r.status === 404) {
+    console.log('[health] /api/rsse/health not found (skipped)')
+    return
+  }
+  if (!r.ok) {
+    const j =
+      r.json && typeof r.json === 'object'
+        ? /** @type {Record<string, unknown>} */ (r.json)
+        : {}
+    const hint =
+      (typeof j.error === 'string' && j.error) ||
+      (typeof j.message === 'string' && j.message) ||
+      `HTTP ${r.status}`
+    fail(`RSSE smoke: /api/rsse/health failed — ${hint}`)
+  }
+  const j =
+    r.json && typeof r.json === 'object'
+      ? /** @type {Record<string, unknown>} */ (r.json)
+      : {}
+  if (j.ok === false) {
+    fail(
+      `RSSE smoke: /api/rsse/health reports ok=false (persistence=${String(j.persistence)}, databaseConfigured=${String(j.databaseConfigured)})`,
+    )
+  }
+  console.log(
+    `[health] ok=${String(j.ok)} persistence=${String(j.persistence)} databaseConfigured=${String(j.databaseConfigured)} checkoutConfigured=${String(j.checkoutConfigured)}`,
+  )
+}
+
 async function main() {
   console.log(`RSSE smoke against ${base}`)
+  await probeRsseHealth()
 
   if (useWebhook && !webhookSecret) {
     fail(

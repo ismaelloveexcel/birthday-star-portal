@@ -12,6 +12,7 @@
     "lint": "next lint",
     "test": "vitest run",
     "verify:db": "node scripts/verify-rsse-db.mjs",
+    "verify:env": "node scripts/verify-rsse-env.mjs",
     "smoke": "node scripts/smoke.mjs",
     "smoke:rsse": "node scripts/rsse-smoke.mjs"
   },
