@@ -530,25 +530,18 @@ export class PostgresRssePersistence implements RssePersistence {
   }
 
   async insertWaitlistGlobal(row: WaitlistRow): Promise<void> {
+    // ON CONFLICT DO NOTHING implements global-waitlist deduplication:
+    // migration 003 adds a unique partial index on (email) WHERE session_id IS NULL,
+    // so re-submitting the same email to the global waitlist is silently ignored.
     await this.pool.query(
       `INSERT INTO waitlist (
         id, email, session_id, experience_type_id, category, source, interest, group_size, created_at
-      ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9::timestamptz)`,
+      ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9::timestamptz)
+      ON CONFLICT DO NOTHING`,
       [
         row.id,
         row.email,
         row.sessionId,
         row.experienceTypeId,
         row.category,
-        row.source,
-        row.interest,
-        row.groupSize,
-        row.createdAt,
-      ],
-    )
-  }
-}
-
-export function createPostgresPersistence(connectionString: string): RssePersistence {
-  return new PostgresRssePersistence(getPgPool(connectionString))
-}
+   
