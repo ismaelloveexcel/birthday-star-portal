@@ -8,6 +8,8 @@ import {
 } from '@/lib/rsse/lemonSqueezyWebhook'
 import { log } from '@/lib/rsse/observability'
 
+export const runtime = 'nodejs'
+
 export async function POST(req: Request) {
   const secret = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET?.trim()
   const rawBody = await req.text()

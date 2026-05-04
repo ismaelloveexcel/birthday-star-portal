@@ -3,6 +3,8 @@ import { z } from 'zod'
 import { applyPlatformCommand } from '@/lib/rsse/applyPlatformCommand'
 import { mapRsseError } from '@/lib/rsse/apiErrors'
 
+export const runtime = 'nodejs'
+
 const bodySchema = z.object({
   title: z.string().max(120).optional(),
   maxPlayers: z.number().int().min(2).max(32).optional(),

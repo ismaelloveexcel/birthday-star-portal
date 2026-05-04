@@ -4,6 +4,8 @@ import { applyPlatformCommand } from '@/lib/rsse/applyPlatformCommand'
 import { getRssePersistence } from '@/lib/rsse/persistence/factory'
 import { mapRsseError } from '@/lib/rsse/apiErrors'
 
+export const runtime = 'nodejs'
+
 const bodySchema = z.object({
   email: z
     .string()

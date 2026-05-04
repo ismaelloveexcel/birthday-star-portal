@@ -3,6 +3,8 @@ import { z } from 'zod'
 import { applyPlatformCommand } from '@/lib/rsse/applyPlatformCommand'
 import { mapRsseError } from '@/lib/rsse/apiErrors'
 
+export const runtime = 'nodejs'
+
 const commandSchema = z.object({
   type: z.enum([
     'CREATE_SESSION',

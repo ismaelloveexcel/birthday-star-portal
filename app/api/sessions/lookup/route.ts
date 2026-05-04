@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { findSessionIdByShortCode } from '@/lib/rsse/persistence/factory'
 import { loadSessionRuntimeFromPersistence } from '@/lib/rsse/sessionRuntime'
 
+export const runtime = 'nodejs'
+
 export async function GET(req: Request) {
   const url = new URL(req.url)
   const code = url.searchParams.get('code')?.toLowerCase()

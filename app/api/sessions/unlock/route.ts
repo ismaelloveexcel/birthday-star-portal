@@ -4,6 +4,8 @@ import { applyPlatformCommand } from '@/lib/rsse/applyPlatformCommand'
 import { mapRsseError } from '@/lib/rsse/apiErrors'
 import { resolveUnlockCheckoutEnv } from '@/lib/rsse/unlockCheckout'
 
+export const runtime = 'nodejs'
+
 const bodySchema = z.object({
   sessionId: z.string().uuid(),
   playerId: z.string().uuid().optional(),

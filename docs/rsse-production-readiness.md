@@ -2,6 +2,8 @@
 
 Practical checklist for deploying the Birthday Star Portal RSSE layer against Postgres (for example Supabase).
 
+**Step-by-step staging (Vercel + Supabase):** `docs/staging-deployment-runbook.md`.
+
 ## Environment variables
 
 | Variable | Required | Notes |

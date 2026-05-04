@@ -4,6 +4,8 @@ import { applyPlatformCommand } from '@/lib/rsse/applyPlatformCommand'
 import { findSessionIdByShortCode } from '@/lib/rsse/persistence/factory'
 import { mapRsseError } from '@/lib/rsse/apiErrors'
 
+export const runtime = 'nodejs'
+
 const bodySchema = z.object({
   shortCode: z.string().min(4).max(12),
   displayName: z.string().min(1).max(20),

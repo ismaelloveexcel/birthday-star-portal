@@ -86,6 +86,10 @@ function main() {
     line('WARN', 'SMOKE_BASE_URL unset (smoke:rsse defaults to http://localhost:3000)')
   }
 
+  console.log(
+    'Note: NEXT_PUBLIC_* values are public in the browser. LEMON_SQUEEZY_WEBHOOK_SECRET must stay server-only (never NEXT_PUBLIC_).',
+  )
+
   if (exitCode === 0) {
     console.log('verify-rsse-env: OK')
   } else {

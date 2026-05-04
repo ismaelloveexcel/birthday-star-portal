@@ -33,6 +33,8 @@ Useful scripts:
 | `npm run verify:db` | RSSE Postgres schema read-only check (`DATABASE_URL` required) |
 | `npm run smoke:rsse` | RSSE HTTP API flow smoke (dev server or `SMOKE_BASE_URL` to staging) |
 
+**Staging deployment (RSSE):** see `docs/staging-deployment-runbook.md`.
+
 ## Environment variables
 
 | Variable                    | Required | Description                                                                                                          |
