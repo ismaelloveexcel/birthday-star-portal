@@ -8,7 +8,7 @@ Practical checklist for deploying the Birthday Star Portal RSSE layer against Po
 |----------|----------|--------|
 | `DATABASE_URL` | **Yes** in production | Postgres connection URI. `getRssePersistence()` throws in production if unset. Prefer the pooler URL for serverless (for example port `6543`, `?pgbouncer=true`) when applicable. |
 | `NEXT_PUBLIC_BASE_URL` | Yes for share links / summaries | Public site origin, no trailing slash issues handled in code where relevant. |
-| `NEXT_PUBLIC_CHECKOUT_URL` | Yes for unlock placeholder | Checkout / pay link surfaced to clients. |
+| `NEXT_PUBLIC_CHECKOUT_URL` | **Yes in production** for `/api/sessions/unlock` | Without it, production returns **503** `checkout_misconfigured`. Non-production may use a placeholder URL. |
 | `LEMON_SQUEEZY_WEBHOOK_SECRET` | If webhooks enabled | Verify webhook signatures; keep out of client bundles. |
 
 RSSE behavior is unchanged when checkout/webhook vars are placeholders, but production unlock flows need real values.
@@ -47,6 +47,14 @@ Database schema smoke (only when `DATABASE_URL` is set):
 npm run verify:db
 ```
 
+## Unlock / payment idempotency
+
+- **`provider_order_id`** on `entitlements` is globally unique: one paid order maps to at most one fulfillment row.
+- **Same session, same order**: duplicate webhook or client retries (including different per-command `idempotencyKey` values) do **not** append another `session_unlocked` event; `applyPlatformCommand` returns the current runtime with an empty `events` array and caches the platform idempotency response.
+- **Cross-session reuse** of the same provider order id raises **`RsseError` / `entitlement_conflict`** (mis-routed webhook or abuse).
+- **Webhooks** should call `applyPlatformCommand` only; use a **stable** fulfillment idempotency key derived from the provider order id (see `lemonFulfillmentIdempotencyKey` in `lib/rsse/lemonSqueezyWebhook.ts`).
+- **`LEMON_SQUEEZY_WEBHOOK_SECRET`**: in production the webhook route returns **503** if unset; when set, requests must pass **`X-Signature`** verification.
+
 ## Manual smoke path (API / pages)
 
 1. Create room (`CREATE_SESSION` via your create flow).
@@ -68,5 +76,5 @@ npm run verify:db
 - **Global waitlist** (`insertWaitlistGlobal` without a session command) is intentionally outside `applyPlatformCommand`; session lifecycle still goes only through commands.
 - **`provider_order_id`** is globally unique in `entitlements`. A conflict for a **different** session raises `RsseError` with code `entitlement_conflict` (webhook misconfiguration or fraud signal).
 - **Parallel `CREATE_SESSION`** with the same idempotency key can still race without an advisory lock; rare in practice.
-- **Duplicate `session_unlocked` events** can still be proposed if a client sends two different command idempotency keys for the same order id; the **entitlement row** stays idempotent; event stream may contain duplicates until command-level dedupe is tightened.
+- **Command-level fulfillment dedupe** uses `entitlements` lookups before proposing `session_unlocked`; the event stream should stay clean for duplicate same-order retries.
 - **Realtime** remains non-authoritative; snapshot + `social_sessions` are authoritative after each command.

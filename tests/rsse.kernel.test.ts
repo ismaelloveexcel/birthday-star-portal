@@ -60,7 +60,7 @@ describe("applyPlatformCommand", () => {
     expect(count).toBe(2);
   });
 
-  it("duplicate fulfillment with different command idempotency keys keeps one entitlement row", async () => {
+  it("duplicate fulfillment with different command idempotency keys keeps one entitlement row and one session_unlocked event", async () => {
     const c = await applyPlatformCommand({
       type: "CREATE_SESSION",
       idempotencyKey: `unlock-dup-${crypto.randomUUID()}`,
@@ -74,8 +74,12 @@ describe("applyPlatformCommand", () => {
           .filter((e) => e.sessionId === sid)
           .map((e) => e.sequenceNumber),
       );
+    const unlockCount = () =>
+      [...getRsseStore().sessionEvents.values()].filter(
+        (e) => e.sessionId === sid && e.eventType === "session_unlocked",
+      ).length;
     let seq = maxSeq();
-    await applyPlatformCommand({
+    const first = await applyPlatformCommand({
       type: "EMIT_EXPERIENCE_EVENT",
       sessionId: sid,
       idempotencyKey: "fulfill-a",
@@ -83,7 +87,7 @@ describe("applyPlatformCommand", () => {
       payload: { entitlementFulfillment: true, providerOrderId: payId },
     });
     seq = maxSeq();
-    await applyPlatformCommand({
+    const second = await applyPlatformCommand({
       type: "EMIT_EXPERIENCE_EVENT",
       sessionId: sid,
       idempotencyKey: "fulfill-b",
@@ -94,6 +98,47 @@ describe("applyPlatformCommand", () => {
       (e) => e.sessionId === sid,
     );
     expect(ents.length).toBe(1);
+    expect(unlockCount()).toBe(1);
+    expect(second.events).toEqual([]);
+    expect(second.snapshot.sessionId).toBe(first.snapshot.sessionId);
+    expect(second.status).toBe(first.status);
+  });
+
+  it("throws entitlement_conflict when provider order is fulfilled for another session", async () => {
+    const payId = `ls-order-${crypto.randomUUID()}`;
+    const a = await applyPlatformCommand({
+      type: "CREATE_SESSION",
+      idempotencyKey: `e1-${crypto.randomUUID()}`,
+    });
+    const b = await applyPlatformCommand({
+      type: "CREATE_SESSION",
+      idempotencyKey: `e2-${crypto.randomUUID()}`,
+    });
+    const sidA = a.snapshot.sessionId;
+    const sidB = b.snapshot.sessionId;
+    const maxSeq = (sid: string) =>
+      Math.max(
+        0,
+        ...[...getRsseStore().sessionEvents.values()]
+          .filter((e) => e.sessionId === sid)
+          .map((e) => e.sequenceNumber),
+      );
+    await applyPlatformCommand({
+      type: "EMIT_EXPERIENCE_EVENT",
+      sessionId: sidA,
+      idempotencyKey: "fulfill-a",
+      lastSeenSequenceNumber: maxSeq(sidA),
+      payload: { entitlementFulfillment: true, providerOrderId: payId },
+    });
+    await expect(
+      applyPlatformCommand({
+        type: "EMIT_EXPERIENCE_EVENT",
+        sessionId: sidB,
+        idempotencyKey: "fulfill-b",
+        lastSeenSequenceNumber: maxSeq(sidB),
+        payload: { entitlementFulfillment: true, providerOrderId: payId },
+      }),
+    ).rejects.toMatchObject({ code: "entitlement_conflict" });
   });
 
   it("rejects stale sequence on live mutation", async () => {

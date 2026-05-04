@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { applyPlatformCommand } from '@/lib/rsse/applyPlatformCommand'
 import { mapRsseError } from '@/lib/rsse/apiErrors'
+import { resolveUnlockCheckoutEnv } from '@/lib/rsse/unlockCheckout'
 
 const bodySchema = z.object({
   sessionId: z.string().uuid(),
@@ -20,9 +21,14 @@ export async function POST(req: Request) {
         { status: 400 },
       )
     }
-    const checkoutUrl =
-      process.env.NEXT_PUBLIC_CHECKOUT_URL?.trim() ||
-      'https://example.com/checkout-placeholder'
+
+    const checkout = resolveUnlockCheckoutEnv()
+    if (!checkout.ok) {
+      return NextResponse.json(
+        { error: checkout.error, code: checkout.code },
+        { status: checkout.status },
+      )
+    }
 
     await applyPlatformCommand({
       type: 'REQUEST_UNLOCK',
@@ -33,8 +39,8 @@ export async function POST(req: Request) {
     })
 
     return NextResponse.json({
-      checkoutUrl,
-      mode: process.env.NEXT_PUBLIC_CHECKOUT_URL ? 'checkout' : 'placeholder',
+      checkoutUrl: checkout.checkoutUrl,
+      mode: checkout.mode,
     })
   } catch (e) {
     return mapRsseError(e)

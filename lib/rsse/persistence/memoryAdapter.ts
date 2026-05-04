@@ -125,6 +125,24 @@ export class MemoryRsseTransaction implements RsseTransaction {
     this.store.waitlist.set(row.id, row)
   }
 
+  async findEntitlementByProviderOrderId(
+    providerOrderId: string,
+  ): Promise<Entitlement | null> {
+    for (const ex of this.store.entitlements.values()) {
+      if (ex.providerOrderId === providerOrderId) return ex
+    }
+    return null
+  }
+
+  async findEntitlementByIdempotencyKey(
+    idempotencyKey: string,
+  ): Promise<Entitlement | null> {
+    for (const ex of this.store.entitlements.values()) {
+      if (ex.idempotencyKey === idempotencyKey) return ex
+    }
+    return null
+  }
+
   async insertEntitlement(row: Entitlement): Promise<void> {
     for (const ex of this.store.entitlements.values()) {
       if (row.providerOrderId && ex.providerOrderId === row.providerOrderId) {

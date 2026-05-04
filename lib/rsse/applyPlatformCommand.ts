@@ -206,6 +206,36 @@ async function buildProposedDrafts(
       if (!orderId) {
         throw new RsseError('Missing order id', 'event_rejected', { command: cmd.type })
       }
+      const existingOrder = await tx.findEntitlementByProviderOrderId(orderId)
+      if (existingOrder) {
+        if (existingOrder.sessionId !== sessionId) {
+          throw new RsseError(
+            'Provider order already fulfilled for another session',
+            'entitlement_conflict',
+          )
+        }
+        return []
+      }
+      if (cmd.idempotencyKey) {
+        const existingKey = await tx.findEntitlementByIdempotencyKey(
+          cmd.idempotencyKey,
+        )
+        if (existingKey) {
+          if (existingKey.sessionId !== sessionId) {
+            throw new RsseError(
+              'Entitlement idempotency key already used for another session',
+              'entitlement_conflict',
+            )
+          }
+          if (existingKey.providerOrderId === orderId) {
+            return []
+          }
+          throw new RsseError(
+            'Command idempotency key already used for a different provider order',
+            'idempotency_conflict',
+          )
+        }
+      }
       return [
         draftEvent({
           sessionId,
@@ -501,6 +531,22 @@ export async function applyPlatformCommand(
       throw e
     }
 
+    const fulfillmentDuplicateNoop =
+      command.type === 'EMIT_EXPERIENCE_EVENT' &&
+      (command.payload as Record<string, unknown> | undefined)
+        ?.entitlementFulfillment === true &&
+      drafts.length === 0
+
+    if (fulfillmentDuplicateNoop && command.sessionId && runtime) {
+      const response = buildResponse(runtime, [])
+      await tx.setIdempotencyResponse(idKey, response)
+      log('info', 'command_applied_duplicate_fulfillment_noop', {
+        sessionId: command.sessionId,
+        latencyMs: Date.now() - started,
+      })
+      return response
+    }
+
     const sessionId =
       command.type === 'CREATE_SESSION' ? newSession!.id : command.sessionId!
 
@@ -622,13 +668,15 @@ export async function applyPlatformCommand(
 
     await tx.setIdempotencyResponse(idKey, response)
 
-    await broadcastSessionUpdate(
-      {
-        ...finalRuntime,
-        derivedFlags: computeDerivedFlags(finalRuntime),
-      },
-      adjusted,
-    )
+    if (adjusted.length > 0) {
+      await broadcastSessionUpdate(
+        {
+          ...finalRuntime,
+          derivedFlags: computeDerivedFlags(finalRuntime),
+        },
+        adjusted,
+      )
+    }
 
     log('info', 'command_applied', {
       sessionId: finalRuntime.session.id,

@@ -14,7 +14,7 @@ export function mapRsseError(e: unknown): NextResponse {
     const status =
       e.code === 'sync_lag_detected'
         ? 409
-        : e.code === 'idempotency_conflict'
+        : e.code === 'idempotency_conflict' || e.code === 'entitlement_conflict'
           ? 409
           : 400
     return jsonError(status, e.message, e.code)

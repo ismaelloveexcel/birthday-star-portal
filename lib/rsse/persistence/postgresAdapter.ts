@@ -90,6 +90,26 @@ function mapResult(r: Record<string, unknown>): SessionResultRow {
   }
 }
 
+function mapEntitlement(r: Record<string, unknown>): Entitlement {
+  return {
+    id: String(r.id),
+    sessionId: String(r.session_id),
+    experienceTypeId:
+      r.experience_type_id != null ? String(r.experience_type_id) : null,
+    type: String(r.type),
+    unlockedByPlayerId: r.unlocked_by_player_id
+      ? String(r.unlocked_by_player_id)
+      : null,
+    amountCents: r.amount_cents != null ? Number(r.amount_cents) : null,
+    provider: r.provider != null ? String(r.provider) : null,
+    providerOrderId:
+      r.provider_order_id != null ? String(r.provider_order_id) : null,
+    idempotencyKey:
+      r.idempotency_key != null ? String(r.idempotency_key) : null,
+    createdAt: iso(r.created_at),
+  }
+}
+
 export class PostgresRsseTransaction implements RsseTransaction {
   constructor(private readonly client: PoolClient) {}
 
@@ -344,6 +364,28 @@ export class PostgresRsseTransaction implements RsseTransaction {
         row.createdAt,
       ],
     )
+  }
+
+  async findEntitlementByProviderOrderId(
+    providerOrderId: string,
+  ): Promise<Entitlement | null> {
+    const r = await this.client.query(
+      `SELECT * FROM entitlements WHERE provider_order_id = $1 LIMIT 1`,
+      [providerOrderId],
+    )
+    if (r.rowCount === 0) return null
+    return mapEntitlement(r.rows[0] as Record<string, unknown>)
+  }
+
+  async findEntitlementByIdempotencyKey(
+    idempotencyKey: string,
+  ): Promise<Entitlement | null> {
+    const r = await this.client.query(
+      `SELECT * FROM entitlements WHERE idempotency_key = $1 LIMIT 1`,
+      [idempotencyKey],
+    )
+    if (r.rowCount === 0) return null
+    return mapEntitlement(r.rows[0] as Record<string, unknown>)
   }
 
   async insertEntitlement(row: Entitlement): Promise<void> {

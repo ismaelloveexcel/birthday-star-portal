@@ -19,6 +19,21 @@ async function countEntitlements(sessionId: string): Promise<number> {
   }
 }
 
+async function countSessionUnlockedEvents(sessionId: string): Promise<number> {
+  const client = new pg.Client({ connectionString: databaseUrl! });
+  await client.connect();
+  try {
+    const r = await client.query(
+      `SELECT count(*)::int AS c FROM session_events
+       WHERE session_id = $1::uuid AND event_type = 'session_unlocked'`,
+      [sessionId],
+    );
+    return r.rows[0]!.c as number;
+  } finally {
+    await client.end();
+  }
+}
+
 async function latestMaxSequence(p: ReturnType<typeof getRssePersistence>, sessionId: string) {
   const evs = await p.readEventsOrdered(sessionId);
   return evs.reduce((m, e) => Math.max(m, e.sequenceNumber), 0);
@@ -110,9 +125,10 @@ describe.skipIf(!databaseUrl)("RSSE Postgres integration", () => {
       payload: { entitlementFulfillment: true, providerOrderId: payId },
     });
     expect(await countEntitlements(sid)).toBe(1);
+    expect(await countSessionUnlockedEvents(sid)).toBe(1);
 
     last = await latestMaxSequence(p, sid);
-    await applyPlatformCommand({
+    const dup = await applyPlatformCommand({
       type: "EMIT_EXPERIENCE_EVENT",
       sessionId: sid,
       idempotencyKey: "fulfill-b",
@@ -120,5 +136,7 @@ describe.skipIf(!databaseUrl)("RSSE Postgres integration", () => {
       payload: { entitlementFulfillment: true, providerOrderId: payId },
     });
     expect(await countEntitlements(sid)).toBe(1);
+    expect(await countSessionUnlockedEvents(sid)).toBe(1);
+    expect(dup.events).toEqual([]);
   });
 });

@@ -42,6 +42,14 @@ export interface RsseTransaction {
   insertWaitlist(row: WaitlistRow): Promise<void>
   insertEntitlement(row: Entitlement): Promise<void>
 
+  findEntitlementByProviderOrderId(
+    providerOrderId: string,
+  ): Promise<Entitlement | null>
+
+  findEntitlementByIdempotencyKey(
+    idempotencyKey: string,
+  ): Promise<Entitlement | null>
+
   /** In-memory index only; no-op for SQL (lookup uses social_sessions.short_code). */
   registerShortCodeIndex(shortCode: string, sessionId: string): Promise<void>
 }
