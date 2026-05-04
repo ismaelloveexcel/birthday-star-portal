@@ -2,20 +2,10 @@ import { Pool } from 'pg'
 
 let pool: Pool | null = null
 
-export function getPgPool(connectionString: string): Pool {
-  if (!pool) {
-    pool = new Pool({
-      connectionString,
-      max: 10,
-      idleTimeoutMillis: 30_000,
-    })
-  }
-  return pool
-}
-
-export function resetPgPoolForTests(): void {
-  if (pool) {
-    void pool.end()
-    pool = null
-  }
-}
+/**
+ * Returns (or lazily creates) the shared Postgres pool.
+ *
+ * SSL: The `connectionString` (DATABASE_URL) should include `sslmode=require`
+ * when connecting to Supabase pooled endpoints. SSL mode is read from the
+ * connection string itself — do not hard-code `ssl: { rejectUnauthorized }`
+ * here so th
