@@ -47,6 +47,44 @@ Database schema smoke (only when `DATABASE_URL` is set):
 npm run verify:db
 ```
 
+## RSSE smoke test
+
+After the app is running, hit the real HTTP APIs in order (create → join → start → checkpoint → unlock → fulfillment → dedupe → complete → lookup → waitlist).
+
+Local (terminal 1):
+
+```powershell
+npm run dev
+```
+
+Terminal 2:
+
+```powershell
+npm run smoke:rsse
+```
+
+Optional base URL (defaults to `http://localhost:3000`):
+
+```powershell
+$env:SMOKE_BASE_URL='http://127.0.0.1:3000'; npm run smoke:rsse
+```
+
+Deployed or staging (server must expose the same routes and env; production needs checkout + DB configured):
+
+```powershell
+$env:SMOKE_BASE_URL='https://your-staging-url.example'; npm run smoke:rsse
+```
+
+**Optional webhook mode** (signed `order_paid` instead of raw command for the first fulfillment):
+
+```powershell
+$env:SMOKE_USE_LEMON_WEBHOOK='1'
+$env:LEMON_SQUEEZY_WEBHOOK_SECRET='your-test-secret'
+npm run smoke:rsse
+```
+
+The script exits non-zero on the first failed step. It does not print secrets.
+
 ## Unlock / payment idempotency
 
 - **`provider_order_id`** on `entitlements` is globally unique: one paid order maps to at most one fulfillment row.
