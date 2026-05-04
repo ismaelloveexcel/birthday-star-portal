@@ -673,16 +673,6 @@ export async function applyPlatformCommand(
 
     await tx.setIdempotencyResponse(idKey, response)
 
-    if (adjusted.length > 0) {
-      await broadcastSessionUpdate(
-        {
-          ...finalRuntime,
-          derivedFlags: computeDerivedFlags(finalRuntime),
-        },
-        adjusted,
-      )
-    }
-
     log('info', 'command_applied', {
       sessionId: finalRuntime.session.id,
       latencyMs: Date.now() - started,
@@ -691,4 +681,7 @@ export async function applyPlatformCommand(
 
     return response
   })
-}
+
+  // Broadcast AFTER the transaction has committed so realtime side-effects never
+  // roll back with the DB transaction, and a broadcast failure cannot fail the
+  // command response that has already been persisted 
