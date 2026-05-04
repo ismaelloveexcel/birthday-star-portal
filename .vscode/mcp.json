@@ -1,0 +1,109 @@
+{
+  "servers": {
+    "notion": {
+      "command": "npx",
+      "args": ["-y", "@notionhq/notion-mcp-server"],
+      "env": {
+        "NOTION_API_KEY": "${input:notionApiKey}"
+      }
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${input:githubPersonalAccessToken}"
+      }
+    },
+    "vercel": {
+      "command": "npx",
+      "args": ["-y", "vercel-mcp"],
+      "env": {
+        "VERCEL_TOKEN": "${input:vercelToken}"
+      }
+    },
+    "supabase-readonly": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=${input:supabaseProjectRef}&read_only=true&features=database,docs,debugging,development"
+    },
+    "postgres-staging": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres", "${input:stagingDatabaseUrl}"]
+    },
+    "ludo-ai": {
+      "type": "http",
+      "url": "https://mcp.ludo.ai/mcp",
+      "headers": {
+        "Authentication": "ApiKey ${input:ludoApiKey}"
+      }
+    },
+    "replicate": {
+      "command": "npx",
+      "args": ["-y", "replicate-mcp"],
+      "env": {
+        "REPLICATE_API_TOKEN": "${input:replicateApiToken}"
+      }
+    },
+    "figma-context": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@tmegit/figma-developer-mcp",
+        "--figma-api-key=${input:figmaApiKey}",
+        "--stdio"
+      ]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp"]
+    }
+  },
+  "inputs": [
+    {
+      "id": "notionApiKey",
+      "type": "promptString",
+      "description": "Notion integration secret for reading deployment/API notes",
+      "password": true
+    },
+    {
+      "id": "githubPersonalAccessToken",
+      "type": "promptString",
+      "description": "GitHub token with repo access",
+      "password": true
+    },
+    {
+      "id": "vercelToken",
+      "type": "promptString",
+      "description": "Vercel token for deployment/env access",
+      "password": true
+    },
+    {
+      "id": "stagingDatabaseUrl",
+      "type": "promptString",
+      "description": "Staging Postgres/Supabase DATABASE_URL, preferably pooled with sslmode=require",
+      "password": true
+    },
+    {
+      "id": "supabaseProjectRef",
+      "type": "promptString",
+      "description": "Supabase staging project ref, from Project Settings > General > Project ID"
+    },
+    {
+      "id": "ludoApiKey",
+      "type": "promptString",
+      "description": "Ludo.ai API key for beta MCP asset generation",
+      "password": true
+    },
+    {
+      "id": "replicateApiToken",
+      "type": "promptString",
+      "description": "Replicate API token for image generation, upscaling, and model exploration",
+      "password": true
+    },
+    {
+      "id": "figmaApiKey",
+      "type": "promptString",
+      "description": "Figma personal access token for design context MCP",
+      "password": true
+    }
+  ]
+}
