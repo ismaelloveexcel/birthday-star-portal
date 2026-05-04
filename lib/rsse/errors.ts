@@ -7,6 +7,7 @@ export type SessionFailureCode =
   | 'sync_lag_detected'
   | 'snapshot_status_mismatch'
   | 'idempotency_conflict'
+  | 'entitlement_conflict'
 
 export class RsseError extends Error {
   constructor(

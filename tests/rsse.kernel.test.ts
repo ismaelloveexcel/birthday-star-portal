@@ -60,6 +60,42 @@ describe("applyPlatformCommand", () => {
     expect(count).toBe(2);
   });
 
+  it("duplicate fulfillment with different command idempotency keys keeps one entitlement row", async () => {
+    const c = await applyPlatformCommand({
+      type: "CREATE_SESSION",
+      idempotencyKey: `unlock-dup-${crypto.randomUUID()}`,
+    });
+    const sid = c.snapshot.sessionId;
+    const payId = `ls-order-${crypto.randomUUID()}`;
+    const maxSeq = () =>
+      Math.max(
+        0,
+        ...[...getRsseStore().sessionEvents.values()]
+          .filter((e) => e.sessionId === sid)
+          .map((e) => e.sequenceNumber),
+      );
+    let seq = maxSeq();
+    await applyPlatformCommand({
+      type: "EMIT_EXPERIENCE_EVENT",
+      sessionId: sid,
+      idempotencyKey: "fulfill-a",
+      lastSeenSequenceNumber: seq,
+      payload: { entitlementFulfillment: true, providerOrderId: payId },
+    });
+    seq = maxSeq();
+    await applyPlatformCommand({
+      type: "EMIT_EXPERIENCE_EVENT",
+      sessionId: sid,
+      idempotencyKey: "fulfill-b",
+      lastSeenSequenceNumber: seq,
+      payload: { entitlementFulfillment: true, providerOrderId: payId },
+    });
+    const ents = [...getRsseStore().entitlements.values()].filter(
+      (e) => e.sessionId === sid,
+    );
+    expect(ents.length).toBe(1);
+  });
+
   it("rejects stale sequence on live mutation", async () => {
     const c = await applyPlatformCommand({
       type: "CREATE_SESSION",

@@ -59,4 +59,10 @@ export interface RssePersistence {
 
   /** Read-only: ordered events (e.g. results page). */
   readEventsOrdered(sessionId: string): Promise<SessionEvent[]>
+
+  /** Events strictly after `afterSequence` (for rehydration / client catch-up). */
+  readEventsAfterSequence(
+    sessionId: string,
+    afterSequence: number,
+  ): Promise<SessionEvent[]>
 }

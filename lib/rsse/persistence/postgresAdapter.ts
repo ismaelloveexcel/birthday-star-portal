@@ -11,6 +11,7 @@ import type {
   WaitlistRow,
 } from '../contracts'
 import { computeDerivedFlags } from '../derivedFlags'
+import { RsseError } from '../errors'
 import { reconcileCachedStatus } from '../snapshots'
 import type { RssePersistence, RsseTransaction } from './types'
 import { getPgPool } from './pgPool'
@@ -346,13 +347,15 @@ export class PostgresRsseTransaction implements RsseTransaction {
   }
 
   async insertEntitlement(row: Entitlement): Promise<void> {
-    await this.client.query(
+    const inserted = await this.client.query(
       `INSERT INTO entitlements (
         id, session_id, experience_type_id, type, unlocked_by_player_id,
         amount_cents, provider, provider_order_id, idempotency_key, created_at
       ) VALUES (
         $1::uuid, $2::uuid, $3, $4, $5::uuid, $6, $7, $8, $9, $10::timestamptz
-      )`,
+      )
+      ON CONFLICT DO NOTHING
+      RETURNING session_id`,
       [
         row.id,
         row.sessionId,
@@ -366,6 +369,28 @@ export class PostgresRsseTransaction implements RsseTransaction {
         row.createdAt,
       ],
     )
+    if ((inserted.rowCount ?? 0) > 0) return
+
+    const existing = await this.client.query(
+      `SELECT session_id FROM entitlements
+       WHERE ($1::text IS NOT NULL AND provider_order_id IS NOT DISTINCT FROM $1::text)
+          OR ($2::text IS NOT NULL AND idempotency_key IS NOT DISTINCT FROM $2::text)`,
+      [row.providerOrderId, row.idempotencyKey],
+    )
+    if (existing.rowCount === 0) {
+      throw new RsseError(
+        'Entitlement insert conflicted with an existing row',
+        'entitlement_conflict',
+      )
+    }
+    for (const ex of existing.rows) {
+      if (String(ex.session_id) !== row.sessionId) {
+        throw new RsseError(
+          'Entitlement already recorded for a different session',
+          'entitlement_conflict',
+        )
+      }
+    }
   }
 
   async registerShortCodeIndex(
@@ -446,6 +471,18 @@ export class PostgresRssePersistence implements RssePersistence {
     const r = await this.pool.query(
       `SELECT * FROM session_events WHERE session_id = $1::uuid ORDER BY sequence_number ASC`,
       [sessionId],
+    )
+    return r.rows.map((row) => mapEvent(row as Record<string, unknown>))
+  }
+
+  async readEventsAfterSequence(
+    sessionId: string,
+    afterSequence: number,
+  ): Promise<SessionEvent[]> {
+    const r = await this.pool.query(
+      `SELECT * FROM session_events WHERE session_id = $1::uuid AND sequence_number > $2
+       ORDER BY sequence_number ASC`,
+      [sessionId, afterSequence],
     )
     return r.rows.map((row) => mapEvent(row as Record<string, unknown>))
   }

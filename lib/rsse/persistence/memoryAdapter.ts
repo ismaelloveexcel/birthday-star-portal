@@ -10,6 +10,7 @@ import type {
   WaitlistRow,
 } from '../contracts'
 import { computeDerivedFlags } from '../derivedFlags'
+import { RsseError } from '../errors'
 import type { RsseMemoryStore } from '../memoryPersistence'
 import { getRsseStore, withRsseTransaction } from '../memoryPersistence'
 import { reconcileCachedStatus } from '../snapshots'
@@ -125,6 +126,26 @@ export class MemoryRsseTransaction implements RsseTransaction {
   }
 
   async insertEntitlement(row: Entitlement): Promise<void> {
+    for (const ex of this.store.entitlements.values()) {
+      if (row.providerOrderId && ex.providerOrderId === row.providerOrderId) {
+        if (ex.sessionId !== row.sessionId) {
+          throw new RsseError(
+            'Entitlement provider_order_id already recorded for another session',
+            'entitlement_conflict',
+          )
+        }
+        return
+      }
+      if (row.idempotencyKey && ex.idempotencyKey === row.idempotencyKey) {
+        if (ex.sessionId !== row.sessionId) {
+          throw new RsseError(
+            'Entitlement idempotency_key already recorded for another session',
+            'entitlement_conflict',
+          )
+        }
+        return
+      }
+    }
     this.store.entitlements.set(row.id, row)
   }
 
@@ -172,6 +193,14 @@ export function createMemoryPersistence(): RssePersistence {
     async readEventsOrdered(sessionId: string): Promise<SessionEvent[]> {
       const tx = new MemoryRsseTransaction(getRsseStore())
       return tx.loadEventsOrdered(sessionId)
+    },
+    async readEventsAfterSequence(
+      sessionId: string,
+      afterSequence: number,
+    ): Promise<SessionEvent[]> {
+      const tx = new MemoryRsseTransaction(getRsseStore())
+      const ordered = await tx.loadEventsOrdered(sessionId)
+      return ordered.filter((e) => e.sequenceNumber > afterSequence)
     },
   }
 }

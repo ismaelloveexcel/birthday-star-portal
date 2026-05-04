@@ -11,6 +11,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
+    "verify:db": "node scripts/verify-rsse-db.mjs",
     "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
