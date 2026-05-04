@@ -38,4 +38,15 @@ describe("resolveUnlockCheckoutEnv", () => {
       expect(r.code).toBe("checkout_misconfigured");
     }
   });
+
+  it("treats # as unconfigured in production", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("NEXT_PUBLIC_CHECKOUT_URL", "#");
+    const r = resolveUnlockCheckoutEnv();
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.status).toBe(503);
+      expect(r.code).toBe("checkout_misconfigured");
+    }
+  });
 });

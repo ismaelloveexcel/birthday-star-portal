@@ -45,6 +45,15 @@ describe("computeRsseHealth", () => {
     expect(body.ok).toBe(true);
     expect(body.persistence).toBe("memory");
   });
+
+  it("treats # as an unconfigured checkout URL", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    vi.stubEnv("DATABASE_URL", "");
+    vi.stubEnv("NEXT_PUBLIC_CHECKOUT_URL", "#");
+    const { httpStatus, body } = await computeRsseHealth();
+    expect(httpStatus).toBe(200);
+    expect(body.checkoutConfigured).toBe(false);
+  });
 });
 
 describe("GET /api/rsse/health", () => {

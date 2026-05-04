@@ -201,6 +201,11 @@ async function buildProposedDrafts(
   if (cmd.type === 'EMIT_EXPERIENCE_EVENT') {
     const p = cmd.payload ?? {}
     if (p.entitlementFulfillment === true) {
+      if (cmd.source !== 'lemon_webhook') {
+        throw new RsseError('Entitlement fulfillment requires trusted source', 'event_rejected', {
+          command: cmd.type,
+        })
+      }
       const orderId =
         typeof p.providerOrderId === 'string' ? p.providerOrderId : ''
       if (!orderId) {

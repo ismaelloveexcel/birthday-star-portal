@@ -4,7 +4,7 @@
  *
  * Env:
  *   SMOKE_BASE_URL               — default http://localhost:3000
- *   SMOKE_USE_LEMON_WEBHOOK=1    — fulfill via signed POST /api/webhooks/lemon-squeezy first
+ *   SMOKE_USE_LEMON_WEBHOOK=1    — fulfill via signed POST /api/webhooks/lemon-squeezy
  *   LEMON_SQUEEZY_WEBHOOK_SECRET — required when SMOKE_USE_LEMON_WEBHOOK=1
  *
  * Usage:
@@ -90,6 +90,27 @@ function assertOk(result, step) {
   return result.json
 }
 
+/**
+ * @param {{ ok: boolean; status: number; json: unknown }} result
+ * @param {string} step
+ * @param {string} expectedCode
+ */
+function assertRejected(result, step, expectedCode) {
+  if (result.ok) {
+    throw new Error(`RSSE smoke failed at ${step}: expected rejection`)
+  }
+  const j = result.json && typeof result.json === 'object'
+    ? /** @type {Record<string, unknown>} */ (result.json)
+    : {}
+  if (j.code !== expectedCode) {
+    const actual = typeof j.code === 'string' ? j.code : `HTTP ${result.status}`
+    throw new Error(
+      `RSSE smoke failed at ${step}: expected ${expectedCode}, got ${actual}`,
+    )
+  }
+  return result.json
+}
+
 /** @param {string} rawBody @param {string} sig */
 async function postRawWebhook(rawBody, sig) {
   const url = `${base}/api/webhooks/lemon-squeezy`
@@ -135,7 +156,7 @@ async function probeRsseHealth() {
   const r = await requestJson('GET', '/api/rsse/health', undefined)
   if (r.status === 404) {
     console.log('[health] /api/rsse/health not found (skipped)')
-    return
+    return {}
   }
   if (!r.ok) {
     const j =
@@ -160,11 +181,17 @@ async function probeRsseHealth() {
   console.log(
     `[health] ok=${String(j.ok)} persistence=${String(j.persistence)} databaseConfigured=${String(j.databaseConfigured)} checkoutConfigured=${String(j.checkoutConfigured)}`,
   )
+  return j
 }
 
 async function main() {
   console.log(`RSSE smoke against ${base}`)
-  await probeRsseHealth()
+  const health = await probeRsseHealth()
+  if (health.persistence !== 'postgres') {
+    fail(
+      'RSSE smoke requires Postgres persistence over HTTP routes. Set DATABASE_URL and restart the app before running smoke:rsse.',
+    )
+  }
 
   if (useWebhook && !webhookSecret) {
     fail(
@@ -281,7 +308,7 @@ async function main() {
       logStep(si, 'webhook retry OK (idempotent HTTP)')
 
       si += 1
-      stepLabel = `[${si}/${TOTAL_STEPS}] command fulfill dedupe`
+      stepLabel = `[${si}/${TOTAL_STEPS}] public fulfill blocked`
       maxSeq = await syncMaxSeqFromLookup(shortCode, maxSeq)
       const f2 = await requestJson('POST', '/api/sessions/command', {
         type: 'EMIT_EXPERIENCE_EVENT',
@@ -293,17 +320,11 @@ async function main() {
           providerOrderId,
         },
       })
-      const fulfillB = assertOk(f2, stepLabel)
-      const evB = /** @type {Record<string, unknown>} */ (fulfillB).events
-      if (!Array.isArray(evB) || evB.length !== 0) {
-        throw new Error(
-          'expected command fulfillment after webhook to return events: []',
-        )
-      }
-      logStep(si, 'command dedupe after webhook OK (events empty)')
+      assertRejected(f2, stepLabel, 'event_rejected')
+      logStep(si, 'public fulfillment command blocked OK')
     } else {
       si += 1
-      stepLabel = `[${si}/${TOTAL_STEPS}] fulfill A`
+      stepLabel = `[${si}/${TOTAL_STEPS}] public fulfill blocked A`
       const f1 = await requestJson('POST', '/api/sessions/command', {
         type: 'EMIT_EXPERIENCE_EVENT',
         sessionId,
@@ -314,15 +335,11 @@ async function main() {
           providerOrderId,
         },
       })
-      const fulfillA = assertOk(f1, stepLabel)
-      if (!eventOfType(fulfillA, 'session_unlocked')) {
-        throw new Error('expected session_unlocked in first fulfillment response')
-      }
-      maxSeq = Math.max(maxSeq, latestSequenceFromResponse(fulfillA))
-      logStep(si, 'fulfillment A OK (session_unlocked present)')
+      assertRejected(f1, stepLabel, 'event_rejected')
+      logStep(si, 'public fulfillment command blocked OK')
 
       si += 1
-      stepLabel = `[${si}/${TOTAL_STEPS}] fulfill B (dedupe)`
+      stepLabel = `[${si}/${TOTAL_STEPS}] public fulfill blocked B`
       const f2 = await requestJson('POST', '/api/sessions/command', {
         type: 'EMIT_EXPERIENCE_EVENT',
         sessionId,
@@ -333,12 +350,8 @@ async function main() {
           providerOrderId,
         },
       })
-      const fulfillB = assertOk(f2, stepLabel)
-      const evB = /** @type {Record<string, unknown>} */ (fulfillB).events
-      if (!Array.isArray(evB) || evB.length !== 0) {
-        throw new Error('expected duplicate fulfillment to return events: []')
-      }
-      logStep(si, 'fulfillment dedupe OK (events empty)')
+      assertRejected(f2, stepLabel, 'event_rejected')
+      logStep(si, 'public fulfillment retry blocked OK')
     }
 
     maxSeq = await syncMaxSeqFromLookup(shortCode, maxSeq)

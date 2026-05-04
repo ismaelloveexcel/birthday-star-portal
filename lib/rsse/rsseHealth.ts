@@ -1,4 +1,5 @@
 import { getRssePersistenceMode } from './persistence/factory'
+import { configuredCheckoutUrl } from './unlockCheckout'
 
 export type RsseHealthBody = {
   ok: boolean
@@ -32,7 +33,7 @@ export async function computeRsseHealth(): Promise<{
 }> {
   const production = process.env.NODE_ENV === 'production'
   const databaseConfigured = Boolean(process.env.DATABASE_URL?.trim())
-  const checkoutConfigured = Boolean(process.env.NEXT_PUBLIC_CHECKOUT_URL?.trim())
+  const checkoutConfigured = Boolean(configuredCheckoutUrl())
   const webhookSecretConfigured = Boolean(
     process.env.LEMON_SQUEEZY_WEBHOOK_SECRET?.trim(),
   )

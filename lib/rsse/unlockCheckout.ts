@@ -2,14 +2,19 @@ export type ResolveUnlockCheckoutResult =
   | { ok: true; checkoutUrl: string; mode: 'checkout' | 'placeholder' }
   | { ok: false; status: number; error: string; code: string }
 
+export function configuredCheckoutUrl(): string | null {
+  const trimmed = process.env.NEXT_PUBLIC_CHECKOUT_URL?.trim()
+  if (!trimmed || trimmed === '#') return null
+  return trimmed
+}
+
 /**
  * Resolves checkout URL for `/api/sessions/unlock`.
  * Production requires `NEXT_PUBLIC_CHECKOUT_URL`; non-production may use a placeholder URL.
  */
 export function resolveUnlockCheckoutEnv(): ResolveUnlockCheckoutResult {
-  const trimmed = process.env.NEXT_PUBLIC_CHECKOUT_URL?.trim()
-  const configured = Boolean(trimmed)
-  if (process.env.NODE_ENV === 'production' && !configured) {
+  const checkoutUrl = configuredCheckoutUrl()
+  if (process.env.NODE_ENV === 'production' && !checkoutUrl) {
     return {
       ok: false,
       status: 503,
@@ -19,7 +24,7 @@ export function resolveUnlockCheckoutEnv(): ResolveUnlockCheckoutResult {
   }
   return {
     ok: true,
-    checkoutUrl: configured ? trimmed! : 'https://example.com/checkout-placeholder',
-    mode: configured ? 'checkout' : 'placeholder',
+    checkoutUrl: checkoutUrl ?? 'https://example.com/checkout-placeholder',
+    mode: checkoutUrl ? 'checkout' : 'placeholder',
   }
 }

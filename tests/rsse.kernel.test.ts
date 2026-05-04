@@ -84,6 +84,7 @@ describe("applyPlatformCommand", () => {
       sessionId: sid,
       idempotencyKey: "fulfill-a",
       lastSeenSequenceNumber: seq,
+      source: "lemon_webhook",
       payload: { entitlementFulfillment: true, providerOrderId: payId },
     });
     seq = maxSeq();
@@ -92,6 +93,7 @@ describe("applyPlatformCommand", () => {
       sessionId: sid,
       idempotencyKey: "fulfill-b",
       lastSeenSequenceNumber: seq,
+      source: "lemon_webhook",
       payload: { entitlementFulfillment: true, providerOrderId: payId },
     });
     const ents = [...getRsseStore().entitlements.values()].filter(
@@ -128,6 +130,7 @@ describe("applyPlatformCommand", () => {
       sessionId: sidA,
       idempotencyKey: "fulfill-a",
       lastSeenSequenceNumber: maxSeq(sidA),
+      source: "lemon_webhook",
       payload: { entitlementFulfillment: true, providerOrderId: payId },
     });
     await expect(
@@ -136,9 +139,28 @@ describe("applyPlatformCommand", () => {
         sessionId: sidB,
         idempotencyKey: "fulfill-b",
         lastSeenSequenceNumber: maxSeq(sidB),
+        source: "lemon_webhook",
         payload: { entitlementFulfillment: true, providerOrderId: payId },
       }),
     ).rejects.toMatchObject({ code: "entitlement_conflict" });
+  });
+
+  it("rejects entitlement fulfillment without trusted source", async () => {
+    const c = await applyPlatformCommand({
+      type: "CREATE_SESSION",
+      idempotencyKey: `untrusted-fulfill-${crypto.randomUUID()}`,
+    });
+    await expect(
+      applyPlatformCommand({
+        type: "EMIT_EXPERIENCE_EVENT",
+        sessionId: c.snapshot.sessionId,
+        idempotencyKey: "untrusted-fulfill-command",
+        payload: {
+          entitlementFulfillment: true,
+          providerOrderId: `ls-order-${crypto.randomUUID()}`,
+        },
+      }),
+    ).rejects.toMatchObject({ code: "event_rejected" });
   });
 
   it("rejects stale sequence on live mutation", async () => {

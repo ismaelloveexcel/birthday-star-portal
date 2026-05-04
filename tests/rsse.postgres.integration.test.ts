@@ -122,6 +122,7 @@ describe.skipIf(!databaseUrl)("RSSE Postgres integration", () => {
       sessionId: sid,
       idempotencyKey: "fulfill-a",
       lastSeenSequenceNumber: last,
+      source: "lemon_webhook",
       payload: { entitlementFulfillment: true, providerOrderId: payId },
     });
     expect(await countEntitlements(sid)).toBe(1);
@@ -133,6 +134,7 @@ describe.skipIf(!databaseUrl)("RSSE Postgres integration", () => {
       sessionId: sid,
       idempotencyKey: "fulfill-b",
       lastSeenSequenceNumber: last,
+      source: "lemon_webhook",
       payload: { entitlementFulfillment: true, providerOrderId: payId },
     });
     expect(await countEntitlements(sid)).toBe(1);

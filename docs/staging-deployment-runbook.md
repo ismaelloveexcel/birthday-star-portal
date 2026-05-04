@@ -6,7 +6,9 @@ Practical steps to deploy RSSE to **staging** (Vercel + Supabase/Postgres) and p
 
 Deploy the app to a **staging** Vercel project, wire **Postgres** (Supabase recommended), apply migrations, set env vars, then prove:
 
-**create → join → start → checkpoint → unlock → fulfill retry → complete → waitlist**
+**create -> join -> start -> checkpoint -> unlock -> public fulfillment blocked -> complete -> waitlist**
+
+With `SMOKE_USE_LEMON_WEBHOOK=1`, smoke also proves **signed webhook fulfill -> webhook retry -> public fulfillment blocked**.
 
 Use `/api/rsse/health` and `npm run smoke:rsse` as automated gates. This runbook does not replace `docs/rsse-production-readiness.md` (RSSE behavior and idempotency); it focuses on **repeatable deploy steps**.
 
@@ -135,18 +137,23 @@ $env:SMOKE_BASE_URL='https://your-staging-url.example'
 npm run smoke:rsse
 ```
 
-**Expected:** the script completes and the final line is:
+**Expected:** the script completes, confirms public fulfillment commands are rejected, and the final line is:
 
 ```text
 RSSE smoke OK
 ```
+
+Smoke requires `/api/rsse/health` to report `persistence: "postgres"`. For local smoke, set `DATABASE_URL` and restart the app before running `npm run smoke:rsse`.
 
 Optional webhook path (requires `LEMON_SQUEEZY_WEBHOOK_SECRET` in the shell matching the deployed project if the smoke hits real signature verification — follow `docs/rsse-production-readiness.md` for details):
 
 ```powershell
 $env:SMOKE_USE_LEMON_WEBHOOK='1'
 $env:LEMON_SQUEEZY_WEBHOOK_SECRET='your-test-secret'
+npm run smoke:rsse
 ```
+
+Webhook smoke proves fulfillment and retry through `/api/webhooks/lemon-squeezy`; the public `/api/sessions/command` path must still reject fulfillment payloads.
 
 ## 10. Failure guide
 
@@ -181,7 +188,8 @@ Use this before calling staging “RSSE-ready”:
 - [ ] `npm run verify:db` passes with staging `DATABASE_URL`.
 - [ ] Green Vercel deploy; URL recorded.
 - [ ] `GET /api/rsse/health` returns `ok: true`, `persistence: "postgres"`, `databaseReachable: true`.
-- [ ] `npm run smoke:rsse` with `SMOKE_BASE_URL` set to staging ends with `RSSE smoke OK`.
+- [ ] `npm run smoke:rsse` with `SMOKE_BASE_URL` set to staging ends with `RSSE smoke OK` and public fulfillment blocked.
+- [ ] Optional webhook smoke ends with `RSSE smoke OK` and proves signed fulfillment retry.
 
 ---
 

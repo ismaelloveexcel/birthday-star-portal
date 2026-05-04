@@ -104,6 +104,7 @@ export type PlatformCommand = {
   idempotencyKey: string
   lastSeenSequenceNumber?: number
   payload?: Record<string, unknown>
+  source?: 'lemon_webhook'
 }
 
 export type PlatformResponse = {

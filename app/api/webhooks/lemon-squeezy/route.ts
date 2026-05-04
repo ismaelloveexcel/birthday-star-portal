@@ -76,6 +76,7 @@ export async function POST(req: Request) {
       type: 'EMIT_EXPERIENCE_EVENT',
       sessionId: parsed.sessionId,
       idempotencyKey: lemonFulfillmentIdempotencyKey(parsed.providerOrderId),
+      source: 'lemon_webhook',
       payload: {
         entitlementFulfillment: true,
         providerOrderId: parsed.providerOrderId,
