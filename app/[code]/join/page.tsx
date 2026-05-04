@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { findSessionIdByShortCode } from "@/lib/rsse/applyPlatformCommand";
+import { findSessionIdByShortCode } from "@/lib/rsse/persistence/factory";
 import { JoinRoomForm } from "./JoinRoomForm";
 
 export default async function JoinPage({
@@ -9,7 +9,7 @@ export default async function JoinPage({
   params: Promise<{ code: string }>;
 }) {
   const { code } = await params;
-  const sid = findSessionIdByShortCode(code.toLowerCase());
+  const sid = await findSessionIdByShortCode(code.toLowerCase());
   if (!sid) notFound();
 
   return (

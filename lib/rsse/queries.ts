@@ -1,19 +1,14 @@
-import { getRsseStore } from './memoryPersistence'
 import type { SessionResultRow } from './contracts'
+import { getRssePersistence } from './persistence/factory'
 
-export function findSessionResultByPublicSlug(
+export async function findSessionResultByPublicSlug(
   slug: string,
-): SessionResultRow | null {
-  return getRsseStore().sessionResults.get(slug) ?? null
+): Promise<SessionResultRow | null> {
+  return getRssePersistence().findSessionResultByPublicSlug(slug)
 }
 
-export function findLatestSessionResultBySessionId(
+export async function findLatestSessionResultBySessionId(
   sessionId: string,
-): SessionResultRow | null {
-  const rows = [...getRsseStore().sessionResults.values()].filter(
-    (r) => r.sessionId === sessionId,
-  )
-  if (rows.length === 0) return null
-  rows.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-  return rows[0] ?? null
+): Promise<SessionResultRow | null> {
+  return getRssePersistence().findLatestSessionResultBySessionId(sessionId)
 }

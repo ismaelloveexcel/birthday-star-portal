@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { findSessionIdByShortCode } from "@/lib/rsse/applyPlatformCommand";
+import { findSessionIdByShortCode } from "@/lib/rsse/persistence/factory";
 import { SessionHarness } from "./SessionHarness";
 
 export default async function SessionPage({
@@ -9,7 +9,7 @@ export default async function SessionPage({
   params: Promise<{ code: string }>;
 }) {
   const { code } = await params;
-  if (!findSessionIdByShortCode(code.toLowerCase())) notFound();
+  if (!(await findSessionIdByShortCode(code.toLowerCase()))) notFound();
 
   return (
     <main id="main" className="min-h-screen bg-stone-950 text-stone-100">

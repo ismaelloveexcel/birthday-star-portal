@@ -57,10 +57,8 @@ seedExperienceTypes(globalStore)
 
 let chain: Promise<unknown> = Promise.resolve()
 
-export async function withRsseTransaction<T>(
-  fn: (store: RsseMemoryStore) => Promise<T>,
-): Promise<T> {
-  const run = chain.then(() => fn(globalStore))
+export async function withRsseTransaction<T>(fn: () => Promise<T>): Promise<T> {
+  const run = chain.then(() => fn())
   chain = run.catch(() => undefined)
   return run as Promise<T>
 }

@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { applyPlatformCommand, findSessionIdByShortCode } from "@/lib/rsse/applyPlatformCommand";
+import { applyPlatformCommand } from "@/lib/rsse/applyPlatformCommand";
+import { findSessionIdByShortCode, resetRssePersistenceSingleton } from "@/lib/rsse/persistence/factory";
 import { resetRsseStore, getRsseStore } from "@/lib/rsse/memoryPersistence";
 import { isTransitionAllowed, allowedTransitions } from "@/lib/rsse/stateMachine";
 import { computeDerivedFlags } from "@/lib/rsse/derivedFlags";
@@ -12,6 +13,7 @@ import { createInitialSnapshot } from "@/lib/rsse/snapshots";
 import { loadSessionRuntime } from "@/lib/rsse/sessionRuntime";
 
 beforeEach(() => {
+  resetRssePersistenceSingleton();
   resetRsseStore();
 });
 
@@ -261,7 +263,7 @@ describe("findSessionIdByShortCode", () => {
     });
     const short = c.events.find((e) => e.eventType === "session_created")?.payload
       .shortCode as string;
-    const sid = findSessionIdByShortCode(short);
+    const sid = await findSessionIdByShortCode(short);
     expect(sid).toBe(c.snapshot.sessionId);
   });
 });

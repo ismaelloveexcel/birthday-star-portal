@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
-import { findSessionIdByShortCode } from '@/lib/rsse/applyPlatformCommand'
-import { getRsseStore } from '@/lib/rsse/memoryPersistence'
-import { loadSessionRuntime } from '@/lib/rsse/sessionRuntime'
+import { findSessionIdByShortCode } from '@/lib/rsse/persistence/factory'
+import { loadSessionRuntimeFromPersistence } from '@/lib/rsse/sessionRuntime'
 
 export async function GET(req: Request) {
   const url = new URL(req.url)
@@ -9,11 +8,11 @@ export async function GET(req: Request) {
   if (!code) {
     return NextResponse.json({ error: 'code required' }, { status: 400 })
   }
-  const sid = findSessionIdByShortCode(code)
+  const sid = await findSessionIdByShortCode(code)
   if (!sid) {
     return NextResponse.json({ error: 'not found' }, { status: 404 })
   }
-  const rt = loadSessionRuntime(getRsseStore(), sid)
+  const rt = await loadSessionRuntimeFromPersistence(sid)
   if (!rt) {
     return NextResponse.json({ error: 'not found' }, { status: 404 })
   }

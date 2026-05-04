@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { applyPlatformCommand } from '@/lib/rsse/applyPlatformCommand'
-import { findSessionIdByShortCode } from '@/lib/rsse/applyPlatformCommand'
+import { findSessionIdByShortCode } from '@/lib/rsse/persistence/factory'
 import { mapRsseError } from '@/lib/rsse/apiErrors'
 
 const bodySchema = z.object({
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
         { status: 400 },
       )
     }
-    const sessionId = findSessionIdByShortCode(
+    const sessionId = await findSessionIdByShortCode(
       parsed.data.shortCode.toLowerCase(),
     )
     if (!sessionId) {

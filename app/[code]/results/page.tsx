@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { findSessionIdByShortCode } from "@/lib/rsse/applyPlatformCommand";
-import { getRsseStore } from "@/lib/rsse/memoryPersistence";
 import {
-  loadEvents,
-  loadSessionRuntime,
-} from "@/lib/rsse/sessionRuntime";
+  findSessionIdByShortCode,
+  getRssePersistence,
+} from "@/lib/rsse/persistence/factory";
+import { loadSessionRuntimeFromPersistence } from "@/lib/rsse/sessionRuntime";
 import { findLatestSessionResultBySessionId } from "@/lib/rsse/queries";
 import { ResultsActions } from "./ResultsActions";
 
@@ -15,13 +14,12 @@ export default async function ResultsPage({
   params: Promise<{ code: string }>;
 }) {
   const { code } = await params;
-  const sid = findSessionIdByShortCode(code.toLowerCase());
+  const sid = await findSessionIdByShortCode(code.toLowerCase());
   if (!sid) notFound();
-  const store = getRsseStore();
-  const rt = loadSessionRuntime(store, sid);
+  const rt = await loadSessionRuntimeFromPersistence(sid);
   if (!rt) notFound();
-  const result = findLatestSessionResultBySessionId(sid);
-  const events = loadEvents(store, sid).filter((e) =>
+  const result = await findLatestSessionResultBySessionId(sid);
+  const events = (await getRssePersistence().readEventsOrdered(sid)).filter((e) =>
     ["checkpoint_reached", "session_unlocked", "session_shared", "host_started"].includes(
       e.eventType,
     ),

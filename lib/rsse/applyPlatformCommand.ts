@@ -3,6 +3,7 @@ import type {
   PlatformResponse,
   SessionEvent,
   SessionRuntimeState,
+  SessionResultRow,
   SocialSession,
 } from './contracts'
 import { computeDerivedFlags } from './derivedFlags'
@@ -12,7 +13,6 @@ import {
 } from './monetizationPolicy'
 import { log } from './observability'
 import { broadcastSessionUpdate } from './realtime'
-import { getRsseStore, withRsseTransaction } from './memoryPersistence'
 import { RsseError } from './errors'
 import { placeholderExperienceAdapter } from './experienceAdapter'
 import {
@@ -20,11 +20,8 @@ import {
   initialRuntimeForNewSession,
 } from './reducer'
 import { buildSessionResultSummary } from './results'
-import {
-  loadEvents,
-  loadPlayers,
-  loadSessionRuntime,
-} from './sessionRuntime'
+import { getRssePersistence } from './persistence/factory'
+import type { RsseTransaction } from './persistence/types'
 
 const adapter = placeholderExperienceAdapter
 
@@ -53,22 +50,16 @@ function needsSequenceCheck(cmd: PlatformCommand): boolean {
   return cmd.type !== 'CREATE_SESSION'
 }
 
-function latestSequence(store: ReturnType<typeof getRsseStore>, sessionId: string): number {
-  let max = 0
-  for (const ev of store.sessionEvents.values()) {
-    if (ev.sessionId === sessionId && ev.sequenceNumber > max) {
-      max = ev.sequenceNumber
-    }
-  }
-  return max
-}
-
 function validateSequence(
   cmd: PlatformCommand,
   runtime: SessionRuntimeState | null,
+  latestFromStore?: number,
 ) {
   if (!needsSequenceCheck(cmd) || !runtime) return
-  const latest = runtime.lastEvent?.sequenceNumber ?? 0
+  const latest = Math.max(
+    runtime.lastEvent?.sequenceNumber ?? 0,
+    latestFromStore ?? 0,
+  )
   if (
     cmd.lastSeenSequenceNumber !== undefined &&
     cmd.lastSeenSequenceNumber < latest
@@ -124,7 +115,7 @@ function renumberMonetizationEvents(events: SessionEvent[]): SessionEvent[] {
 async function buildProposedDrafts(
   cmd: PlatformCommand,
   runtime: SessionRuntimeState | null,
-  store: ReturnType<typeof getRsseStore>,
+  tx: RsseTransaction,
 ): Promise<Omit<SessionEvent, 'sequenceNumber' | 'createdAt'>[]> {
   if (cmd.type === 'CREATE_SESSION') {
     throw new RsseError('Use create branch', 'event_rejected')
@@ -132,8 +123,8 @@ async function buildProposedDrafts(
   if (!cmd.sessionId) {
     throw new RsseError('sessionId required', 'event_rejected', { command: cmd.type })
   }
-    const sessionId = cmd.sessionId
-    const rt = runtime ?? loadSessionRuntime(store, sessionId)
+  const sessionId = cmd.sessionId
+  const rt = runtime ?? (await tx.loadRuntime(sessionId))
   if (!rt) {
     throw new RsseError('Session not found', 'event_rejected', { command: cmd.type })
   }
@@ -149,7 +140,7 @@ async function buildProposedDrafts(
       typeof p.avatarEmoji === 'string' && p.avatarEmoji.length > 0
         ? p.avatarEmoji.slice(0, 8)
         : '*'
-      const players = loadPlayers(store, sessionId)
+    const players = await tx.loadPlayers(sessionId)
     if (players.length >= rt.session.maxPlayers) {
       throw new RsseError('Room full', 'event_rejected', { command: cmd.type })
     }
@@ -158,7 +149,7 @@ async function buildProposedDrafts(
     const role = isFirst ? 'host' : 'player'
     return [
       draftEvent({
-          sessionId,
+        sessionId,
         playerId,
         eventType: 'player_joined',
         payload: {
@@ -188,7 +179,7 @@ async function buildProposedDrafts(
       players: rt.activePlayers,
     })
     const hostEv = draftEvent({
-        sessionId,
+      sessionId,
       playerId: cmd.playerId,
       eventType: 'host_started',
       payload: {},
@@ -197,7 +188,7 @@ async function buildProposedDrafts(
     const rest = out.proposedEvents.map((pe) =>
       draftEvent({
         ...pe,
-          sessionId,
+        sessionId,
         playerId: pe.playerId ?? null,
         eventType: pe.eventType,
         payload: pe.payload,
@@ -217,7 +208,7 @@ async function buildProposedDrafts(
       }
       return [
         draftEvent({
-            sessionId,
+          sessionId,
           playerId: null,
           eventType: 'session_unlocked',
           payload: { providerOrderId: orderId },
@@ -229,7 +220,7 @@ async function buildProposedDrafts(
       const email = typeof p.email === 'string' ? p.email : ''
       return [
         draftEvent({
-            sessionId,
+          sessionId,
           playerId: cmd.playerId ?? null,
           eventType: 'waitlist_joined',
           payload: { email },
@@ -240,7 +231,7 @@ async function buildProposedDrafts(
     if (p.shareSession === true) {
       return [
         draftEvent({
-            sessionId,
+          sessionId,
           playerId: cmd.playerId ?? null,
           eventType: 'session_shared',
           payload: {},
@@ -257,7 +248,7 @@ async function buildProposedDrafts(
     })
     return out.proposedEvents.map((pe) =>
       draftEvent({
-          sessionId,
+        sessionId,
         playerId: pe.playerId ?? null,
         eventType: pe.eventType,
         payload: pe.payload,
@@ -269,14 +260,14 @@ async function buildProposedDrafts(
   if (cmd.type === 'REQUEST_UNLOCK') {
     return [
       draftEvent({
-          sessionId,
+        sessionId,
         playerId: cmd.playerId ?? null,
         eventType: 'unlock_clicked',
         payload: {},
         idempotencyKey: null,
       }),
       draftEvent({
-          sessionId,
+        sessionId,
         playerId: cmd.playerId ?? null,
         eventType: 'unlock_requested',
         payload: {},
@@ -286,15 +277,15 @@ async function buildProposedDrafts(
   }
 
   if (cmd.type === 'COMPLETE_SESSION') {
-    const players = loadPlayers(store, cmd.sessionId)
-    const events = loadEvents(store, cmd.sessionId)
+    const players = await tx.loadPlayers(cmd.sessionId)
+    const events = await tx.loadEventsOrdered(cmd.sessionId)
     const baseUrl =
       process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') ??
       'https://example.com'
-    const nextSeq = latestSequence(store, cmd.sessionId) + 1
+    const nextSeq = (await tx.getLatestSequenceNumber(cmd.sessionId)) + 1
     const completedStub: SessionEvent = {
       id: 'temp',
-        sessionId,
+      sessionId,
       playerId: cmd.playerId ?? null,
       eventType: 'session_completed',
       payload: {},
@@ -312,14 +303,14 @@ async function buildProposedDrafts(
     })
     return [
       draftEvent({
-          sessionId,
+        sessionId,
         playerId: cmd.playerId ?? null,
         eventType: 'session_completed',
         payload: {},
         idempotencyKey: cmd.idempotencyKey,
       }),
       draftEvent({
-          sessionId,
+        sessionId,
         playerId: null,
         eventType: 'results_generated',
         payload: { summary },
@@ -331,7 +322,7 @@ async function buildProposedDrafts(
   if (cmd.type === 'ARCHIVE_SESSION') {
     return [
       draftEvent({
-          sessionId,
+        sessionId,
         playerId: cmd.playerId ?? null,
         eventType: 'session_archived',
         payload: {},
@@ -343,16 +334,16 @@ async function buildProposedDrafts(
   return []
 }
 
-function createSessionDraft(
+async function createSessionDraft(
   cmd: PlatformCommand,
-  store: ReturnType<typeof getRsseStore>,
-): {
+  tx: RsseTransaction,
+): Promise<{
   session: SocialSession
   drafts: Omit<SessionEvent, 'sequenceNumber' | 'createdAt'>[]
-} {
+}> {
   const ts = nowIso()
   let code = shortCode()
-  while (store.shortCodeIndex.has(code)) {
+  while (await tx.isShortCodeTaken(code)) {
     code = shortCode()
   }
   const sessionId = crypto.randomUUID()
@@ -402,25 +393,31 @@ function createSessionDraft(
   }
 }
 
-function persist(
-  store: ReturnType<typeof getRsseStore>,
-  events: SessionEvent[],
+async function persistAfterReduce(
+  tx: RsseTransaction,
+  adjusted: SessionEvent[],
   finalRuntime: Omit<SessionRuntimeState, 'derivedFlags'>,
   opts?: { shortCode?: string; isCreate?: boolean },
-) {
-  if (opts?.isCreate && opts.shortCode) {
-    store.shortCodeIndex.set(opts.shortCode.toLowerCase(), finalRuntime.session.id)
+): Promise<void> {
+  const sorted = [...adjusted].sort((a, b) => a.sequenceNumber - b.sequenceNumber)
+  if (opts?.isCreate) {
+    await tx.insertSocialSession(finalRuntime.session)
+    await tx.lockSessionForWrite(finalRuntime.session.id)
+    if (opts.shortCode) {
+      await tx.registerShortCodeIndex(opts.shortCode, finalRuntime.session.id)
+    }
+  } else {
+    await tx.updateSocialSession(finalRuntime.session)
   }
-  store.socialSessions.set(finalRuntime.session.id, finalRuntime.session)
-  for (const ev of events) {
-    store.sessionEvents.set(ev.id, ev)
+  for (const ev of sorted) {
     if (ev.eventType === 'player_joined') {
       const pid = ev.payload.playerId as string
       const pl = finalRuntime.activePlayers.find((p) => p.id === pid)
-      if (pl) store.sessionPlayers.set(pl.id, pl)
+      if (pl) await tx.upsertPlayer(pl)
     }
+    await tx.insertEvent(ev)
   }
-  store.sessionSnapshots.set(finalRuntime.session.id, finalRuntime.snapshot)
+  await tx.upsertSnapshot(finalRuntime.snapshot)
 }
 
 function buildResponse(final: SessionRuntimeState, events: SessionEvent[]): PlatformResponse {
@@ -442,39 +439,44 @@ export async function applyPlatformCommand(
     source: 'applyPlatformCommand',
   })
 
-  return withRsseTransaction(async (store) => {
+  const persistence = getRssePersistence()
+  return persistence.withTransaction(async (tx) => {
     const idKey =
       command.type === 'CREATE_SESSION'
         ? idempotencyKeyCreate(command)
         : idempotencyKeySession(command)
-    const cached = store.idempotencyCache.get(idKey)
+    const cached = await tx.getIdempotencyResponse(idKey)
     if (cached) {
       log('info', 'idempotency_hit', { sessionId: command.sessionId })
       return cached
     }
 
-    let runtime: SessionRuntimeState | null =
-      command.sessionId != null
-        ? loadSessionRuntime(store, command.sessionId)
-        : null
+    let runtime: SessionRuntimeState | null = null
+    let latestSeqLocked = 0
 
-    validateSequence(command, runtime)
-
-    if (command.sessionId && command.idempotencyKey) {
-      const dup = [...store.sessionEvents.values()].find(
-        (e) =>
-          e.sessionId === command.sessionId &&
-          e.idempotencyKey === command.idempotencyKey,
-      )
-      if (dup) {
-        const rt = loadSessionRuntime(store, command.sessionId)
-        if (rt) {
-          const all = loadEvents(store, command.sessionId)
-          const resp = buildResponse(rt, all.filter((e) => e.sequenceNumber >= dup.sequenceNumber))
-          store.idempotencyCache.set(idKey, resp)
-          return resp
+    if (command.sessionId) {
+      await tx.lockSessionForWrite(command.sessionId)
+      if (command.idempotencyKey) {
+        const dup = await tx.findEventBySessionIdempotency(
+          command.sessionId,
+          command.idempotencyKey,
+        )
+        if (dup) {
+          const rt = await tx.loadRuntime(command.sessionId)
+          if (rt) {
+            const all = await tx.loadEventsOrdered(command.sessionId)
+            const resp = buildResponse(
+              rt,
+              all.filter((e) => e.sequenceNumber >= dup.sequenceNumber),
+            )
+            await tx.setIdempotencyResponse(idKey, resp)
+            return resp
+          }
         }
       }
+      runtime = await tx.loadRuntime(command.sessionId)
+      latestSeqLocked = await tx.getLatestSequenceNumber(command.sessionId)
+      validateSequence(command, runtime, latestSeqLocked)
     }
 
     let drafts: Omit<SessionEvent, 'sequenceNumber' | 'createdAt'>[] = []
@@ -482,11 +484,11 @@ export async function applyPlatformCommand(
 
     try {
       if (command.type === 'CREATE_SESSION') {
-        const created = createSessionDraft(command, store)
+        const created = await createSessionDraft(command, tx)
         newSession = created.session
         drafts = created.drafts
       } else {
-        drafts = await buildProposedDrafts(command, runtime, store)
+        drafts = await buildProposedDrafts(command, runtime, tx)
       }
     } catch (e) {
       if (e instanceof RsseError) {
@@ -503,9 +505,11 @@ export async function applyPlatformCommand(
       command.type === 'CREATE_SESSION' ? newSession!.id : command.sessionId!
 
     const startSeq =
-      command.type === 'CREATE_SESSION' ? 1 : latestSequence(store, sessionId) + 1
+      command.type === 'CREATE_SESSION'
+        ? 1
+        : (await tx.getLatestSequenceNumber(sessionId)) + 1
 
-    let proposed = assignSequences(drafts, startSeq)
+    const proposed = assignSequences(drafts, startSeq)
 
     let workingBase: Omit<SessionRuntimeState, 'derivedFlags'>
     if (command.type === 'CREATE_SESSION') {
@@ -523,7 +527,7 @@ export async function applyPlatformCommand(
       }
     }
 
-    let next = applyEventsToRuntime(workingBase, proposed)
+    const next = applyEventsToRuntime(workingBase, proposed)
     const previousRuntime =
       runtime ??
       ({
@@ -548,11 +552,8 @@ export async function applyPlatformCommand(
     })
     const adjusted = renumberMonetizationEvents(adjustedRaw)
 
-    let finalBase = workingBase
-    if (monetizationDecision.action !== 'ALLOW') {
-      finalBase = workingBase
-    }
-    let finalRuntime = applyEventsToRuntime(finalBase, adjusted)
+    const finalBase = workingBase
+    const finalRuntime = applyEventsToRuntime(finalBase, adjusted)
 
     for (const ev of adjusted) {
       if (ev.eventType === 'results_generated') {
@@ -562,19 +563,20 @@ export async function applyPlatformCommand(
           typeof (summary as { shareText?: string }).shareText === 'string'
             ? (summary as { shareText: string }).shareText
             : ''
-        store.sessionResults.set(slug, {
+        const row: SessionResultRow = {
           id: crypto.randomUUID(),
           sessionId: ev.sessionId,
           summary,
           shareText,
           publicSlug: slug,
           createdAt: ev.createdAt,
-        })
+        }
+        await tx.insertSessionResult(row)
       }
       if (ev.eventType === 'waitlist_joined') {
         const email = typeof ev.payload.email === 'string' ? ev.payload.email : 'unknown'
         const wid = crypto.randomUUID()
-        store.waitlist.set(wid, {
+        await tx.insertWaitlist({
           id: wid,
           email,
           sessionId: ev.sessionId,
@@ -589,7 +591,7 @@ export async function applyPlatformCommand(
       if (ev.eventType === 'session_unlocked') {
         const orderId = ev.payload.providerOrderId as string | undefined
         const eid = crypto.randomUUID()
-        store.entitlements.set(eid, {
+        await tx.insertEntitlement({
           id: eid,
           sessionId: ev.sessionId,
           experienceTypeId: finalRuntime.session.experienceTypeId,
@@ -604,7 +606,7 @@ export async function applyPlatformCommand(
       }
     }
 
-    persist(store, adjusted, finalRuntime, {
+    await persistAfterReduce(tx, adjusted, finalRuntime, {
       isCreate: command.type === 'CREATE_SESSION',
       shortCode:
         command.type === 'CREATE_SESSION' ? newSession?.shortCode : undefined,
@@ -618,7 +620,7 @@ export async function applyPlatformCommand(
       adjusted,
     )
 
-    store.idempotencyCache.set(idKey, response)
+    await tx.setIdempotencyResponse(idKey, response)
 
     await broadcastSessionUpdate(
       {
@@ -636,9 +638,4 @@ export async function applyPlatformCommand(
 
     return response
   })
-}
-
-export function findSessionIdByShortCode(shortCode: string): string | null {
-  const store = getRsseStore()
-  return store.shortCodeIndex.get(shortCode.toLowerCase()) ?? null
 }

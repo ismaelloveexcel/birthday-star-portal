@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { findSessionIdByShortCode } from "@/lib/rsse/applyPlatformCommand";
-import { getRsseStore } from "@/lib/rsse/memoryPersistence";
-import { loadSessionRuntime } from "@/lib/rsse/sessionRuntime";
+import { findSessionIdByShortCode } from "@/lib/rsse/persistence/factory";
+import { loadSessionRuntimeFromPersistence } from "@/lib/rsse/sessionRuntime";
 
 export default async function SessionLobbyPage({
   params,
@@ -10,9 +9,9 @@ export default async function SessionLobbyPage({
   params: Promise<{ code: string }>;
 }) {
   const { code } = await params;
-  const sid = findSessionIdByShortCode(code.toLowerCase());
+  const sid = await findSessionIdByShortCode(code.toLowerCase());
   if (!sid) notFound();
-  const rt = loadSessionRuntime(getRsseStore(), sid);
+  const rt = await loadSessionRuntimeFromPersistence(sid);
   if (!rt) notFound();
 
   const { status, shortCode } = rt.session;

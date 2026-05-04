@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { applyPlatformCommand } from '@/lib/rsse/applyPlatformCommand'
-import { getRsseStore } from '@/lib/rsse/memoryPersistence'
+import { getRssePersistence } from '@/lib/rsse/persistence/factory'
 import { mapRsseError } from '@/lib/rsse/apiErrors'
 
 const bodySchema = z.object({
@@ -49,9 +49,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, tracked: 'session' })
     }
 
-    const store = getRsseStore()
     const id = crypto.randomUUID()
-    store.waitlist.set(id, {
+    await getRssePersistence().insertWaitlistGlobal({
       id,
       email: d.email,
       sessionId: null,
