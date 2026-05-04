@@ -206,19 +206,18 @@ export function createMemoryPersistence(): RssePersistence {
       return rows[0] ?? null
     },
     async insertWaitlistGlobal(row: WaitlistRow): Promise<void> {
-      getRsseStore().waitlist.set(row.id, row)
+      // Mirror Postgres global dedupe: skip if same email already exists with no sessionId.
+      const store = getRsseStore()
+      const duplicate = [...store.waitlist.values()].some(
+        (w) => w.email === row.email && w.sessionId === null,
+      )
+      if (!duplicate) {
+        store.waitlist.set(row.id, row)
+      }
     },
     async readEventsOrdered(sessionId: string): Promise<SessionEvent[]> {
       const tx = new MemoryRsseTransaction(getRsseStore())
       return tx.loadEventsOrdered(sessionId)
     },
     async readEventsAfterSequence(
-      sessionId: string,
-      afterSequence: number,
-    ): Promise<SessionEvent[]> {
-      const tx = new MemoryRsseTransaction(getRsseStore())
-      const ordered = await tx.loadEventsOrdered(sessionId)
-      return ordered.filter((e) => e.sequenceNumber > afterSequence)
-    },
-  }
-}
+      se
