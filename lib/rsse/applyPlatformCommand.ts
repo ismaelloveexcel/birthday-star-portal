@@ -464,6 +464,12 @@ function buildResponse(final: SessionRuntimeState, events: SessionEvent[]): Plat
   }
 }
 
+type CommandTransactionResult = {
+  response: PlatformResponse
+  broadcastRuntime: SessionRuntimeState | null
+  broadcastEvents: SessionEvent[]
+}
+
 export async function applyPlatformCommand(
   command: PlatformCommand,
 ): Promise<PlatformResponse> {
@@ -475,7 +481,7 @@ export async function applyPlatformCommand(
   })
 
   const persistence = getRssePersistence()
-  return persistence.withTransaction(async (tx) => {
+  const txResult = await persistence.withTransaction<CommandTransactionResult>(async (tx) => {
     const idKey =
       command.type === 'CREATE_SESSION'
         ? idempotencyKeyCreate(command)
@@ -483,7 +489,11 @@ export async function applyPlatformCommand(
     const cached = await tx.getIdempotencyResponse(idKey)
     if (cached) {
       log('info', 'idempotency_hit', { sessionId: command.sessionId })
-      return cached
+      return {
+        response: cached,
+        broadcastRuntime: null,
+        broadcastEvents: [],
+      }
     }
 
     let runtime: SessionRuntimeState | null = null
@@ -505,7 +515,11 @@ export async function applyPlatformCommand(
               all.filter((e) => e.sequenceNumber >= dup.sequenceNumber),
             )
             await tx.setIdempotencyResponse(idKey, resp)
-            return resp
+            return {
+              response: resp,
+              broadcastRuntime: null,
+              broadcastEvents: [],
+            }
           }
         }
       }
@@ -543,13 +557,17 @@ export async function applyPlatformCommand(
       drafts.length === 0
 
     if (fulfillmentDuplicateNoop && command.sessionId && runtime) {
-      const response = buildResponse(runtime, [])
-      await tx.setIdempotencyResponse(idKey, response)
+      const noopResponse = buildResponse(runtime, [])
+      await tx.setIdempotencyResponse(idKey, noopResponse)
       log('info', 'command_applied_duplicate_fulfillment_noop', {
         sessionId: command.sessionId,
         latencyMs: Date.now() - started,
       })
-      return response
+      return {
+        response: noopResponse,
+        broadcastRuntime: null,
+        broadcastEvents: [],
+      }
     }
 
     const sessionId =
@@ -663,15 +681,13 @@ export async function applyPlatformCommand(
         command.type === 'CREATE_SESSION' ? newSession?.shortCode : undefined,
     })
 
-    const response = buildResponse(
-      {
-        ...finalRuntime,
-        derivedFlags: computeDerivedFlags(finalRuntime),
-      },
-      adjusted,
-    )
+    const runtimeWithFlags = {
+      ...finalRuntime,
+      derivedFlags: computeDerivedFlags(finalRuntime),
+    }
+    const txResponse = buildResponse(runtimeWithFlags, adjusted)
 
-    await tx.setIdempotencyResponse(idKey, response)
+    await tx.setIdempotencyResponse(idKey, txResponse)
 
     log('info', 'command_applied', {
       sessionId: finalRuntime.session.id,
@@ -679,9 +695,31 @@ export async function applyPlatformCommand(
       stateAfter: finalRuntime.session.status,
     })
 
-    return response
+    return {
+      response: txResponse,
+      broadcastRuntime: adjusted.length > 0 ? runtimeWithFlags : null,
+      broadcastEvents: adjusted,
+    }
   })
 
   // Broadcast AFTER the transaction has committed so realtime side-effects never
   // roll back with the DB transaction, and a broadcast failure cannot fail the
-  // command response that has already been persisted 
+  // command response that has already been persisted and returned.
+  if (txResult.broadcastRuntime && txResult.broadcastEvents.length > 0) {
+    try {
+      await broadcastSessionUpdate(
+        txResult.broadcastRuntime,
+        txResult.broadcastEvents,
+      )
+    } catch (broadcastErr) {
+      const message =
+        broadcastErr instanceof Error ? broadcastErr.message : String(broadcastErr)
+      log('warn', 'realtime_broadcast_failed', {
+        sessionId: txResult.response.snapshot.sessionId,
+        message,
+      })
+    }
+  }
+
+  return txResult.response
+}

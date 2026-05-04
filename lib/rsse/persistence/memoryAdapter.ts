@@ -220,4 +220,12 @@ export function createMemoryPersistence(): RssePersistence {
       return tx.loadEventsOrdered(sessionId)
     },
     async readEventsAfterSequence(
-      se
+      sessionId: string,
+      afterSequence: number,
+    ): Promise<SessionEvent[]> {
+      const tx = new MemoryRsseTransaction(getRsseStore())
+      const ordered = await tx.loadEventsOrdered(sessionId)
+      return ordered.filter((e) => e.sequenceNumber > afterSequence)
+    },
+  }
+}

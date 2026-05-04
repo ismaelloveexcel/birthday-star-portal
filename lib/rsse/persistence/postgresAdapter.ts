@@ -544,4 +544,15 @@ export class PostgresRssePersistence implements RssePersistence {
         row.sessionId,
         row.experienceTypeId,
         row.category,
-   
+        row.source,
+        row.interest,
+        row.groupSize,
+        row.createdAt,
+      ],
+    )
+  }
+}
+
+export function createPostgresPersistence(connectionString: string): RssePersistence {
+  return new PostgresRssePersistence(getPgPool(connectionString))
+}
