@@ -1,4 +1,5 @@
 import { getRssePersistenceMode } from './persistence/factory'
+import { log } from './observability'
 import { configuredCheckoutUrl } from './unlockCheckout'
 
 export type RsseHealthBody = {
@@ -43,7 +44,13 @@ export async function computeRsseHealth(): Promise<{
   if (databaseConfigured) {
     try {
       databaseReachable = await pingDatabase()
-    } catch {
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      const code =
+        err && typeof err === 'object' && 'code' in err
+          ? String((err as { code?: unknown }).code)
+          : undefined
+      log('warn', 'rsse_health_database_ping_failed', { message, code })
       databaseReachable = false
     }
   }
