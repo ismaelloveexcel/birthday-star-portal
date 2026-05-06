@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
+import Link from "next/link";
 import BirthdayPortal from "@/components/BirthdayPortal";
 import { loadExperience } from "@/lib/experience/loadExperience";
 import { spaceMissionExperience } from "@/lib/experience/spaceMission";
@@ -119,6 +120,9 @@ export default function PackClient({ encoded }: { encoded: string | null }) {
 
   return (
     <div id="main">
+      <Link href="/world" className="portal-world-dock">
+        Explore gift world
+      </Link>
       <BirthdayPortal experience={result.experience} {...result.data} isDemo={false} />
     </div>
   );

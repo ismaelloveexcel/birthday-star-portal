@@ -1003,6 +1003,221 @@ textarea {
     linear-gradient(180deg, rgba(15, 23, 64, 0.92), rgba(8, 12, 34, 0.82));
 }
 
+/* ===== Gift arcade world shell ===== */
+.world-page {
+  min-height: 100vh;
+}
+
+.world-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.world-hero-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 3rem;
+  align-items: center;
+}
+
+.world-lede {
+  max-width: 42rem;
+  line-height: 1.8;
+}
+
+.world-map {
+  position: relative;
+  min-height: 30rem;
+  overflow: hidden;
+  border: 1px solid rgba(168, 180, 212, 0.16);
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 58% 18%, rgba(245, 200, 66, 0.18), transparent 24%),
+    linear-gradient(180deg, rgba(12, 22, 58, 0.94), rgba(7, 10, 28, 0.88));
+  box-shadow: 0 34px 90px rgba(0, 0, 0, 0.32);
+}
+
+.world-map::before {
+  content: "Dubai District";
+  position: absolute;
+  left: 1.2rem;
+  top: 1.2rem;
+  color: var(--color-gold);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.world-road {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 17%;
+  height: 4.5rem;
+  border-radius: 999px 999px 8px 8px;
+  background: linear-gradient(90deg, rgba(94, 234, 212, 0.12), rgba(249, 168, 212, 0.18));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transform: perspective(20rem) rotateX(55deg);
+}
+
+.world-water {
+  position: absolute;
+  inset: auto 0 0;
+  height: 20%;
+  background: linear-gradient(180deg, rgba(94, 234, 212, 0.04), rgba(94, 234, 212, 0.2));
+}
+
+.world-tower {
+  position: absolute;
+  display: grid;
+  place-items: end center;
+  width: 7.5rem;
+  height: 12rem;
+  padding: 1rem 0.8rem;
+  border-radius: 8px 8px 0 0;
+  background: linear-gradient(180deg, rgba(254, 249, 240, 0.92), rgba(94, 234, 212, 0.42));
+  color: #101932;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.32), 0 0 34px rgba(94, 234, 212, 0.22);
+}
+
+.world-tower span {
+  font-weight: 800;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.world-tower.is-locked {
+  background: linear-gradient(180deg, rgba(80, 94, 128, 0.86), rgba(42, 54, 92, 0.78));
+  color: rgba(254, 249, 240, 0.7);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
+}
+
+.tower-a { left: 18%; bottom: 28%; height: 15rem; }
+.tower-b { left: 48%; bottom: 26%; height: 10rem; }
+.tower-c { right: 12%; bottom: 25%; height: 13rem; }
+
+.world-district-grid,
+.world-arcade-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.world-district-card,
+.world-arcade-card,
+.world-shell-strip {
+  position: relative;
+  padding: 1.35rem;
+  border: 1px solid rgba(168, 180, 212, 0.16);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(15, 23, 64, 0.88), rgba(8, 12, 34, 0.78));
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.28);
+}
+
+.world-district-card p,
+.world-arcade-card p,
+.world-shell-strip p {
+  line-height: 1.7;
+}
+
+.world-signal {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(254, 249, 240, 0.78);
+  font-size: 0.9rem;
+}
+
+.world-arcade-card {
+  display: grid;
+  align-content: space-between;
+  gap: 1rem;
+  min-height: 18rem;
+}
+
+.world-arcade-card.is-open {
+  border-color: rgba(245, 200, 66, 0.44);
+  background:
+    radial-gradient(circle at 76% 12%, rgba(245, 200, 66, 0.14), transparent 34%),
+    linear-gradient(180deg, rgba(19, 35, 90, 0.95), rgba(8, 12, 34, 0.82));
+}
+
+.world-arcade-card.is-locked::after,
+.world-arcade-card.is-planned::after {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-comet);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.world-arcade-card.is-locked::after { content: "Locked"; }
+.world-arcade-card.is-planned::after { content: "Planned"; }
+
+.world-arcade-topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--color-gold);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.world-arcade-topline strong {
+  color: rgba(254, 249, 240, 0.78);
+}
+
+.world-game-slot {
+  display: block;
+  margin-bottom: 0.85rem;
+  color: rgba(254, 249, 240, 0.42);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+}
+
+.world-shell-strip {
+  display: grid;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.world-shell-actions {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: start;
+}
+
+.world-shell-actions span {
+  color: var(--color-comet);
+  font-size: 0.9rem;
+}
+
+.portal-world-dock {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 60;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(245, 200, 66, 0.42);
+  background: rgba(8, 12, 34, 0.88);
+  color: var(--color-star);
+  font-weight: 700;
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(16px);
+}
+
 /* ===== Animations ===== */
 @keyframes glowPulse {
   0%, 100% {
@@ -1134,7 +1349,9 @@ textarea {
 @media (min-width: 900px) {
   .hero-grid,
   .story-grid,
-  .dossier-grid {
+  .dossier-grid,
+  .world-hero-grid,
+  .world-shell-strip {
     grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
   }
 
@@ -1143,11 +1360,13 @@ textarea {
   }
 
   .hero-proof-grid,
+  .world-district-grid,
   .demo-games-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .demo-games-grid {
+  .demo-games-grid,
+  .world-arcade-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
@@ -1162,6 +1381,14 @@ textarea {
   .hero-stage {
     min-height: 34rem;
   }
+
+  .world-map {
+    min-height: 24rem;
+  }
+
+  .tower-a { left: 10%; }
+  .tower-b { left: 42%; }
+  .tower-c { right: 8%; }
 
   .product-heading {
     display: grid;

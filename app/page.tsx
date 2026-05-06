@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import BirthdayPortal from "@/components/BirthdayPortal";
 import CharacterGuide from "@/components/CharacterGuide";
 import CreateForm from "@/features/create/CreateForm";
@@ -102,6 +103,9 @@ export default function HomePage() {
           <a href="#form" className="btn-secondary" style={{ minHeight: 40, padding: "0.4rem 1rem" }}>
             Get the Portal
           </a>
+          <Link href="/world" className="btn-secondary" style={{ minHeight: 40, padding: "0.4rem 1rem" }}>
+            Explore World
+          </Link>
         </div>
       </header>
 
@@ -141,6 +145,9 @@ export default function HomePage() {
               <a href="#form" className="btn-secondary">
                 Create My Portal — {config.PRICE}
               </a>
+              <Link href="/world" className="btn-secondary">
+                Enter Gift World
+              </Link>
             </div>
             <div className="hero-micro-demo hero-micro-inline">
               <span className="hero-micro-kicker">Live preview</span>
@@ -196,6 +203,24 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section pt-0" aria-labelledby="world-shell-heading">
+        <div className="max-w-6xl mx-auto world-shell-strip">
+          <div>
+            <p className="eyebrow mb-3">Platform foundation</p>
+            <h2 id="world-shell-heading" className="font-display text-2xl md:text-4xl text-glow mb-4">
+              Birthday is the first arcade, not the whole world.
+            </h2>
+            <p className="text-comet">
+              Recipients can play the gifted birthday mission, then step back into a larger arcade world. New game ideas can stay locked until they are worth building.
+            </p>
+          </div>
+          <div className="world-shell-actions">
+            <Link href="/world" className="btn-primary">Open world hub</Link>
+            <span>Dubai first. Mauritius next.</span>
           </div>
         </div>
       </section>
