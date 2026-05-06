@@ -15,7 +15,7 @@ export interface MonetizationPolicy {
   }): MonetizationDecision
 }
 
-const DEFAULT_LOCK_CENTS = 499
+const DEFAULT_LOCK_CENTS = 999
 
 /**
  * Structural v1: lock when unlock is requested and session not yet entitled.

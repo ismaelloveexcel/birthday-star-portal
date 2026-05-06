@@ -273,6 +273,10 @@ describe("monetizationPolicy", () => {
       .filter((e) => e.sessionId === sid)
       .map((e) => e.eventType);
     expect(names).toContain("session_locked");
+    const lockEvent = [...getRsseStore().sessionEvents.values()]
+      .filter((e) => e.sessionId === sid)
+      .find((e) => e.eventType === "session_locked");
+    expect(lockEvent?.payload.priceCents).toBe(999);
   });
 });
 

@@ -155,7 +155,7 @@ export function SessionHarness({ code }: { code: string }) {
                     void refresh();
                   }}
                 >
-                  Open checkout (placeholder)
+                  Open checkout
                 </button>
               ) : null}
               <button

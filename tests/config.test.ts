@@ -6,6 +6,12 @@ async function loadConfig() {
 }
 
 describe("config production guards", () => {
+  it("exposes the Lemon checkout price", async () => {
+    const { config } = await loadConfig();
+
+    expect(config.PRICE).toBe("AED 9.99");
+  });
+
   it("does not throw in production when checkout URL is missing", async () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("NEXT_PUBLIC_BASE_URL", "https://example.com");

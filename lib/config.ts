@@ -1,7 +1,7 @@
 const _rawBaseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 const _rawCheckoutUrl = process.env.NEXT_PUBLIC_CHECKOUT_URL;
 const _isProd = process.env.NODE_ENV === "production";
-const PRODUCT_PRICE = "$9.99";
+const PRODUCT_PRICE = "AED 9.99";
 
 if (
   _isProd &&
