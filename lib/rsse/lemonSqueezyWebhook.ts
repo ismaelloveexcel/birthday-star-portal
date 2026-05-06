@@ -41,6 +41,11 @@ export type ParsedLemonWebhook = {
   orderPaid: boolean
 }
 
+export function isPaidLemonOrderWebhook(parsed: ParsedLemonWebhook): boolean {
+  if (!parsed.providerOrderId || !parsed.orderPaid) return false
+  return parsed.eventName === 'order_created' || parsed.eventName.includes('order_paid')
+}
+
 /**
  * Read session id from `meta.custom_data` or top-level `custom_data` (Lemon payload shapes vary).
  */

@@ -1,6 +1,7 @@
 import { createHmac } from "node:crypto";
 import { describe, it, expect } from "vitest";
 import {
+  isPaidLemonOrderWebhook,
   lemonFulfillmentIdempotencyKey,
   parseLemonWebhookBody,
   verifyLemonSqueezyWebhookSignature,
@@ -42,6 +43,28 @@ describe("lemonSqueezyWebhook", () => {
     const p = parseLemonWebhookBody(body);
     expect(p.sessionId).toBe("22222222-2222-2222-2222-222222222222");
     expect(p.providerOrderId).toBe("99");
+  });
+
+  it("treats paid order_created events as fulfillment events", () => {
+    const parsed = parseLemonWebhookBody({
+      meta: {
+        event_name: "order_created",
+        custom_data: { session_id: "33333333-3333-3333-3333-333333333333" },
+      },
+      data: { id: 100, attributes: { status: "paid" } },
+    });
+    expect(isPaidLemonOrderWebhook(parsed)).toBe(true);
+  });
+
+  it("does not fulfill unpaid order_created events", () => {
+    const parsed = parseLemonWebhookBody({
+      meta: {
+        event_name: "order_created",
+        custom_data: { session_id: "44444444-4444-4444-4444-444444444444" },
+      },
+      data: { id: 101, attributes: { status: "pending" } },
+    });
+    expect(isPaidLemonOrderWebhook(parsed)).toBe(false);
   });
 
   it("lemonFulfillmentIdempotencyKey is stable per order id", () => {

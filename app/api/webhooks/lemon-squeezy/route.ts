@@ -3,6 +3,7 @@ import { applyPlatformCommand } from '@/lib/rsse/applyPlatformCommand'
 import { RsseError } from '@/lib/rsse/errors'
 import {
   lemonFulfillmentIdempotencyKey,
+  isPaidLemonOrderWebhook,
   parseLemonWebhookBody,
   verifyLemonSqueezyWebhookSignature,
 } from '@/lib/rsse/lemonSqueezyWebhook'
@@ -47,7 +48,7 @@ export async function POST(req: Request) {
   }
 
   const parsed = parseLemonWebhookBody(body)
-  if (!parsed.eventName.includes('order_paid')) {
+  if (!parsed.eventName.includes('order') && parsed.eventName !== '') {
     return NextResponse.json({
       ok: true,
       ignored: true,
@@ -63,7 +64,7 @@ export async function POST(req: Request) {
     })
   }
 
-  if (!parsed.providerOrderId || !parsed.orderPaid) {
+  if (!parsed.providerOrderId || !isPaidLemonOrderWebhook(parsed)) {
     return NextResponse.json({
       ok: true,
       skipped: true,
