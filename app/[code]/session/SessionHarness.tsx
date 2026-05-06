@@ -135,7 +135,7 @@ export function SessionHarness({ code }: { code: string }) {
                   type="button"
                   className="rounded-md border border-amber-900/50 py-2 text-sm text-amber-200/90"
                   onClick={async () => {
-                    await fetch("/api/sessions/unlock", {
+                    const response = await fetch("/api/sessions/unlock", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({
@@ -145,6 +145,13 @@ export function SessionHarness({ code }: { code: string }) {
                         lastSeenSequenceNumber: lookup.lastSequence,
                       }),
                     });
+                    const body = (await response.json()) as {
+                      checkoutUrl?: string;
+                    };
+                    if (response.ok && body.checkoutUrl) {
+                      window.location.href = body.checkoutUrl;
+                      return;
+                    }
                     void refresh();
                   }}
                 >

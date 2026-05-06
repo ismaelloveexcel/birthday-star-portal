@@ -24,7 +24,7 @@ export async function POST(req: Request) {
       )
     }
 
-    const checkout = resolveUnlockCheckoutEnv()
+    const checkout = resolveUnlockCheckoutEnv(parsed.data.sessionId)
     if (!checkout.ok) {
       return NextResponse.json(
         { error: checkout.error, code: checkout.code },
